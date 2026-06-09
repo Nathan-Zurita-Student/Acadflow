@@ -7,18 +7,18 @@ const router = createRouter({
     {
       path: '/invite/:token',
       name: 'accept-invite',
-      component: () => import('@/pages/AcceptInvitePage.vue'),
+      component: () => import('@/Pages/AcceptInvitePage.vue'),
     },
     {
       path: '/login',
       name: 'login',
-      component: () => import('@/pages/auth/LoginPage.vue'),
+      component: () => import('@/Pages/auth/LoginPage.vue'),
       meta: { guest: true },
     },
     {
       path: '/register',
       name: 'register',
-      component: () => import('@/pages/auth/RegisterPage.vue'),
+      component: () => import('@/Pages/auth/RegisterPage.vue'),
       meta: { guest: true },
     },
     {
@@ -29,32 +29,32 @@ const router = createRouter({
         {
           path: '',
           name: 'dashboard',
-          component: () => import('@/pages/dashboard/DashboardPage.vue'),
+          component: () => import('@/Pages/dashboard/DashboardPage.vue'),
         },
         {
           path: 'projects',
           name: 'projects',
-          component: () => import('@/pages/projects/ProjectsPage.vue'),
+          component: () => import('@/Pages/projects/ProjectsPage.vue'),
         },
         {
           path: 'projects/:id',
           name: 'project-detail',
-          component: () => import('@/pages/projects/ProjectDetailPage.vue'),
+          component: () => import('@/Pages/projects/ProjectDetailPage.vue'),
         },
         {
           path: 'projects/:id/kanban',
           name: 'project-kanban',
-          component: () => import('@/pages/projects/KanbanPage.vue'),
+          component: () => import('@/Pages/projects/KanbanPage.vue'),
         },
         {
           path: 'projects/:id/members',
           name: 'project-members',
-          component: () => import('@/pages/projects/MembersPage.vue'),
+          component: () => import('@/Pages/projects/MembersPage.vue'),
         },
         {
           path: 'projects/:id/files',
           name: 'project-files',
-          component: () => import('@/pages/projects/FilesPage.vue'),
+          component: () => import('@/Pages/projects/FilesPage.vue'),
         },
       ],
     },

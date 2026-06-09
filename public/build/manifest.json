@@ -17,6 +17,22 @@
       "_client-DjaC1YHG.js"
     ]
   },
+  "_projects-Dq4jcSEC.js": {
+    "file": "assets/projects-Dq4jcSEC.js",
+    "name": "projects",
+    "imports": [
+      "_client-DjaC1YHG.js",
+      "_pinia-DESetvJu.js",
+      "_projects-BdGCESht.js"
+    ]
+  },
+  "_runtime-dom.esm-bundler-CI4O_clK.js": {
+    "file": "assets/runtime-dom.esm-bundler-CI4O_clK.js",
+    "name": "runtime-dom.esm-bundler",
+    "imports": [
+      "_client-DjaC1YHG.js"
+    ]
+  },
   "node_modules/vue3-apexcharts/dist/apexcharts.ssr.esm-fe46cd2d.js": {
     "file": "assets/apexcharts.ssr.esm-fe46cd2d-BuUM2w9C.js",
     "name": "apexcharts.ssr.esm-fe46cd2d",
@@ -24,7 +40,7 @@
     "isDynamicEntry": true
   },
   "resources/css/app.css": {
-    "file": "assets/app-SQf1r4ew.css",
+    "file": "assets/app-rcUWiRBJ.css",
     "name": "app",
     "names": [
       "app.css"
@@ -33,134 +49,32 @@
     "isEntry": true
   },
   "resources/js/app.ts": {
-    "file": "assets/app-BnN9SmGL.js",
+    "file": "assets/app-BfEMUULT.js",
     "name": "app",
     "src": "resources/js/app.ts",
     "isEntry": true,
     "imports": [
       "_client-DjaC1YHG.js",
+      "_runtime-dom.esm-bundler-CI4O_clK.js",
       "_pinia-DESetvJu.js",
-      "_projects-BdGCESht.js"
+      "_projects-BdGCESht.js",
+      "_projects-Dq4jcSEC.js"
     ],
     "dynamicImports": [
       "node_modules/vue3-apexcharts/dist/apexcharts.ssr.esm-fe46cd2d.js",
-      "resources/js/pages/AcceptInvitePage.vue",
-      "resources/js/pages/auth/LoginPage.vue",
-      "resources/js/pages/auth/RegisterPage.vue",
-      "resources/js/layouts/AppLayout.vue",
-      "resources/js/pages/dashboard/DashboardPage.vue",
-      "resources/js/pages/projects/ProjectsPage.vue",
-      "resources/js/pages/projects/ProjectDetailPage.vue",
-      "resources/js/pages/projects/KanbanPage.vue",
-      "resources/js/pages/projects/MembersPage.vue",
-      "resources/js/pages/projects/FilesPage.vue"
+      "resources/js/app.ts",
+      "resources/js/layouts/AppLayout.vue"
     ]
   },
   "resources/js/layouts/AppLayout.vue": {
-    "file": "assets/AppLayout-DTH-mFGR.js",
+    "file": "assets/AppLayout-1suZrohu.js",
     "name": "AppLayout",
     "src": "resources/js/layouts/AppLayout.vue",
     "isDynamicEntry": true,
     "imports": [
       "_client-DjaC1YHG.js",
-      "resources/js/app.ts"
-    ]
-  },
-  "resources/js/pages/AcceptInvitePage.vue": {
-    "file": "assets/AcceptInvitePage-BshPQ84e.js",
-    "name": "AcceptInvitePage",
-    "src": "resources/js/pages/AcceptInvitePage.vue",
-    "isDynamicEntry": true,
-    "imports": [
-      "_client-DjaC1YHG.js",
       "resources/js/app.ts",
-      "_projects-BdGCESht.js"
-    ]
-  },
-  "resources/js/pages/auth/LoginPage.vue": {
-    "file": "assets/LoginPage-C7X4A5QR.js",
-    "name": "LoginPage",
-    "src": "resources/js/pages/auth/LoginPage.vue",
-    "isDynamicEntry": true,
-    "imports": [
-      "_client-DjaC1YHG.js",
-      "resources/js/app.ts"
-    ]
-  },
-  "resources/js/pages/auth/RegisterPage.vue": {
-    "file": "assets/RegisterPage-C1TrWlp5.js",
-    "name": "RegisterPage",
-    "src": "resources/js/pages/auth/RegisterPage.vue",
-    "isDynamicEntry": true,
-    "imports": [
-      "_client-DjaC1YHG.js",
-      "resources/js/app.ts"
-    ]
-  },
-  "resources/js/pages/dashboard/DashboardPage.vue": {
-    "file": "assets/DashboardPage-tKEobBZR.js",
-    "name": "DashboardPage",
-    "src": "resources/js/pages/dashboard/DashboardPage.vue",
-    "isDynamicEntry": true,
-    "imports": [
-      "_client-DjaC1YHG.js",
-      "resources/js/app.ts",
-      "_projects-BdGCESht.js"
-    ]
-  },
-  "resources/js/pages/projects/FilesPage.vue": {
-    "file": "assets/FilesPage-Cm6HaWkp.js",
-    "name": "FilesPage",
-    "src": "resources/js/pages/projects/FilesPage.vue",
-    "isDynamicEntry": true,
-    "imports": [
-      "_client-DjaC1YHG.js",
-      "_projects-BdGCESht.js"
-    ]
-  },
-  "resources/js/pages/projects/KanbanPage.vue": {
-    "file": "assets/KanbanPage-DjvuokQF.js",
-    "name": "KanbanPage",
-    "src": "resources/js/pages/projects/KanbanPage.vue",
-    "isDynamicEntry": true,
-    "imports": [
-      "_client-DjaC1YHG.js",
-      "resources/js/app.ts",
-      "_pinia-DESetvJu.js",
-      "_projects-BdGCESht.js"
-    ]
-  },
-  "resources/js/pages/projects/MembersPage.vue": {
-    "file": "assets/MembersPage-CSRKU328.js",
-    "name": "MembersPage",
-    "src": "resources/js/pages/projects/MembersPage.vue",
-    "isDynamicEntry": true,
-    "imports": [
-      "_client-DjaC1YHG.js",
-      "resources/js/app.ts",
-      "_pinia-DESetvJu.js",
-      "_projects-BdGCESht.js"
-    ]
-  },
-  "resources/js/pages/projects/ProjectDetailPage.vue": {
-    "file": "assets/ProjectDetailPage-B_HYxhq2.js",
-    "name": "ProjectDetailPage",
-    "src": "resources/js/pages/projects/ProjectDetailPage.vue",
-    "isDynamicEntry": true,
-    "imports": [
-      "_client-DjaC1YHG.js",
-      "resources/js/app.ts"
-    ]
-  },
-  "resources/js/pages/projects/ProjectsPage.vue": {
-    "file": "assets/ProjectsPage-BRHIF9I8.js",
-    "name": "ProjectsPage",
-    "src": "resources/js/pages/projects/ProjectsPage.vue",
-    "isDynamicEntry": true,
-    "imports": [
-      "_client-DjaC1YHG.js",
-      "resources/js/app.ts",
-      "_pinia-DESetvJu.js"
+      "_projects-Dq4jcSEC.js"
     ]
   }
 }
