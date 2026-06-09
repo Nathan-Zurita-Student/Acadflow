@@ -230,7 +230,7 @@
 
           <!-- ── Comments tab ───────────────────────────── -->
           <div v-if="activeTab === 'comments'" class="p-6 space-y-4">
-            <div class="space-y-3 max-h-64 overflow-y-auto">
+            <div ref="commentsContainer" class="space-y-3 max-h-64 overflow-y-auto">
               <div v-for="c in detail?.comments ?? []" :key="c.id" class="flex gap-2.5">
                 <div class="w-7 h-7 rounded-full bg-indigo-600/30 flex items-center justify-center text-xs font-semibold text-indigo-300 flex-shrink-0">
                   {{ c.user.name[0] }}
@@ -317,7 +317,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useTasksStore } from '@/stores/tasks'
 import { useProjectsStore } from '@/stores/projects'
@@ -343,6 +343,8 @@ const activeTab    = ref('form')
 const detail       = ref<Task | null>(null)
 const newComment   = ref('')
 const newCheckItem = ref('')
+const commentsContainer = ref<HTMLElement | null>(null)
+let commentsPollInterval: ReturnType<typeof setInterval> | null = null
 
 // ── member picker ─────────────────────────────────────
 const pickerOpen   = ref(false)
@@ -380,7 +382,10 @@ function onOutsideClick(e: MouseEvent) {
   }
 }
 onMounted(() => document.addEventListener('mousedown', onOutsideClick))
-onUnmounted(() => document.removeEventListener('mousedown', onOutsideClick))
+onUnmounted(() => {
+  document.removeEventListener('mousedown', onOutsideClick)
+  stopCommentsPolling()
+})
 
 // ── files ─────────────────────────────────────────────
 const fileInput    = ref<HTMLInputElement | null>(null)
@@ -404,6 +409,36 @@ const form = ref({
   priority:    props.task?.priority    ?? 'medium',
   due_date:    props.task?.due_date    ?? '',
 })
+
+async function refreshComments() {
+  if (!props.task) return
+  const res = await tasksApi.get(props.projectId, props.task.id)
+  if (detail.value) detail.value.comments = res.data.comments ?? []
+}
+
+function startCommentsPolling() {
+  if (commentsPollInterval) return
+  commentsPollInterval = setInterval(refreshComments, 5000)
+}
+
+function stopCommentsPolling() {
+  if (commentsPollInterval) { clearInterval(commentsPollInterval); commentsPollInterval = null }
+}
+
+watch(activeTab, (tab) => {
+  if (tab === 'comments') {
+    startCommentsPolling()
+    nextTick(() => scrollCommentsToBottom())
+  } else {
+    stopCommentsPolling()
+  }
+})
+
+function scrollCommentsToBottom() {
+  if (commentsContainer.value) {
+    commentsContainer.value.scrollTop = commentsContainer.value.scrollHeight
+  }
+}
 
 onMounted(async () => {
   if (isEdit && props.task) {
@@ -464,8 +499,9 @@ async function deleteChecklist(id: number) {
 async function addComment() {
   if (!newComment.value.trim() || !props.task) return
   const res = await tasksApi.addComment(props.projectId, props.task.id, newComment.value)
-  detail.value?.comments?.unshift(res.data)
+  detail.value?.comments?.push(res.data)
   newComment.value = ''
+  nextTick(() => scrollCommentsToBottom())
 }
 
 // ── file upload ───────────────────────────────────────

@@ -63,5 +63,11 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  return { user, token, loading, isAuthenticated, login, register, logout, fetchMe, clearAuth }
+  async function updateProfile(formData: FormData) {
+    const { data } = await authApi.updateProfile(formData)
+    user.value = data
+    return data
+  }
+
+  return { user, token, loading, isAuthenticated, login, register, logout, fetchMe, clearAuth, updateProfile }
 })

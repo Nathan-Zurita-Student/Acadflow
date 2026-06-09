@@ -6,17 +6,8 @@
         sidebarOpen ? 'translate-x-0' : '-translate-x-full']"
     >
       <!-- Logo -->
-      <div class="flex items-center gap-3 px-5 py-5 border-b border-dark-700/60">
-        <div class="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center flex-shrink-0">
-          <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-          </svg>
-        </div>
-        <div>
-          <h1 class="text-sm font-bold text-white">AcadFlow</h1>
-          <p class="text-xs text-dark-500">Gestão Acadêmica</p>
-        </div>
+      <div class="flex items-center gap-3 px-5 py-4 border-b border-dark-700/60">
+        <img src="/imagem/acadflow.png" alt="AcadFlow" class="h-10 w-auto object-contain" />
       </div>
 
       <!-- Navigation -->
@@ -30,7 +21,7 @@
             <p class="text-xs font-semibold text-dark-500 uppercase tracking-wider">Projeto Atual</p>
           </div>
           <div class="ml-2 pl-3 border-l border-dark-700">
-            <NavItem :to="`/projects/${currentProject.id}`" icon="chart" label="Visão Geral" :exact="true" />
+            <NavItem v-if="isLeaderOfCurrentProject" :to="`/projects/${currentProject.id}`" icon="chart" label="Visão Geral" :exact="true" />
             <NavItem :to="`/projects/${currentProject.id}/kanban`" icon="kanban" label="Kanban" />
             <NavItem :to="`/projects/${currentProject.id}/members`" icon="users" label="Membros" />
             <NavItem :to="`/projects/${currentProject.id}/files`" icon="paperclip" label="Arquivos" />
@@ -40,15 +31,19 @@
 
       <!-- User section -->
       <div class="px-3 py-3 border-t border-dark-700/60">
-        <div class="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-dark-800 cursor-pointer group">
-          <div class="w-8 h-8 rounded-full bg-indigo-600/30 flex items-center justify-center flex-shrink-0 text-indigo-400 text-sm font-semibold">
-            {{ userInitial }}
+        <div class="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-dark-800 cursor-pointer group"
+          @click="showProfile = true">
+          <div class="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
+            <img v-if="auth.user?.avatar" :src="auth.user.avatar" class="w-full h-full object-cover" alt="Avatar" />
+            <div v-else class="w-full h-full bg-indigo-600/30 flex items-center justify-center text-indigo-400 text-sm font-semibold">
+              {{ userInitial }}
+            </div>
           </div>
           <div class="flex-1 min-w-0">
-            <p class="text-sm font-medium text-dark-100 truncate">{{ auth.user?.name }}</p>
-            <p class="text-xs text-dark-500 truncate">{{ auth.user?.role }}</p>
+            <p class="text-sm font-medium text-dark-100 truncate">{{ auth.user?.display_name || auth.user?.name }}</p>
+            <p class="text-xs text-dark-500 truncate">{{ auth.user?.email }}</p>
           </div>
-          <button @click="handleLogout" class="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-dark-700 transition-opacity">
+          <button @click.stop="handleLogout" class="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-dark-700 transition-opacity">
             <svg class="w-4 h-4 text-dark-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -57,6 +52,8 @@
         </div>
       </div>
     </aside>
+
+    <ProfileModal v-if="showProfile" @close="showProfile = false" />
 
     <!-- Overlay -->
     <div v-if="sidebarOpen" @click="sidebarOpen = false"
@@ -93,14 +90,23 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useProjectsStore } from '@/stores/projects'
 import NavItem from '@/components/ui/NavItem.vue'
+import ProfileModal from '@/components/ui/ProfileModal.vue'
 
 const auth = useAuthStore()
 const projectsStore = useProjectsStore()
 const router = useRouter()
 const sidebarOpen = ref(false)
+const showProfile = ref(false)
 
 const currentProject = computed(() => projectsStore.currentProject)
 const userInitial = computed(() => auth.user?.name?.[0]?.toUpperCase() ?? '?')
+
+const isLeaderOfCurrentProject = computed(() => {
+  if (!currentProject.value) return false
+  if (currentProject.value.is_owner) return true
+  const uid = auth.user?.id
+  return currentProject.value.members.some(m => m.id === uid && m.role === 'leader')
+})
 const currentDate = computed(() =>
   new Intl.DateTimeFormat('pt-BR', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date())
 )

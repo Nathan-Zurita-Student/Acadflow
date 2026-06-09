@@ -18,6 +18,7 @@ Route::prefix('auth')->group(function () {
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('logout', [AuthController::class, 'logout']);
         Route::get('me', [AuthController::class, 'me']);
+        Route::post('profile', [AuthController::class, 'updateProfile']);
     });
 });
 
@@ -54,6 +55,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::get('{project}/attachments', [AttachmentController::class, 'index']);
         Route::post('{project}/attachments', [AttachmentController::class, 'store']);
+        Route::get('{project}/attachments/{attachment}/download', [AttachmentController::class, 'download']);
         Route::delete('{project}/attachments/{attachment}', [AttachmentController::class, 'destroy']);
     });
 

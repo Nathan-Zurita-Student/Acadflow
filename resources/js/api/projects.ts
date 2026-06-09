@@ -39,14 +39,17 @@ export const tasksApi = {
 
 export const attachmentsApi = {
   list: (projectId: number) => api.get<Attachment[]>(`/projects/${projectId}/attachments`),
-  upload: (projectId: number, file: File, taskId?: number) => {
+  upload: (projectId: number, file: File, taskId?: number, name?: string) => {
     const form = new FormData()
     form.append('file', file)
     if (taskId) form.append('task_id', String(taskId))
+    if (name)   form.append('name', name)
     return api.post<Attachment>(`/projects/${projectId}/attachments`, form, {
       headers: { 'Content-Type': 'multipart/form-data' },
     })
   },
+  downloadUrl: (projectId: number, attachmentId: number) =>
+    `/api/projects/${projectId}/attachments/${attachmentId}/download`,
   delete: (projectId: number, attachmentId: number) => api.delete(`/projects/${projectId}/attachments/${attachmentId}`),
 }
 

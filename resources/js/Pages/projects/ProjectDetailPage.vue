@@ -137,8 +137,9 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useProjectsStore } from '@/stores/projects'
+import { useAuthStore } from '@/stores/auth'
 import StatCard from '@/components/ui/StatCard.vue'
 import RiskBadge from '@/components/ui/RiskBadge.vue'
 import MemberRow from '@/components/ui/MemberRow.vue'
@@ -146,14 +147,29 @@ import TimelineItem from '@/components/ui/TimelineItem.vue'
 import ProjectModal from '@/components/ui/ProjectModal.vue'
 
 const route = useRoute()
+const router = useRouter()
 const store = useProjectsStore()
+const authStore = useAuthStore()
 const projectId = Number(route.params.id)
 const loading = ref(true)
 const showEdit = ref(false)
 
 const dashboard = computed(() => store.currentDashboard)
 
-onMounted(refresh)
+const isLeader = computed(() => {
+  const project = store.currentProject
+  if (!project) return false
+  if (project.is_owner) return true
+  const uid = authStore.user?.id
+  return project.members.some(m => m.id === uid && m.role === 'leader')
+})
+
+onMounted(async () => {
+  await refresh()
+  if (!isLeader.value) {
+    router.replace(`/projects/${projectId}/kanban`)
+  }
+})
 
 async function refresh() {
   loading.value = true
@@ -161,6 +177,8 @@ async function refresh() {
   try { await store.fetchDashboard(projectId) }
   finally { loading.value = false }
 }
+
+
 
 const statusLabels: Record<string, string> = {
   backlog: 'Backlog', pending: 'Pendente', in_progress: 'Em andamento', review: 'Revisão', done: 'Concluída',

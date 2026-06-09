@@ -178,26 +178,8 @@
         <span v-if="task.is_overdue" class="text-xs text-red-400">⚠</span>
       </div>
 
-      <!-- Right: timer + due date + assignees -->
+      <!-- Right: due date + assignees -->
       <div class="flex items-center gap-1.5">
-        <!-- Timer -->
-        <button
-          class="flex items-center gap-1 text-xs px-1.5 py-0.5 rounded-md transition-colors"
-          :class="timerRunning
-            ? 'text-indigo-400 bg-indigo-500/10 hover:bg-indigo-500/20'
-            : 'text-dark-500 hover:text-dark-300 hover:bg-dark-700'"
-          @click.stop="toggleTimer"
-          :title="timerRunning ? 'Parar timer' : 'Iniciar timer'"
-        >
-          <svg v-if="!timerRunning" class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M8 5v14l11-7z" />
-          </svg>
-          <svg v-else class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
-          </svg>
-          <span>{{ timerDisplay }}</span>
-        </button>
-
         <!-- Due date -->
         <span
           v-if="task.due_date"
@@ -224,8 +206,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { timeApi, tasksApi } from '@/api/projects'
+import { ref, computed } from 'vue'
+import { tasksApi } from '@/api/projects'
 import type { Task, TaskStatus } from '@/types'
 import PriorityDot from '@/components/ui/PriorityDot.vue'
 
@@ -332,59 +314,6 @@ const allAssignees = computed(() => {
 })
 const displayAssignees = computed(() => allAssignees.value.slice(0, 3))
 const extraAssignees   = computed(() => Math.max(0, allAssignees.value.length - 3))
-
-// ── timer ────────────────────────────────────────────
-const STORAGE_KEY = `acadflow_timer_${props.task.id}`
-const elapsed      = ref(0)
-const timerRunning = ref(false)
-let interval: ReturnType<typeof setInterval> | null = null
-
-function loadTimer() {
-  const raw = localStorage.getItem(STORAGE_KEY)
-  if (!raw) return
-  elapsed.value = Math.floor((Date.now() - Number(raw)) / 1000)
-  timerRunning.value = true
-  startInterval()
-}
-
-function startInterval() {
-  if (interval) return
-  interval = setInterval(() => {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    if (raw) elapsed.value = Math.floor((Date.now() - Number(raw)) / 1000)
-  }, 1000)
-}
-
-async function toggleTimer() {
-  if (timerRunning.value) {
-    clearInterval(interval!); interval = null
-    timerRunning.value = false
-    const seconds = elapsed.value
-    localStorage.removeItem(STORAGE_KEY)
-    elapsed.value = 0
-    if (seconds > 0 && props.projectId) {
-      try { await timeApi.log(props.projectId, props.task.id, seconds) } catch {}
-    }
-  } else {
-    localStorage.setItem(STORAGE_KEY, String(Date.now()))
-    timerRunning.value = true
-    elapsed.value = 0
-    startInterval()
-  }
-}
-
-const timerDisplay = computed(() => {
-  const base = props.task.time_seconds + (timerRunning.value ? elapsed.value : 0)
-  if (base === 0 && !timerRunning.value) return ''
-  const h = Math.floor(base / 3600)
-  const m = Math.floor((base % 3600) / 60)
-  const s = base % 60
-  if (h > 0) return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
-  return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
-})
-
-onMounted(loadTimer)
-onUnmounted(() => { if (interval) clearInterval(interval) })
 
 function formatDate(d: string) {
   return new Date(d + 'T00:00:00').toLocaleDateString('pt-BR', { day: 'numeric', month: 'short' })
