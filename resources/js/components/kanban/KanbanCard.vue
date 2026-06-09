@@ -180,13 +180,14 @@
 
       <!-- Right: due date + assignees -->
       <div class="flex items-center gap-1.5">
-        <!-- Due date -->
+        <!-- Countdown de prazo -->
         <span
           v-if="task.due_date"
-          class="text-xs"
-          :class="task.is_overdue ? 'text-red-400' : 'text-dark-500'"
+          class="text-xs px-1.5 py-0.5 rounded-md font-medium"
+          :class="dueDateClass"
           @click="$emit('click')"
-        >{{ formatDate(task.due_date) }}</span>
+          :title="formatDate(task.due_date)"
+        >{{ dueDateLabel }}</span>
 
         <!-- Assignees (up to 3) -->
         <div class="flex -space-x-1" @click="$emit('click')">
@@ -318,4 +319,31 @@ const extraAssignees   = computed(() => Math.max(0, allAssignees.value.length - 
 function formatDate(d: string) {
   return new Date(d + 'T00:00:00').toLocaleDateString('pt-BR', { day: 'numeric', month: 'short' })
 }
+
+const dueDateDiff = computed(() => {
+  if (!props.task.due_date) return null
+  const today = new Date(); today.setHours(0, 0, 0, 0)
+  const due   = new Date(props.task.due_date + 'T00:00:00')
+  return Math.round((due.getTime() - today.getTime()) / 86400000)
+})
+
+const dueDateLabel = computed(() => {
+  const d = dueDateDiff.value
+  if (d === null) return ''
+  if (props.task.status === 'done') return formatDate(props.task.due_date!)
+  if (d < 0)  return `${Math.abs(d)}d atrasada`
+  if (d === 0) return 'Vence hoje'
+  if (d === 1) return 'Vence amanhã'
+  if (d <= 7)  return `${d}d restantes`
+  return formatDate(props.task.due_date!)
+})
+
+const dueDateClass = computed(() => {
+  const d = dueDateDiff.value
+  if (d === null || props.task.status === 'done') return 'text-dark-500'
+  if (d < 0)  return 'bg-red-500/15 text-red-400'
+  if (d === 0) return 'bg-orange-500/15 text-orange-400'
+  if (d <= 3)  return 'bg-yellow-500/10 text-yellow-400'
+  return 'text-dark-500'
+})
 </script>

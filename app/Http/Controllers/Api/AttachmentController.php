@@ -5,12 +5,15 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Attachment;
 use App\Models\Project;
+use App\Services\NotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class AttachmentController extends Controller
 {
+    public function __construct(private NotificationService $notifications) {}
+
     public function index(Request $request, Project $project): JsonResponse
     {
         $this->authorize('view', $project);
@@ -57,7 +60,33 @@ class AttachmentController extends Controller
 
         $attachment->load('uploader');
 
+        // notificar membros do projeto (exceto quem fez upload)
+        $members = $project->members()
+            ->where('users.id', '!=', $request->user()->id)
+            ->get();
+
+        $uploaderName = $request->user()->name;
+        $this->notifications->notifyMany(
+            $members,
+            'file_uploaded',
+            'Novo arquivo enviado 📎',
+            "{$uploaderName} enviou \"{$displayName}\" em {$project->name}",
+            ['project_id' => $project->id, 'attachment_id' => $attachment->id],
+        );
+
         return response()->json($this->resource($attachment), 201);
+    }
+
+    public function view(Project $project, Attachment $attachment)
+    {
+        $this->authorize('view', $project);
+
+        $fullPath = Storage::disk('public')->path($attachment->path);
+
+        return response()->file($fullPath, [
+            'Content-Type'        => $attachment->mime_type,
+            'Content-Disposition' => 'inline; filename="' . $attachment->name . '"',
+        ]);
     }
 
     public function download(Project $project, Attachment $attachment)

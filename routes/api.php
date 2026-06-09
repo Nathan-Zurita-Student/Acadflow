@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AttachmentController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\InviteController;
+use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\ProjectController;
 use App\Http\Controllers\Api\TaskController;
 use Illuminate\Support\Facades\Route;
@@ -23,6 +24,10 @@ Route::prefix('auth')->group(function () {
 });
 
 Route::middleware('auth:sanctum')->group(function () {
+    Route::get('notifications', [NotificationController::class, 'index']);
+    Route::post('notifications/{notification}/read', [NotificationController::class, 'markRead']);
+    Route::post('notifications/read-all', [NotificationController::class, 'markAllRead']);
+
     Route::get('dashboard', [DashboardController::class, 'index']);
 
     Route::prefix('projects')->group(function () {
@@ -55,6 +60,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::get('{project}/attachments', [AttachmentController::class, 'index']);
         Route::post('{project}/attachments', [AttachmentController::class, 'store']);
+        Route::get('{project}/attachments/{attachment}/view', [AttachmentController::class, 'view']);
         Route::get('{project}/attachments/{attachment}/download', [AttachmentController::class, 'download']);
         Route::delete('{project}/attachments/{attachment}', [AttachmentController::class, 'destroy']);
     });

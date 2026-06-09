@@ -48,6 +48,8 @@ export const attachmentsApi = {
       headers: { 'Content-Type': 'multipart/form-data' },
     })
   },
+  viewUrl:     (projectId: number, attachmentId: number) =>
+    `/api/projects/${projectId}/attachments/${attachmentId}/view`,
   downloadUrl: (projectId: number, attachmentId: number) =>
     `/api/projects/${projectId}/attachments/${attachmentId}/download`,
   delete: (projectId: number, attachmentId: number) => api.delete(`/projects/${projectId}/attachments/${attachmentId}`),

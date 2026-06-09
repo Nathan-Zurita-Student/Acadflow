@@ -4,13 +4,18 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Project;
+use App\Models\User;
+use App\Services\NotificationService;
 use App\Services\ProjectService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class ProjectController extends Controller
 {
-    public function __construct(private ProjectService $projectService) {}
+    public function __construct(
+        private ProjectService $projectService,
+        private NotificationService $notifications,
+    ) {}
 
     public function index(Request $request): JsonResponse
     {
@@ -95,6 +100,18 @@ class ProjectController extends Controller
         ]);
 
         $this->projectService->addMember($project, $data['user_id'], $data['role'] ?? 'member');
+
+        $newMember = User::find($data['user_id']);
+        if ($newMember && $newMember->id !== $request->user()->id) {
+            $roleLabel = ($data['role'] ?? 'member') === 'leader' ? 'líder' : 'membro';
+            $this->notifications->notify(
+                $newMember,
+                'project_member_added',
+                'Você foi adicionado a um projeto 🎓',
+                "{$request->user()->name} adicionou você como {$roleLabel} no projeto \"{$project->name}\".",
+                ['project_id' => $project->id],
+            );
+        }
 
         return response()->json(['message' => 'Membro adicionado com sucesso.']);
     }

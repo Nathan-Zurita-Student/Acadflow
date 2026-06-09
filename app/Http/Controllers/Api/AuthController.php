@@ -74,7 +74,7 @@ class AuthController extends Controller
                 Storage::disk('public')->delete($oldPath);
             }
             $path = $request->file('avatar')->store('avatars', 'public');
-            $data['avatar'] = url(Storage::url($path));
+            $data['avatar'] = Storage::url($path);
         }
 
         $user->update($data);

@@ -2,16 +2,21 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Events\CommentPosted;
 use App\Http\Controllers\Controller;
 use App\Models\Project;
 use App\Models\Task;
+use App\Services\NotificationService;
 use App\Services\ProjectService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class TaskController extends Controller
 {
-    public function __construct(private ProjectService $projectService) {}
+    public function __construct(
+        private ProjectService $projectService,
+        private NotificationService $notifications,
+    ) {}
 
     public function index(Request $request, Project $project): JsonResponse
     {
@@ -72,6 +77,19 @@ class TaskController extends Controller
 
         $project->recalculateProgress();
         $this->projectService->logActivity($project, $request->user(), 'created_task', 'Task', $task->id, ['title' => $task->title]);
+
+        // notificar membros alocados
+        foreach ($task->assignees as $member) {
+            if ($member->id !== $request->user()->id) {
+                $this->notifications->notify(
+                    $member,
+                    'task_assigned',
+                    'Você foi alocado em uma tarefa',
+                    "{$request->user()->name} alocou você na tarefa \"{$task->title}\" — {$project->name}",
+                    ['project_id' => $project->id, 'task_id' => $task->id],
+                );
+            }
+        }
 
         $task->load(['assignee', 'assignees', 'tags', 'checklists']);
 
@@ -187,6 +205,16 @@ class TaskController extends Controller
 
         $this->projectService->logActivity($project, $request->user(), 'approved_task', 'Task', $task->id, ['title' => $task->title]);
 
+        // notificar criador e assignees
+        $notifyIds = collect([$task->created_by])
+            ->merge($task->assignees->pluck('id'))
+            ->unique()->filter(fn($id) => $id && $id !== $request->user()->id);
+        foreach ($notifyIds as $uid) {
+            $this->notifications->notify($uid, 'task_approved', 'Tarefa aprovada! ✅',
+                "Sua tarefa \"{$task->title}\" foi aprovada pelo líder.",
+                ['project_id' => $project->id, 'task_id' => $task->id]);
+        }
+
         return response()->json(['approval_status' => 'approved']);
     }
 
@@ -206,6 +234,16 @@ class TaskController extends Controller
         $task->update(['approval_status' => 'rejected', 'rejection_note' => $data['note'] ?? null]);
 
         $this->projectService->logActivity($project, $request->user(), 'rejected_task', 'Task', $task->id, ['title' => $task->title]);
+
+        $notifyIds = collect([$task->created_by])
+            ->merge($task->assignees->pluck('id'))
+            ->unique()->filter(fn($id) => $id && $id !== $request->user()->id);
+        $noteMsg = $data['note'] ? " Motivo: {$data['note']}" : '';
+        foreach ($notifyIds as $uid) {
+            $this->notifications->notify($uid, 'task_rejected', 'Tarefa reprovada ❌',
+                "Sua tarefa \"{$task->title}\" foi reprovada.{$noteMsg}",
+                ['project_id' => $project->id, 'task_id' => $task->id]);
+        }
 
         return response()->json(['approval_status' => 'rejected', 'rejection_note' => $task->rejection_note]);
     }
@@ -240,6 +278,26 @@ class TaskController extends Controller
         $comment->load('user');
 
         $this->projectService->logActivity($project, $request->user(), 'commented_task', 'Task', $task->id);
+
+        // notificar assignees e criador (exceto quem comentou)
+        $task->load('assignees');
+        $notifyIds = collect([$task->created_by])
+            ->merge($task->assignees->pluck('id'))
+            ->unique()->filter(fn($id) => $id && $id !== $request->user()->id);
+        foreach ($notifyIds as $uid) {
+            $this->notifications->notify($uid, 'task_comment', 'Novo comentário na tarefa 💬',
+                "{$request->user()->name} comentou em \"{$task->title}\"",
+                ['project_id' => $project->id, 'task_id' => $task->id]);
+        }
+
+        $commentPayload = [
+            'id'         => $comment->id,
+            'content'    => $comment->content,
+            'user'       => ['id' => $comment->user->id, 'name' => $comment->user->name, 'avatar' => $comment->user->avatar],
+            'created_at' => $comment->created_at,
+        ];
+
+        broadcast(new CommentPosted($task->id, $project->id, $commentPayload));
 
         return response()->json([
             'id' => $comment->id,

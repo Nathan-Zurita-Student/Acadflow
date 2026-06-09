@@ -73,6 +73,7 @@
           <span class="text-xs text-dark-500 bg-dark-800 border border-dark-700 px-2 py-1 rounded-md">
             {{ currentDate }}
           </span>
+          <NotificationBell />
         </div>
       </header>
 
@@ -91,6 +92,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useProjectsStore } from '@/stores/projects'
 import NavItem from '@/components/ui/NavItem.vue'
 import ProfileModal from '@/components/ui/ProfileModal.vue'
+import NotificationBell from '@/components/ui/NotificationBell.vue'
 
 const auth = useAuthStore()
 const projectsStore = useProjectsStore()

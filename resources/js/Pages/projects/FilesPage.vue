@@ -53,7 +53,7 @@
             </svg>
           </a>
           <!-- Download -->
-          <a :href="downloadUrl(a.id)" :download="a.name"
+          <a :href="a.url" :download="a.name"
             class="p-1.5 rounded hover:bg-dark-700 text-dark-400 hover:text-dark-200 transition-colors"
             title="Baixar arquivo">
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -227,10 +227,6 @@ async function deleteFile(id: number) {
   if (!confirm('Excluir este arquivo?')) return
   await attachmentsApi.delete(projectId, id)
   attachments.value = attachments.value.filter(a => a.id !== id)
-}
-
-function downloadUrl(attachmentId: number) {
-  return attachmentsApi.downloadUrl(projectId, attachmentId)
 }
 
 function fileExt(name: string) {
