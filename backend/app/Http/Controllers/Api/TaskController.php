@@ -161,6 +161,55 @@ class TaskController extends Controller
         return response()->json(['message' => 'Tarefas reordenadas.']);
     }
 
+    public function submitApproval(Request $request, Project $project, Task $task): JsonResponse
+    {
+        $this->authorize('view', $project);
+
+        $task->update(['approval_status' => 'pending', 'rejection_note' => null]);
+
+        $this->projectService->logActivity($project, $request->user(), 'submitted_approval', 'Task', $task->id, ['title' => $task->title]);
+
+        return response()->json(['approval_status' => 'pending']);
+    }
+
+    public function approveTask(Request $request, Project $project, Task $task): JsonResponse
+    {
+        $this->authorize('update', $project);
+
+        $isLeader = $project->owner_id === $request->user()->id
+            || $project->members()->where('users.id', $request->user()->id)->wherePivot('role', 'leader')->exists();
+
+        if (! $isLeader) {
+            return response()->json(['message' => 'Apenas o líder pode aprovar tarefas.'], 403);
+        }
+
+        $task->update(['approval_status' => 'approved', 'rejection_note' => null]);
+
+        $this->projectService->logActivity($project, $request->user(), 'approved_task', 'Task', $task->id, ['title' => $task->title]);
+
+        return response()->json(['approval_status' => 'approved']);
+    }
+
+    public function rejectTask(Request $request, Project $project, Task $task): JsonResponse
+    {
+        $this->authorize('update', $project);
+
+        $isLeader = $project->owner_id === $request->user()->id
+            || $project->members()->where('users.id', $request->user()->id)->wherePivot('role', 'leader')->exists();
+
+        if (! $isLeader) {
+            return response()->json(['message' => 'Apenas o líder pode rejeitar tarefas.'], 403);
+        }
+
+        $data = $request->validate(['note' => ['nullable', 'string', 'max:500']]);
+
+        $task->update(['approval_status' => 'rejected', 'rejection_note' => $data['note'] ?? null]);
+
+        $this->projectService->logActivity($project, $request->user(), 'rejected_task', 'Task', $task->id, ['title' => $task->title]);
+
+        return response()->json(['approval_status' => 'rejected', 'rejection_note' => $task->rejection_note]);
+    }
+
     public function logTime(Request $request, Project $project, Task $task): JsonResponse
     {
         $this->authorize('view', $project);
@@ -259,6 +308,8 @@ class TaskController extends Controller
             'checklists_total' => $task->checklists->count(),
             'checklists_done'  => $task->checklists->where('completed', true)->count(),
             'time_seconds'     => $task->relationLoaded('timeLogs') ? $task->timeLogs->sum('seconds') : 0,
+            'approval_status'  => $task->approval_status,
+            'rejection_note'   => $task->rejection_note,
             'created_at'       => $task->created_at,
             'updated_at'       => $task->updated_at,
         ];

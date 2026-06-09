@@ -31,7 +31,7 @@
         <!-- Content -->
         <div class="flex-1 overflow-y-auto">
 
-          <!-- Form tab -->
+          <!-- ── Form tab ─────────────────────────────────── -->
           <div v-if="activeTab === 'form'" class="p-6 space-y-4">
             <div>
               <label class="label">Título *</label>
@@ -67,6 +67,128 @@
               <input v-model="form.due_date" type="date" class="input" />
             </div>
 
+            <!-- ── Alocação de membros ─────────────────────── -->
+            <div v-if="projectMembers.length">
+              <label class="label">
+                Membros alocados
+                <span v-if="!isLeader" class="ml-1.5 text-xs text-dark-600 font-normal normal-case">(somente o líder pode alterar)</span>
+              </label>
+
+              <!-- Selected chips -->
+              <div v-if="selectedIds.length" class="flex flex-wrap gap-2 mb-2">
+                <div
+                  v-for="m in selectedMembers" :key="m.id"
+                  class="flex items-center gap-1.5 pl-1.5 pr-2 py-1 rounded-full text-xs font-medium bg-indigo-600/15 border border-indigo-500/25 text-indigo-300"
+                >
+                  <span class="w-5 h-5 rounded-full bg-indigo-600/40 flex items-center justify-center text-xs font-bold">
+                    {{ m.name[0] }}
+                  </span>
+                  {{ m.name.split(' ')[0] }}
+                  <button
+                    v-if="isLeader"
+                    @click="toggleMember(m.id)"
+                    class="ml-0.5 hover:text-white transition-colors"
+                  >
+                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Picker (leader only) -->
+              <div v-if="isLeader" class="relative" ref="pickerRef">
+                <button
+                  type="button"
+                  @click="pickerOpen = !pickerOpen"
+                  class="w-full flex items-center justify-between px-3 py-2 rounded-xl border border-dark-700 bg-dark-900 hover:border-dark-600 text-sm text-dark-400 hover:text-dark-200 transition-colors"
+                >
+                  <span class="flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                    </svg>
+                    {{ selectedIds.length ? 'Adicionar / remover membros' : 'Alocar membros para esta tarefa' }}
+                  </span>
+                  <svg class="w-4 h-4 transition-transform" :class="{ 'rotate-180': pickerOpen }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+
+                <!-- Dropdown -->
+                <div
+                  v-if="pickerOpen"
+                  class="absolute z-10 top-full left-0 right-0 mt-1 bg-dark-800 border border-dark-700 rounded-xl shadow-2xl overflow-hidden"
+                >
+                  <!-- Search -->
+                  <div class="p-2 border-b border-dark-700">
+                    <input
+                      v-model="memberSearch"
+                      placeholder="Buscar membro..."
+                      class="w-full text-sm bg-dark-900 border border-dark-700 rounded-lg px-3 py-2 text-dark-200 placeholder-dark-600 focus:outline-none focus:border-indigo-500"
+                      @click.stop
+                    />
+                  </div>
+
+                  <!-- Member list -->
+                  <div class="max-h-52 overflow-y-auto">
+                    <div
+                      v-for="m in filteredMembers" :key="m.id"
+                      @click="toggleMember(m.id)"
+                      class="flex items-center gap-3 px-3 py-2.5 hover:bg-dark-700 cursor-pointer transition-colors"
+                    >
+                      <!-- Checkbox -->
+                      <div
+                        class="w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 transition-colors"
+                        :class="isSelected(m.id)
+                          ? 'bg-indigo-600 border-indigo-600'
+                          : 'border-dark-600 bg-dark-800'"
+                      >
+                        <svg v-if="isSelected(m.id)" class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                      </div>
+
+                      <!-- Avatar -->
+                      <div class="w-7 h-7 rounded-full bg-indigo-600/30 flex items-center justify-center text-xs font-bold text-indigo-300 flex-shrink-0">
+                        {{ m.name[0] }}
+                      </div>
+
+                      <!-- Info -->
+                      <div class="flex-1 min-w-0">
+                        <p class="text-sm text-dark-200 font-medium truncate">{{ m.name }}</p>
+                        <p class="text-xs text-dark-500 truncate">{{ m.email }}</p>
+                      </div>
+
+                      <!-- Role badge -->
+                      <span
+                        class="text-xs px-1.5 py-0.5 rounded-full flex-shrink-0"
+                        :class="m.role === 'leader' ? 'bg-yellow-500/15 text-yellow-400' : 'bg-dark-700 text-dark-500'"
+                      >{{ m.role === 'leader' ? 'Líder' : 'Membro' }}</span>
+                    </div>
+
+                    <p v-if="!filteredMembers.length" class="text-sm text-dark-600 text-center py-4">
+                      Nenhum membro encontrado
+                    </p>
+                  </div>
+
+                  <!-- Footer -->
+                  <div class="p-2 border-t border-dark-700 flex items-center justify-between">
+                    <span class="text-xs text-dark-500">{{ selectedIds.length }} selecionado{{ selectedIds.length !== 1 ? 's' : '' }}</span>
+                    <button
+                      @click="pickerOpen = false"
+                      class="text-xs text-indigo-400 hover:text-indigo-300 font-medium px-2 py-1 rounded-lg hover:bg-indigo-500/10 transition-colors"
+                    >Confirmar</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Read-only for non-leaders -->
+              <p v-else-if="!selectedIds.length" class="text-sm text-dark-600 italic">
+                Nenhum membro alocado
+              </p>
+            </div>
+
             <p v-if="error" class="text-sm text-red-400 bg-red-400/10 border border-red-400/20 rounded-lg px-3 py-2">{{ error }}</p>
 
             <div class="flex gap-3 pt-2">
@@ -78,7 +200,7 @@
             </div>
           </div>
 
-          <!-- Checklist tab -->
+          <!-- ── Checklist tab ───────────────────────────── -->
           <div v-if="activeTab === 'checklist'" class="p-6">
             <div class="flex gap-2 mb-4">
               <input v-model="newCheckItem" class="input flex-1" placeholder="Novo item..." @keyup.enter="addCheckItem" />
@@ -106,7 +228,7 @@
             </div>
           </div>
 
-          <!-- Comments tab -->
+          <!-- ── Comments tab ───────────────────────────── -->
           <div v-if="activeTab === 'comments'" class="p-6 space-y-4">
             <div class="space-y-3 max-h-64 overflow-y-auto">
               <div v-for="c in detail?.comments ?? []" :key="c.id" class="flex gap-2.5">
@@ -129,15 +251,11 @@
             </div>
           </div>
 
-          <!-- Files tab -->
+          <!-- ── Files tab ───────────────────────────────── -->
           <div v-if="activeTab === 'files'" class="p-6 space-y-4">
-
-            <!-- Drop zone -->
             <div
               class="border-2 border-dashed rounded-xl p-6 text-center transition-colors cursor-pointer"
-              :class="isDraggingFile
-                ? 'border-indigo-500 bg-indigo-500/5'
-                : 'border-dark-600 hover:border-dark-500 hover:bg-dark-700/30'"
+              :class="isDraggingFile ? 'border-indigo-500 bg-indigo-500/5' : 'border-dark-600 hover:border-dark-500 hover:bg-dark-700/30'"
               @dragover.prevent="isDraggingFile = true"
               @dragleave.self="isDraggingFile = false"
               @drop.prevent="onFileDrop"
@@ -149,10 +267,8 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                     d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                 </svg>
-                <p class="text-sm text-dark-400">
-                  Arraste arquivos aqui ou <span class="text-indigo-400 font-medium">clique para selecionar</span>
-                </p>
-                <p class="text-xs text-dark-600 mt-1">Imagens, PDFs, documentos, links — qualquer formato</p>
+                <p class="text-sm text-dark-400">Arraste arquivos aqui ou <span class="text-indigo-400 font-medium">clique para selecionar</span></p>
+                <p class="text-xs text-dark-600 mt-1">Imagens, PDFs, documentos — qualquer formato, até 50MB</p>
               </div>
               <div v-else class="flex flex-col items-center gap-2">
                 <div class="w-6 h-6 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" />
@@ -163,56 +279,35 @@
               </div>
             </div>
 
-            <!-- File list -->
             <div v-if="attachments.length" class="space-y-2">
-              <div
-                v-for="file in attachments" :key="file.id"
-                class="flex items-center gap-3 p-3 rounded-xl bg-dark-700/40 border border-dark-700 hover:border-dark-600 group transition-colors"
-              >
-                <!-- Icon -->
-                <div class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
-                  :class="fileIconBg(file.mime_type)">
+              <div v-for="file in attachments" :key="file.id"
+                class="flex items-center gap-3 p-3 rounded-xl bg-dark-700/40 border border-dark-700 hover:border-dark-600 group transition-colors">
+                <div class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" :class="fileIconBg(file.mime_type)">
                   <svg class="w-4 h-4" :class="fileIconColor(file.mime_type)" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="fileIconPath(file.mime_type)" />
                   </svg>
                 </div>
-
-                <!-- Info -->
                 <div class="flex-1 min-w-0">
                   <p class="text-sm font-medium text-dark-200 truncate">{{ file.name }}</p>
                   <p class="text-xs text-dark-500">{{ formatSize(file.size) }} · {{ timeAgo(file.created_at) }}</p>
                 </div>
-
-                <!-- Actions -->
                 <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <a
-                    :href="file.url" target="_blank" rel="noopener"
-                    class="p-1.5 rounded-lg hover:bg-dark-600 text-dark-400 hover:text-white transition-colors"
-                    title="Abrir"
-                    @click.stop
-                  >
+                  <a :href="file.url" target="_blank" rel="noopener"
+                    class="p-1.5 rounded-lg hover:bg-dark-600 text-dark-400 hover:text-white transition-colors" title="Abrir" @click.stop>
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                     </svg>
                   </a>
-                  <button
-                    @click="deleteAttachment(file.id)"
-                    class="p-1.5 rounded-lg hover:bg-red-600/20 text-dark-400 hover:text-red-400 transition-colors"
-                    title="Remover"
-                  >
+                  <button @click="deleteAttachment(file.id)"
+                    class="p-1.5 rounded-lg hover:bg-red-600/20 text-dark-400 hover:text-red-400 transition-colors" title="Remover">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                     </svg>
                   </button>
                 </div>
               </div>
             </div>
-
-            <p v-else-if="!uploading" class="text-sm text-dark-600 text-center py-2">
-              Nenhum arquivo anexado ainda
-            </p>
+            <p v-else-if="!uploading" class="text-sm text-dark-600 text-center py-2">Nenhum arquivo anexado ainda</p>
           </div>
 
         </div>
@@ -222,8 +317,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { storeToRefs } from 'pinia'
 import { useTasksStore } from '@/stores/tasks'
+import { useProjectsStore } from '@/stores/projects'
 import { tasksApi, attachmentsApi } from '@/api/projects'
 import type { Task, TaskStatus, Attachment } from '@/types'
 
@@ -231,25 +328,67 @@ const props = defineProps<{
   projectId: number
   task?: Task
   defaultStatus?: TaskStatus
+  isLeader?: boolean
 }>()
 const emit = defineEmits(['close', 'saved'])
 
-const store = useTasksStore()
-const isEdit = !!props.task
-const saving = ref(false)
-const error = ref('')
-const activeTab = ref('form')
-const detail = ref<Task | null>(null)
-const newComment = ref('')
+const store         = useTasksStore()
+const projectsStore = useProjectsStore()
+const { currentProject } = storeToRefs(projectsStore)
+
+const isEdit       = !!props.task
+const saving       = ref(false)
+const error        = ref('')
+const activeTab    = ref('form')
+const detail       = ref<Task | null>(null)
+const newComment   = ref('')
 const newCheckItem = ref('')
 
-// ── files ────────────────────────────────────────────
-const fileInput = ref<HTMLInputElement | null>(null)
-const attachments = ref<Attachment[]>([])
+// ── member picker ─────────────────────────────────────
+const pickerOpen   = ref(false)
+const memberSearch = ref('')
+const pickerRef    = ref<HTMLElement | null>(null)
+const selectedIds  = ref<number[]>(
+  props.task?.assignees?.map(a => a.id) ?? []
+)
+
+const projectMembers = computed(() => currentProject.value?.members ?? [])
+
+const filteredMembers = computed(() => {
+  const q = memberSearch.value.toLowerCase()
+  if (!q) return projectMembers.value
+  return projectMembers.value.filter(m =>
+    m.name.toLowerCase().includes(q) || m.email.toLowerCase().includes(q)
+  )
+})
+
+const selectedMembers = computed(() =>
+  projectMembers.value.filter(m => selectedIds.value.includes(m.id))
+)
+
+function isSelected(id: number) { return selectedIds.value.includes(id) }
+
+function toggleMember(id: number) {
+  const idx = selectedIds.value.indexOf(id)
+  if (idx === -1) selectedIds.value.push(id)
+  else selectedIds.value.splice(idx, 1)
+}
+
+function onOutsideClick(e: MouseEvent) {
+  if (pickerRef.value && !pickerRef.value.contains(e.target as Node)) {
+    pickerOpen.value = false
+  }
+}
+onMounted(() => document.addEventListener('mousedown', onOutsideClick))
+onUnmounted(() => document.removeEventListener('mousedown', onOutsideClick))
+
+// ── files ─────────────────────────────────────────────
+const fileInput    = ref<HTMLInputElement | null>(null)
+const attachments  = ref<Attachment[]>([])
 const isDraggingFile = ref(false)
-const uploading = ref(false)
+const uploading    = ref(false)
 const uploadProgress = ref(0)
-const uploadQueue = ref<File[]>([])
+const uploadQueue  = ref<File[]>([])
 
 const tabs = [
   { id: 'form',      label: 'Detalhes' },
@@ -259,11 +398,11 @@ const tabs = [
 ]
 
 const form = ref({
-  title: props.task?.title ?? '',
+  title:       props.task?.title       ?? '',
   description: props.task?.description ?? '',
-  status: props.task?.status ?? props.defaultStatus ?? 'backlog',
-  priority: props.task?.priority ?? 'medium',
-  due_date: props.task?.due_date ?? '',
+  status:      props.task?.status      ?? props.defaultStatus ?? 'backlog',
+  priority:    props.task?.priority    ?? 'medium',
+  due_date:    props.task?.due_date    ?? '',
 })
 
 onMounted(async () => {
@@ -272,6 +411,9 @@ onMounted(async () => {
     detail.value = res.data
     attachments.value = res.data.attachments ?? []
   }
+  if (!currentProject.value || currentProject.value.id !== props.projectId) {
+    await projectsStore.fetchProject(props.projectId)
+  }
 })
 
 async function submit() {
@@ -279,10 +421,14 @@ async function submit() {
   error.value = ''
   saving.value = true
   try {
+    const payload = {
+      ...form.value,
+      ...(props.isLeader ? { assignee_ids: selectedIds.value } : {}),
+    }
     if (isEdit && props.task) {
-      await store.updateTask(props.projectId, props.task.id, form.value)
+      await store.updateTask(props.projectId, props.task.id, payload)
     } else {
-      await store.createTask(props.projectId, form.value)
+      await store.createTask(props.projectId, payload)
     }
     emit('saved')
   } catch (e: any) {
@@ -327,19 +473,16 @@ function onFileSelect(e: Event) {
   const files = Array.from((e.target as HTMLInputElement).files ?? [])
   if (files.length) uploadFiles(files)
 }
-
 function onFileDrop(e: DragEvent) {
   isDraggingFile.value = false
   const files = Array.from(e.dataTransfer?.files ?? [])
   if (files.length) uploadFiles(files)
 }
-
 async function uploadFiles(files: File[]) {
   if (!props.task) return
   uploadQueue.value = files
   uploading.value = true
   uploadProgress.value = 0
-
   for (let i = 0; i < files.length; i++) {
     try {
       const { data } = await attachmentsApi.upload(props.projectId, files[i], props.task.id)
@@ -347,45 +490,39 @@ async function uploadFiles(files: File[]) {
     } catch {}
     uploadProgress.value = Math.round(((i + 1) / files.length) * 100)
   }
-
   uploading.value = false
   uploadQueue.value = []
   if (fileInput.value) fileInput.value.value = ''
 }
-
 async function deleteAttachment(id: number) {
   await attachmentsApi.delete(props.projectId, id)
   attachments.value = attachments.value.filter(a => a.id !== id)
 }
 
 // ── file helpers ──────────────────────────────────────
-function fileIconPath(mime: string): string {
+function fileIconPath(mime: string) {
   if (mime.startsWith('image/')) return 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z'
   if (mime === 'application/pdf') return 'M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z'
   if (mime.includes('video')) return 'M15 10l4.553-2.069A1 1 0 0121 8.845v6.31a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z'
   return 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'
 }
-
-function fileIconBg(mime: string): string {
+function fileIconBg(mime: string) {
   if (mime.startsWith('image/')) return 'bg-purple-500/15'
   if (mime === 'application/pdf') return 'bg-red-500/15'
   if (mime.includes('video')) return 'bg-blue-500/15'
   return 'bg-emerald-500/15'
 }
-
-function fileIconColor(mime: string): string {
+function fileIconColor(mime: string) {
   if (mime.startsWith('image/')) return 'text-purple-400'
   if (mime === 'application/pdf') return 'text-red-400'
   if (mime.includes('video')) return 'text-blue-400'
   return 'text-emerald-400'
 }
-
-function formatSize(bytes: number): string {
+function formatSize(bytes: number) {
   if (bytes < 1024) return bytes + ' B'
   if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB'
   return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
 }
-
 function timeAgo(date: string) {
   const diff = (Date.now() - new Date(date).getTime()) / 1000
   if (diff < 60) return 'agora'

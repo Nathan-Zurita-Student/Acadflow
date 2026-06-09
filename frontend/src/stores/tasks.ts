@@ -24,13 +24,13 @@ export const useTasksStore = defineStore('tasks', () => {
     return data
   }
 
-  async function createTask(projectId: number, payload: Partial<Task> & { tag_ids?: number[] }) {
+  async function createTask(projectId: number, payload: Partial<Task> & { tag_ids?: number[]; assignee_ids?: number[] }) {
     const { data } = await tasksApi.create(projectId, payload)
     tasks.value.push(data)
     return data
   }
 
-  async function updateTask(projectId: number, taskId: number, payload: Partial<Task> & { tag_ids?: number[] }) {
+  async function updateTask(projectId: number, taskId: number, payload: Partial<Task> & { tag_ids?: number[]; assignee_ids?: number[] }) {
     const { data } = await tasksApi.update(projectId, taskId, payload)
     const idx = tasks.value.findIndex((t: Task) => t.id === taskId)
     if (idx !== -1) tasks.value[idx] = data

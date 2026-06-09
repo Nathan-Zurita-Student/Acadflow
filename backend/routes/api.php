@@ -43,6 +43,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('{project}/tasks/reorder', [TaskController::class, 'reorder']);
         Route::post('{project}/tasks/{task}/comments', [TaskController::class, 'storeComment']);
         Route::post('{project}/tasks/{task}/time', [TaskController::class, 'logTime']);
+        Route::post('{project}/tasks/{task}/submit-approval', [TaskController::class, 'submitApproval']);
+        Route::post('{project}/tasks/{task}/approve', [TaskController::class, 'approveTask']);
+        Route::post('{project}/tasks/{task}/reject', [TaskController::class, 'rejectTask']);
         Route::post('{project}/tasks/{task}/checklists', [TaskController::class, 'storeChecklist']);
         Route::put('{project}/tasks/{task}/checklists/{checklistId}', [TaskController::class, 'updateChecklist']);
         Route::delete('{project}/tasks/{task}/checklists/{checklistId}', [TaskController::class, 'destroyChecklist']);

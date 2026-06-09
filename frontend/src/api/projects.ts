@@ -23,6 +23,12 @@ export const tasksApi = {
     api.post(`/projects/${projectId}/tasks/reorder`, { tasks }),
   addComment: (projectId: number, taskId: number, content: string) =>
     api.post(`/projects/${projectId}/tasks/${taskId}/comments`, { content }),
+  submitApproval: (projectId: number, taskId: number) =>
+    api.post<{ approval_status: string }>(`/projects/${projectId}/tasks/${taskId}/submit-approval`),
+  approveTask: (projectId: number, taskId: number) =>
+    api.post<{ approval_status: string }>(`/projects/${projectId}/tasks/${taskId}/approve`),
+  rejectTask: (projectId: number, taskId: number, note?: string) =>
+    api.post<{ approval_status: string; rejection_note: string | null }>(`/projects/${projectId}/tasks/${taskId}/reject`, { note }),
   addChecklist: (projectId: number, taskId: number, title: string) =>
     api.post(`/projects/${projectId}/tasks/${taskId}/checklists`, { title }),
   updateChecklist: (projectId: number, taskId: number, checklistId: number, completed: boolean) =>

@@ -71,6 +71,8 @@ export interface Task {
   checklists_total: number
   checklists_done: number
   time_seconds: number
+  approval_status: 'pending' | 'approved' | 'rejected' | null
+  rejection_note: string | null
   created_at: string
   updated_at: string
   // detail fields
