@@ -21,11 +21,16 @@
             :class="['px-3 py-1.5 text-sm rounded-lg transition-colors',
               activeTab === tab.id ? 'bg-dark-700 text-white font-medium' : 'text-dark-400 hover:text-dark-200']">
             {{ tab.label }}
+            <span v-if="tab.id === 'files' && attachments.length"
+              class="ml-1 text-xs bg-indigo-600/30 text-indigo-400 px-1.5 py-0.5 rounded-full">
+              {{ attachments.length }}
+            </span>
           </button>
         </div>
 
         <!-- Content -->
         <div class="flex-1 overflow-y-auto">
+
           <!-- Form tab -->
           <div v-if="activeTab === 'form'" class="p-6 space-y-4">
             <div>
@@ -123,6 +128,93 @@
               <button @click="addComment" :disabled="!newComment.trim()" class="btn-primary">Enviar</button>
             </div>
           </div>
+
+          <!-- Files tab -->
+          <div v-if="activeTab === 'files'" class="p-6 space-y-4">
+
+            <!-- Drop zone -->
+            <div
+              class="border-2 border-dashed rounded-xl p-6 text-center transition-colors cursor-pointer"
+              :class="isDraggingFile
+                ? 'border-indigo-500 bg-indigo-500/5'
+                : 'border-dark-600 hover:border-dark-500 hover:bg-dark-700/30'"
+              @dragover.prevent="isDraggingFile = true"
+              @dragleave.self="isDraggingFile = false"
+              @drop.prevent="onFileDrop"
+              @click="fileInput?.click()"
+            >
+              <input ref="fileInput" type="file" class="hidden" multiple @change="onFileSelect" />
+              <div v-if="!uploading">
+                <svg class="w-8 h-8 text-dark-500 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                </svg>
+                <p class="text-sm text-dark-400">
+                  Arraste arquivos aqui ou <span class="text-indigo-400 font-medium">clique para selecionar</span>
+                </p>
+                <p class="text-xs text-dark-600 mt-1">Imagens, PDFs, documentos, links — qualquer formato</p>
+              </div>
+              <div v-else class="flex flex-col items-center gap-2">
+                <div class="w-6 h-6 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" />
+                <p class="text-sm text-dark-400">Enviando {{ uploadQueue.length > 1 ? uploadQueue.length + ' arquivos' : 'arquivo' }}...</p>
+                <div class="w-48 h-1.5 bg-dark-700 rounded-full overflow-hidden">
+                  <div class="h-full bg-indigo-500 rounded-full transition-all" :style="{ width: uploadProgress + '%' }" />
+                </div>
+              </div>
+            </div>
+
+            <!-- File list -->
+            <div v-if="attachments.length" class="space-y-2">
+              <div
+                v-for="file in attachments" :key="file.id"
+                class="flex items-center gap-3 p-3 rounded-xl bg-dark-700/40 border border-dark-700 hover:border-dark-600 group transition-colors"
+              >
+                <!-- Icon -->
+                <div class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
+                  :class="fileIconBg(file.mime_type)">
+                  <svg class="w-4 h-4" :class="fileIconColor(file.mime_type)" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="fileIconPath(file.mime_type)" />
+                  </svg>
+                </div>
+
+                <!-- Info -->
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-medium text-dark-200 truncate">{{ file.name }}</p>
+                  <p class="text-xs text-dark-500">{{ formatSize(file.size) }} · {{ timeAgo(file.created_at) }}</p>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <a
+                    :href="file.url" target="_blank" rel="noopener"
+                    class="p-1.5 rounded-lg hover:bg-dark-600 text-dark-400 hover:text-white transition-colors"
+                    title="Abrir"
+                    @click.stop
+                  >
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                  </a>
+                  <button
+                    @click="deleteAttachment(file.id)"
+                    class="p-1.5 rounded-lg hover:bg-red-600/20 text-dark-400 hover:text-red-400 transition-colors"
+                    title="Remover"
+                  >
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <p v-else-if="!uploading" class="text-sm text-dark-600 text-center py-2">
+              Nenhum arquivo anexado ainda
+            </p>
+          </div>
+
         </div>
       </div>
     </div>
@@ -132,8 +224,8 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useTasksStore } from '@/stores/tasks'
-import { tasksApi } from '@/api/projects'
-import type { Task, TaskStatus } from '@/types'
+import { tasksApi, attachmentsApi } from '@/api/projects'
+import type { Task, TaskStatus, Attachment } from '@/types'
 
 const props = defineProps<{
   projectId: number
@@ -151,10 +243,19 @@ const detail = ref<Task | null>(null)
 const newComment = ref('')
 const newCheckItem = ref('')
 
+// ── files ────────────────────────────────────────────
+const fileInput = ref<HTMLInputElement | null>(null)
+const attachments = ref<Attachment[]>([])
+const isDraggingFile = ref(false)
+const uploading = ref(false)
+const uploadProgress = ref(0)
+const uploadQueue = ref<File[]>([])
+
 const tabs = [
-  { id: 'form', label: 'Detalhes' },
+  { id: 'form',      label: 'Detalhes' },
   { id: 'checklist', label: 'Checklist' },
-  { id: 'comments', label: 'Comentários' },
+  { id: 'comments',  label: 'Comentários' },
+  { id: 'files',     label: 'Arquivos' },
 ]
 
 const form = ref({
@@ -167,7 +268,9 @@ const form = ref({
 
 onMounted(async () => {
   if (isEdit && props.task) {
-    detail.value = (await tasksApi.get(props.projectId, props.task.id)).data
+    const res = await tasksApi.get(props.projectId, props.task.id)
+    detail.value = res.data
+    attachments.value = res.data.attachments ?? []
   }
 })
 
@@ -189,13 +292,7 @@ async function submit() {
   }
 }
 
-async function addComment() {
-  if (!newComment.value.trim() || !props.task) return
-  const res = await tasksApi.addComment(props.projectId, props.task.id, newComment.value)
-  detail.value?.comments?.unshift(res.data)
-  newComment.value = ''
-}
-
+// ── checklist ─────────────────────────────────────────
 async function addCheckItem() {
   if (!newCheckItem.value.trim() || !props.task) return
   const res = await tasksApi.addChecklist(props.projectId, props.task.id, newCheckItem.value)
@@ -213,9 +310,80 @@ async function toggleChecklist(id: number, completed: boolean) {
 async function deleteChecklist(id: number) {
   if (!props.task) return
   await tasksApi.deleteChecklist(props.projectId, props.task.id, id)
-  if (detail.value?.checklists) {
+  if (detail.value?.checklists)
     detail.value.checklists = detail.value.checklists.filter((c: { id: number }) => c.id !== id)
+}
+
+// ── comments ──────────────────────────────────────────
+async function addComment() {
+  if (!newComment.value.trim() || !props.task) return
+  const res = await tasksApi.addComment(props.projectId, props.task.id, newComment.value)
+  detail.value?.comments?.unshift(res.data)
+  newComment.value = ''
+}
+
+// ── file upload ───────────────────────────────────────
+function onFileSelect(e: Event) {
+  const files = Array.from((e.target as HTMLInputElement).files ?? [])
+  if (files.length) uploadFiles(files)
+}
+
+function onFileDrop(e: DragEvent) {
+  isDraggingFile.value = false
+  const files = Array.from(e.dataTransfer?.files ?? [])
+  if (files.length) uploadFiles(files)
+}
+
+async function uploadFiles(files: File[]) {
+  if (!props.task) return
+  uploadQueue.value = files
+  uploading.value = true
+  uploadProgress.value = 0
+
+  for (let i = 0; i < files.length; i++) {
+    try {
+      const { data } = await attachmentsApi.upload(props.projectId, files[i], props.task.id)
+      attachments.value.unshift(data)
+    } catch {}
+    uploadProgress.value = Math.round(((i + 1) / files.length) * 100)
   }
+
+  uploading.value = false
+  uploadQueue.value = []
+  if (fileInput.value) fileInput.value.value = ''
+}
+
+async function deleteAttachment(id: number) {
+  await attachmentsApi.delete(props.projectId, id)
+  attachments.value = attachments.value.filter(a => a.id !== id)
+}
+
+// ── file helpers ──────────────────────────────────────
+function fileIconPath(mime: string): string {
+  if (mime.startsWith('image/')) return 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z'
+  if (mime === 'application/pdf') return 'M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z'
+  if (mime.includes('video')) return 'M15 10l4.553-2.069A1 1 0 0121 8.845v6.31a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z'
+  return 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'
+}
+
+function fileIconBg(mime: string): string {
+  if (mime.startsWith('image/')) return 'bg-purple-500/15'
+  if (mime === 'application/pdf') return 'bg-red-500/15'
+  if (mime.includes('video')) return 'bg-blue-500/15'
+  return 'bg-emerald-500/15'
+}
+
+function fileIconColor(mime: string): string {
+  if (mime.startsWith('image/')) return 'text-purple-400'
+  if (mime === 'application/pdf') return 'text-red-400'
+  if (mime.includes('video')) return 'text-blue-400'
+  return 'text-emerald-400'
+}
+
+function formatSize(bytes: number): string {
+  if (bytes < 1024) return bytes + ' B'
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB'
+  return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
 }
 
 function timeAgo(date: string) {

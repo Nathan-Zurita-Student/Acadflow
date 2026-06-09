@@ -2,7 +2,7 @@
   <div class="space-y-6 animate-fade-in">
     <!-- Header -->
     <div>
-      <h1 class="text-xl font-bold text-white">Olá, {{ auth.user?.name?.split(' ')[0] }} 👋</h1>
+      <h1 class="text-xl font-bold text-white">Olá, {{ auth.user?.name?.split(' ')[0] }}!</h1>
       <p class="text-dark-400 text-sm mt-0.5">Veja um resumo de todos os seus projetos.</p>
     </div>
 

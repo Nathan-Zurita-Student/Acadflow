@@ -30,7 +30,7 @@ class AttachmentController extends Controller
         $this->authorize('view', $project);
 
         $request->validate([
-            'file' => ['required', 'file', 'max:20480', 'mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png,gif,webp,zip,txt'],
+            'file' => ['required', 'file', 'max:51200'],
             'task_id' => ['nullable', 'exists:tasks,id'],
         ]);
 
