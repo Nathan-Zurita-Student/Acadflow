@@ -1,9 +1,47 @@
-@import 'tailwindcss';
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
-@source '../../storage/framework/views/*.php';
+@layer base {
+  * { @apply border-dark-700; }
+  body {
+    @apply bg-dark-950 text-dark-100 font-sans antialiased;
+    font-feature-settings: "cv11", "ss01";
+  }
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { @apply bg-dark-900; }
+  ::-webkit-scrollbar-thumb { @apply bg-dark-600 rounded-full; }
+  ::-webkit-scrollbar-thumb:hover { @apply bg-dark-500; }
+}
 
-@theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500
+           text-white text-sm font-medium rounded-lg transition-all duration-150
+           focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2
+           focus:ring-offset-dark-900 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center gap-2 px-4 py-2 bg-dark-700 hover:bg-dark-600
+           text-dark-200 text-sm font-medium rounded-lg border border-dark-600
+           transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-dark-500;
+  }
+  .btn-danger {
+    @apply inline-flex items-center gap-2 px-4 py-2 bg-red-600/20 hover:bg-red-600/30
+           text-red-400 text-sm font-medium rounded-lg border border-red-600/30
+           transition-all duration-150;
+  }
+  .card {
+    @apply bg-dark-800 border border-dark-700 rounded-xl p-5;
+  }
+  .input {
+    @apply w-full bg-dark-900 border border-dark-700 rounded-lg px-3 py-2 text-sm
+           text-dark-100 placeholder-dark-500 focus:outline-none focus:ring-2
+           focus:ring-indigo-500 focus:border-transparent transition-all;
+  }
+  .label { @apply block text-sm font-medium text-dark-300 mb-1.5; }
+  .badge {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium;
+  }
 }
