@@ -13,10 +13,10 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
 # Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-WORKDIR /app/backend
+WORKDIR /app
 
 # Copia tudo
-COPY backend/ .
+COPY . .
 
 # Instala dependências PHP
 RUN composer install --no-dev --optimize-autoloader
