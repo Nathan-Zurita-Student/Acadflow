@@ -26,14 +26,6 @@
             <label class="label">Senha</label>
             <input v-model="form.password" type="password" class="input" placeholder="Mínimo 8 caracteres" required />
           </div>
-          <div>
-            <label class="label">Tipo de conta</label>
-            <select v-model="form.role" class="input">
-              <option value="member">Membro</option>
-              <option value="leader">Líder de Projeto</option>
-            </select>
-          </div>
-
           <p v-if="error" class="text-sm text-red-400 bg-red-400/10 border border-red-400/20 rounded-lg px-3 py-2">
             {{ error }}
           </p>
@@ -46,7 +38,7 @@
 
         <p class="mt-4 text-center text-sm text-dark-400">
           Já tem conta?
-          <RouterLink to="/login" class="text-indigo-400 hover:text-indigo-300 font-medium ml-1">Entrar</RouterLink>
+          <RouterLink :to="route.query.redirect ? `/login?redirect=${encodeURIComponent(String(route.query.redirect))}` : '/login'" class="text-indigo-400 hover:text-indigo-300 font-medium ml-1">Entrar</RouterLink>
         </p>
       </div>
     </div>
@@ -55,13 +47,14 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
 const auth = useAuthStore()
 const router = useRouter()
+const route  = useRoute()
 
-const form = ref({ name: '', email: '', password: '', role: 'member' })
+const form = ref({ name: '', email: '', password: '' })
 const error = ref('')
 const loading = ref(false)
 
@@ -69,8 +62,9 @@ async function handleRegister() {
   error.value = ''
   loading.value = true
   try {
-    await auth.register(form.value.name, form.value.email, form.value.password, form.value.role)
-    router.push('/')
+    await auth.register(form.value.name, form.value.email, form.value.password)
+    const redirect = route.query.redirect as string | undefined
+    router.push(redirect || '/')
   } catch (e: any) {
     const errs = e.response?.data?.errors as Record<string, string[]> | undefined
     error.value = errs ? (Object.values(errs)[0]?.[0] ?? 'Erro ao cadastrar.') : (e.response?.data?.message ?? 'Erro ao cadastrar.')

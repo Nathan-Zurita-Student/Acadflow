@@ -36,7 +36,7 @@
 
         <p class="mt-4 text-center text-sm text-dark-400">
           Não tem conta?
-          <RouterLink to="/register" class="text-indigo-400 hover:text-indigo-300 font-medium ml-1">Cadastre-se</RouterLink>
+          <RouterLink :to="route.query.redirect ? `/register?redirect=${encodeURIComponent(String(route.query.redirect))}` : '/register'" class="text-indigo-400 hover:text-indigo-300 font-medium ml-1">Cadastre-se</RouterLink>
         </p>
       </div>
 
@@ -49,11 +49,12 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
 const auth = useAuthStore()
 const router = useRouter()
+const route  = useRoute()
 
 const form = ref({ email: '', password: '' })
 const error = ref('')
@@ -64,7 +65,8 @@ async function handleLogin() {
   loading.value = true
   try {
     await auth.login(form.value.email, form.value.password)
-    router.push('/')
+    const redirect = route.query.redirect as string | undefined
+    router.push(redirect || '/')
   } catch (e: any) {
     const errs = e.response?.data?.errors as Record<string, string[]> | undefined
     error.value = e.response?.data?.message
