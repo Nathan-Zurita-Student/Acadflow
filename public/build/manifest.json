@@ -49,7 +49,7 @@
     "isEntry": true
   },
   "resources/js/app.ts": {
-    "file": "assets/app-C5uHnHj5.js",
+    "file": "assets/app-DuEtx54c.js",
     "name": "app",
     "src": "resources/js/app.ts",
     "isEntry": true,
@@ -67,7 +67,7 @@
     ]
   },
   "resources/js/layouts/AppLayout.vue": {
-    "file": "assets/AppLayout-hBnyNqJ0.js",
+    "file": "assets/AppLayout-DqX6AB6x.js",
     "name": "AppLayout",
     "src": "resources/js/layouts/AppLayout.vue",
     "isDynamicEntry": true,

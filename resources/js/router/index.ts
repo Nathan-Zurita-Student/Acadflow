@@ -70,6 +70,10 @@ const router = createRouter({
 router.beforeEach(async (to) => {
   const auth = useAuthStore()
 
+  if (auth.isAuthenticated && !auth.user) {
+    await auth.fetchMe()
+  }
+
   if (to.meta.auth && !auth.isAuthenticated) return '/login'
   if (to.meta.guest && auth.isAuthenticated) return '/'
 })
