@@ -788,8 +788,6 @@ async function addComment() {
     const idx = detail.value!.comments.findIndex((c: any) => c.id === tempId)
     if (idx !== -1) detail.value!.comments.splice(idx, 1, res.data)
   } catch {
-    newComment.value = text
-    commentRows.value = Math.min(text.split('\n').length, 4)
     detail.value!.comments = detail.value!.comments.filter((c: any) => c.id !== tempId)
   } finally {
     sending.value = false

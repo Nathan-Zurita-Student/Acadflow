@@ -297,7 +297,11 @@ class TaskController extends Controller
             'created_at' => $comment->created_at,
         ];
 
-        broadcast(new CommentPosted($task->id, $project->id, $commentPayload));
+        try {
+            broadcast(new CommentPosted($task->id, $project->id, $commentPayload));
+        } catch (\Throwable $e) {
+            \Log::warning('CommentPosted broadcast failed: ' . $e->getMessage());
+        }
 
         return response()->json([
             'id' => $comment->id,
