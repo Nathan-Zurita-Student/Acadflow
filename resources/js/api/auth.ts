@@ -10,7 +10,5 @@ export const authApi = {
   register: (data: RegisterPayload) => api.post<AuthResponse>('/auth/register', data),
   logout: () => api.post('/auth/logout'),
   me: () => api.get<User>('/auth/me'),
-  updateProfile: (data: FormData) => api.post<User>('/auth/profile', data, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  }),
+  updateProfile: (data: FormData) => api.post<User>('/auth/profile', data),
 }

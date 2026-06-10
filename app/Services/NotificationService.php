@@ -21,7 +21,11 @@ class NotificationService
             'data'    => $data,
         ]);
 
-        broadcast(new NotificationSent($userId, $notification))->toOthers();
+        try {
+            broadcast(new NotificationSent($userId, $notification))->toOthers();
+        } catch (\Throwable $e) {
+            \Log::warning('Broadcast failed: ' . $e->getMessage());
+        }
 
         return $notification;
     }
@@ -37,7 +41,11 @@ class NotificationService
                 'message' => $message,
                 'data'    => $data,
             ]);
-            broadcast(new NotificationSent($userId, $notification))->toOthers();
+            try {
+                broadcast(new NotificationSent($userId, $notification))->toOthers();
+            } catch (\Throwable $e) {
+                \Log::warning('Broadcast failed: ' . $e->getMessage());
+            }
         }
     }
 }

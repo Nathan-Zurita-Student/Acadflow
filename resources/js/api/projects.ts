@@ -44,9 +44,7 @@ export const attachmentsApi = {
     form.append('file', file)
     if (taskId) form.append('task_id', String(taskId))
     if (name)   form.append('name', name)
-    return api.post<Attachment>(`/projects/${projectId}/attachments`, form, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    })
+    return api.post<Attachment>(`/projects/${projectId}/attachments`, form)
   },
   viewUrl:     (projectId: number, attachmentId: number) =>
     `/api/projects/${projectId}/attachments/${attachmentId}/view`,

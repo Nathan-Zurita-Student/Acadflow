@@ -119,11 +119,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watchEffect } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useProjectsStore } from '@/stores/projects'
 import { useNotificationsStore } from '@/stores/notifications'
+import { useThemeStore } from '@/stores/theme'
 import { dashboardApi } from '@/api/projects'
 import echo from '@/echo'
 import NavItem from '@/components/ui/NavItem.vue'
@@ -136,6 +137,12 @@ const auth = useAuthStore()
 const projectsStore = useProjectsStore()
 const notifStore = useNotificationsStore()
 const router = useRouter()
+const themeStore = useThemeStore()
+
+// Keep data-theme in sync with the Pinia store (belt-and-suspenders on top of app.ts init)
+watchEffect(() => {
+  document.documentElement.setAttribute('data-theme', themeStore.current)
+})
 const sidebarOpen = ref(false)
 const sidebarCollapsed = ref(false)
 const showProfile = ref(false)
