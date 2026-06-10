@@ -23,4 +23,13 @@ export default defineConfig({
       '@': resolve(__dirname, 'resources/js'),
     },
   },
+  build: {
+    chunkSizeWarningLimit: 1000,
+    rollupOptions: {
+      onwarn(warning, warn) {
+        if (warning.code === 'INVALID_ANNOTATION') return
+        warn(warning)
+      },
+    },
+  },
 })

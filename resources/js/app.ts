@@ -4,10 +4,12 @@ import { createPinia } from 'pinia'
 import VueApexCharts from 'vue3-apexcharts'
 import router from './router'
 
+const pages = import.meta.glob('./Pages/**/*.vue')
+
 createInertiaApp({
-  resolve: name => {
-    const pages = import.meta.glob('./Pages/**/*.vue', { eager: true }) as Record<string, any>
-    return pages[`./Pages/${name}.vue`]
+  resolve: async (name) => {
+    const mod = await (pages[`./Pages/${name}.vue`] as () => Promise<any>)()
+    return mod.default
   },
   setup({ el, App, props, plugin }) {
     createApp({ render: () => h(App, props) })

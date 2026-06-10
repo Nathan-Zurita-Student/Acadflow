@@ -1,0 +1,1 @@
+import{A as e,P as t,R as n,b as r,h as i,x as a}from"./client-UqjS-KjB.js";import{t as o}from"./app-Bpvcq7gw.js";var s={class:`min-h-screen bg-dark-950`},c=a({__name:`App`,setup(a){let c=o();return e(()=>c.fetchMe()),(e,a)=>{let o=n(`RouterView`);return t(),i(`div`,s,[r(o)])}}});export{c as default};
