@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Project\StoreProjectRequest;
+use App\Http\Requests\Project\UpdateProjectRequest;
 use App\Models\Project;
 use App\Models\User;
 use App\Services\NotificationService;
@@ -30,15 +32,9 @@ class ProjectController extends Controller
         return response()->json($projects);
     }
 
-    public function store(Request $request): JsonResponse
+    public function store(StoreProjectRequest $request): JsonResponse
     {
-        $data = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'description' => ['nullable', 'string'],
-            'category' => ['nullable', 'string', 'max:100'],
-            'status' => ['nullable', 'in:planning,active,paused,completed,cancelled'],
-            'deadline' => ['nullable', 'date'],
-        ]);
+        $data = $request->validated();
 
         $project = $this->projectService->createProject($request->user(), $data);
         $project->load(['owner', 'members']);
@@ -54,17 +50,11 @@ class ProjectController extends Controller
         return response()->json($this->projectResource($project, $request->user()->id));
     }
 
-    public function update(Request $request, Project $project): JsonResponse
+    public function update(UpdateProjectRequest $request, Project $project): JsonResponse
     {
         $this->authorize('update', $project);
 
-        $data = $request->validate([
-            'name' => ['sometimes', 'string', 'max:255'],
-            'description' => ['nullable', 'string'],
-            'category' => ['nullable', 'string', 'max:100'],
-            'status' => ['nullable', 'in:planning,active,paused,completed,cancelled'],
-            'deadline' => ['nullable', 'date'],
-        ]);
+        $data = $request->validated();
 
         $project = $this->projectService->updateProject($project, $data);
         $project->load(['owner', 'members']);

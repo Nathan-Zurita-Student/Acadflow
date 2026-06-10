@@ -114,6 +114,16 @@ class DashboardController extends Controller
         ];
     }
 
+    public function searchUsers(Request $request): JsonResponse
+    {
+        $users = \App\Models\User::where('name', 'like', '%' . $request->q . '%')
+            ->orWhere('email', 'like', '%' . $request->q . '%')
+            ->take(10)
+            ->get(['id', 'name', 'email', 'avatar']);
+
+        return response()->json($users);
+    }
+
     public function myTasks(Request $request): JsonResponse
     {
         $user = $request->user();

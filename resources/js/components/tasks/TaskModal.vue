@@ -459,8 +459,9 @@ import { useAuthStore } from '@/stores/auth'
 import { useToast } from '@/composables/useToast'
 import { tasksApi, attachmentsApi } from '@/api/projects'
 import PomodoroTimer from '@/components/tasks/PomodoroTimer.vue'
-import type { Task, TaskStatus, Attachment } from '@/types'
+import type { Task, TaskStatus, Attachment, Comment, ChecklistItem } from '@/types'
 import UserAvatar from '@/components/ui/UserAvatar.vue'
+import { useTimeAgo } from '@/composables/useTimeAgo'
 
 const props = defineProps<{
   projectId: number
@@ -591,8 +592,10 @@ function formatDateSep(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString('pt-BR', { day: 'numeric', month: 'long' })
 }
 
+type LocalComment = Omit<Comment, 'id'> & { id: number | string; pending?: boolean }
+
 const groupedComments = computed(() => {
-  const comments: any[] = detail.value?.comments ?? []
+  const comments: LocalComment[] = detail.value?.comments ?? []
   return comments.map((c, i) => {
     const prev = comments[i - 1]
     const next = comments[i + 1]
@@ -600,8 +603,9 @@ const groupedComments = computed(() => {
     const prevDateStr = prev ? new Date(prev.created_at).toDateString() : null
     const currDateStr = new Date(c.created_at).toDateString()
     const dateSeparator = prevDateStr !== currDateStr ? formatDateSep(c.created_at) : null
-    const closeEnough = (a: any, b: any) =>
-      a?.user?.id === b?.user?.id &&
+    const closeEnough = (a: LocalComment | undefined, b: LocalComment | undefined) =>
+      !!a && !!b &&
+      a.user?.id === b.user?.id &&
       Math.abs(new Date(b.created_at).getTime() - new Date(a.created_at).getTime()) < 5 * 60 * 1000
     const isFirstInGroup = !prev || !!dateSeparator || !closeEnough(prev, c)
     const isLastInGroup  = !next || new Date(next.created_at).toDateString() !== currDateStr || !closeEnough(c, next)
@@ -628,7 +632,7 @@ function onCommentInput() {
   }
 }
 
-function selectMention(member: any) {
+function selectMention(member: { id: number; name: string }) {
   const first = member.name.split(' ')[0]
   newComment.value = newComment.value.replace(/@[\wÀ-ſ]*$/, `@${first} `)
   mentionOpen.value = false
@@ -638,7 +642,7 @@ function selectMention(member: any) {
 const completedChecklistRatio = computed(() => {
   const items = detail.value?.checklists ?? []
   if (!items.length) return ''
-  const done = items.filter((i: any) => i.completed).length
+  const done = items.filter((i: ChecklistItem) => i.completed).length
   return `${done}/${items.length}`
 })
 
@@ -771,23 +775,24 @@ async function addComment() {
 
   // Optimistic update — message appears instantly
   const tempId = `pending-${Date.now()}`
-  const optimistic: any = {
+  const optimistic: LocalComment = {
     id: tempId,
     content: text,
-    user: { id: currentUserId.value, name: authStore.user?.name ?? 'Você' },
+    user: { id: currentUserId.value!, name: authStore.user?.name ?? 'Você', avatar: null },
     created_at: new Date().toISOString(),
     pending: true,
   }
   if (!detail.value!.comments) detail.value!.comments = []
-  detail.value!.comments.push(optimistic)
+  const localComments = detail.value!.comments as LocalComment[]
+  localComments.push(optimistic)
   nextTick(() => scrollCommentsToBottom())
 
   try {
     const res = await tasksApi.addComment(props.projectId, props.task.id, text)
-    const idx = detail.value!.comments.findIndex((c: any) => c.id === tempId)
-    if (idx !== -1) detail.value!.comments.splice(idx, 1, res.data)
+    const idx = localComments.findIndex(c => c.id === tempId)
+    if (idx !== -1) localComments.splice(idx, 1, res.data as LocalComment)
   } catch {
-    detail.value!.comments = detail.value!.comments.filter((c: any) => c.id !== tempId)
+    detail.value!.comments = localComments.filter(c => c.id !== tempId) as Comment[]
   } finally {
     sending.value = false
   }
@@ -858,11 +863,5 @@ function formatSize(bytes: number) {
   if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB'
   return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
 }
-function timeAgo(date: string) {
-  const diff = (Date.now() - new Date(date).getTime()) / 1000
-  if (diff < 60) return 'agora'
-  if (diff < 3600) return `${Math.floor(diff / 60)}m atrás`
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h atrás`
-  return `${Math.floor(diff / 86400)}d atrás`
-}
+const { timeAgo } = useTimeAgo()
 </script>

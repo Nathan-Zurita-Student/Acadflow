@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Note\StoreNoteRequest;
+use App\Http\Requests\Note\UpdateNoteRequest;
 use App\Models\Project;
 use App\Models\ProjectNote;
 use Illuminate\Http\JsonResponse;
@@ -23,14 +25,11 @@ class NoteController extends Controller
         return response()->json($notes);
     }
 
-    public function store(Request $request, Project $project): JsonResponse
+    public function store(StoreNoteRequest $request, Project $project): JsonResponse
     {
         $this->authorize('view', $project);
 
-        $data = $request->validate([
-            'title'   => ['required', 'string', 'max:255'],
-            'content' => ['nullable', 'string'],
-        ]);
+        $data = $request->validated();
 
         $note = $project->notes()->create([
             ...$data,
@@ -42,14 +41,11 @@ class NoteController extends Controller
         return response()->json($this->resource($note), 201);
     }
 
-    public function update(Request $request, Project $project, ProjectNote $note): JsonResponse
+    public function update(UpdateNoteRequest $request, Project $project, ProjectNote $note): JsonResponse
     {
         $this->authorize('view', $project);
 
-        $data = $request->validate([
-            'title'   => ['sometimes', 'string', 'max:255'],
-            'content' => ['nullable', 'string'],
-        ]);
+        $data = $request->validated();
 
         $note->update($data);
         $note->load('author:id,name,avatar');

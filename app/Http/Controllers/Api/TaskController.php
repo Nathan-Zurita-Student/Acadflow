@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Events\CommentPosted;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Task\StoreTaskRequest;
+use App\Http\Requests\Task\UpdateTaskRequest;
+use App\Http\Resources\TaskResource;
 use App\Models\Project;
 use App\Models\Task;
 use App\Services\NotificationService;
@@ -34,24 +36,14 @@ class TaskController extends Controller
             $query->where('priority', $request->priority);
         }
 
-        return response()->json($query->orderBy('position')->get()->map(fn($t) => $this->taskResource($t)));
+        return response()->json(TaskResource::collection($query->orderBy('position')->get()));
     }
 
-    public function store(Request $request, Project $project): JsonResponse
+    public function store(StoreTaskRequest $request, Project $project): JsonResponse
     {
         $this->authorize('view', $project);
 
-        $data = $request->validate([
-            'title'        => ['required', 'string', 'max:255'],
-            'description'  => ['nullable', 'string'],
-            'assignee_ids' => ['nullable', 'array'],
-            'assignee_ids.*' => ['exists:users,id'],
-            'status'       => ['nullable', 'in:backlog,pending,in_progress,review,done'],
-            'priority'     => ['nullable', 'in:low,medium,high,urgent'],
-            'due_date'     => ['nullable', 'date'],
-            'tag_ids'      => ['nullable', 'array'],
-            'tag_ids.*'    => ['exists:tags,id'],
-        ]);
+        $data = $request->validated();
 
         $assigneeIds = $data['assignee_ids'] ?? [];
         $maxPos = $project->tasks()->where('status', $data['status'] ?? 'backlog')->max('position') ?? -1;
@@ -93,7 +85,7 @@ class TaskController extends Controller
 
         $task->load(['assignee', 'assignees', 'tags', 'checklists']);
 
-        return response()->json($this->taskResource($task), 201);
+        return response()->json(new TaskResource($task), 201);
     }
 
     public function show(Request $request, Project $project, Task $task): JsonResponse
@@ -101,24 +93,14 @@ class TaskController extends Controller
         $this->authorize('view', $project);
         $task->load(['assignee', 'creator', 'tags', 'checklists', 'comments.user', 'attachments.uploader']);
 
-        return response()->json($this->taskDetailResource($task));
+        return response()->json(new TaskResource($task));
     }
 
-    public function update(Request $request, Project $project, Task $task): JsonResponse
+    public function update(UpdateTaskRequest $request, Project $project, Task $task): JsonResponse
     {
         $this->authorize('view', $project);
 
-        $data = $request->validate([
-            'title'          => ['sometimes', 'string', 'max:255'],
-            'description'    => ['nullable', 'string'],
-            'assignee_ids'   => ['nullable', 'array'],
-            'assignee_ids.*' => ['exists:users,id'],
-            'status'         => ['sometimes', 'in:backlog,pending,in_progress,review,done'],
-            'priority'       => ['sometimes', 'in:low,medium,high,urgent'],
-            'due_date'       => ['nullable', 'date'],
-            'tag_ids'        => ['nullable', 'array'],
-            'tag_ids.*'      => ['exists:tags,id'],
-        ]);
+        $data = $request->validated();
 
         $fields = [];
         foreach (['title', 'description', 'status', 'priority'] as $f) {
@@ -144,7 +126,7 @@ class TaskController extends Controller
 
         $task->load(['assignee', 'assignees', 'tags', 'checklists']);
 
-        return response()->json($this->taskResource($task));
+        return response()->json(new TaskResource($task));
     }
 
     public function destroy(Request $request, Project $project, Task $task): JsonResponse
@@ -248,159 +230,4 @@ class TaskController extends Controller
         return response()->json(['approval_status' => 'rejected', 'rejection_note' => $task->rejection_note]);
     }
 
-    public function logTime(Request $request, Project $project, Task $task): JsonResponse
-    {
-        $this->authorize('view', $project);
-
-        $data = $request->validate(['seconds' => ['required', 'integer', 'min:1']]);
-
-        $task->timeLogs()->create([
-            'user_id' => $request->user()->id,
-            'seconds' => $data['seconds'],
-        ]);
-
-        return response()->json([
-            'time_seconds' => $task->timeLogs()->sum('seconds'),
-        ]);
-    }
-
-    public function storeComment(Request $request, Project $project, Task $task): JsonResponse
-    {
-        $this->authorize('view', $project);
-
-        $data = $request->validate(['content' => ['required', 'string']]);
-
-        $comment = $task->comments()->create([
-            'user_id' => $request->user()->id,
-            'content' => $data['content'],
-        ]);
-
-        $comment->load('user');
-
-        $this->projectService->logActivity($project, $request->user(), 'commented_task', 'Task', $task->id);
-
-        // notificar assignees e criador (exceto quem comentou)
-        $task->load('assignees');
-        $notifyIds = collect([$task->created_by])
-            ->merge($task->assignees->pluck('id'))
-            ->unique()->filter(fn($id) => $id && $id !== $request->user()->id);
-        foreach ($notifyIds as $uid) {
-            $this->notifications->notify($uid, 'task_comment', 'Novo comentário na tarefa 💬',
-                "{$request->user()->name} comentou em \"{$task->title}\"",
-                ['project_id' => $project->id, 'task_id' => $task->id]);
-        }
-
-        $commentPayload = [
-            'id'         => $comment->id,
-            'content'    => $comment->content,
-            'user'       => ['id' => $comment->user->id, 'name' => $comment->user->name, 'avatar' => $comment->user->avatar],
-            'created_at' => $comment->created_at,
-        ];
-
-        try {
-            broadcast(new CommentPosted($task->id, $project->id, $commentPayload));
-        } catch (\Throwable $e) {
-            \Log::warning('CommentPosted broadcast failed: ' . $e->getMessage());
-        }
-
-        return response()->json([
-            'id' => $comment->id,
-            'content' => $comment->content,
-            'user' => ['id' => $comment->user->id, 'name' => $comment->user->name, 'avatar' => $comment->user->avatar],
-            'created_at' => $comment->created_at,
-        ], 201);
-    }
-
-    public function storeChecklist(Request $request, Project $project, Task $task): JsonResponse
-    {
-        $this->authorize('view', $project);
-
-        $data = $request->validate(['title' => ['required', 'string', 'max:255']]);
-        $maxPos = $task->checklists()->max('position') ?? -1;
-
-        $item = $task->checklists()->create([
-            'title' => $data['title'],
-            'position' => $maxPos + 1,
-        ]);
-
-        return response()->json($item, 201);
-    }
-
-    public function updateChecklist(Request $request, Project $project, Task $task, int $checklistId): JsonResponse
-    {
-        $this->authorize('view', $project);
-
-        $item = $task->checklists()->findOrFail($checklistId);
-        $data = $request->validate(['completed' => ['required', 'boolean']]);
-        $item->update($data);
-
-        return response()->json($item);
-    }
-
-    public function destroyChecklist(Request $request, Project $project, Task $task, int $checklistId): JsonResponse
-    {
-        $this->authorize('view', $project);
-        $task->checklists()->where('id', $checklistId)->delete();
-
-        return response()->json(null, 204);
-    }
-
-    private function taskResource(Task $task): array
-    {
-        $assignees = $task->relationLoaded('assignees')
-            ? $task->assignees->map(fn($u) => ['id' => $u->id, 'name' => $u->name, 'avatar' => $u->avatar])
-            : collect();
-
-        return [
-            'id'               => $task->id,
-            'title'            => $task->title,
-            'description'      => $task->description,
-            'status'           => $task->status,
-            'priority'         => $task->priority,
-            'due_date'         => $task->due_date?->toDateString(),
-            'position'         => $task->position,
-            'is_overdue'       => $task->isOverdue(),
-            'assignee'         => $task->assignee ? [
-                'id'     => $task->assignee->id,
-                'name'   => $task->assignee->name,
-                'avatar' => $task->assignee->avatar,
-            ] : null,
-            'assignees'        => $assignees,
-            'tags'             => $task->tags->map(fn($t) => ['id' => $t->id, 'name' => $t->name, 'color' => $t->color]),
-            'checklists_total' => $task->checklists->count(),
-            'checklists_done'  => $task->checklists->where('completed', true)->count(),
-            'time_seconds'     => $task->relationLoaded('timeLogs') ? $task->timeLogs->sum('seconds') : 0,
-            'approval_status'  => $task->approval_status,
-            'rejection_note'   => $task->rejection_note,
-            'created_at'       => $task->created_at,
-            'updated_at'       => $task->updated_at,
-        ];
-    }
-
-    private function taskDetailResource(Task $task): array
-    {
-        return array_merge($this->taskResource($task), [
-            'creator' => $task->creator ? ['id' => $task->creator->id, 'name' => $task->creator->name] : null,
-            'checklists' => $task->checklists->map(fn($c) => [
-                'id' => $c->id,
-                'title' => $c->title,
-                'completed' => $c->completed,
-                'position' => $c->position,
-            ]),
-            'comments' => $task->comments->map(fn($c) => [
-                'id' => $c->id,
-                'content' => $c->content,
-                'user' => ['id' => $c->user->id, 'name' => $c->user->name, 'avatar' => $c->user->avatar],
-                'created_at' => $c->created_at,
-            ]),
-            'attachments' => $task->attachments->map(fn($a) => [
-                'id' => $a->id,
-                'name' => $a->name,
-                'mime_type' => $a->mime_type,
-                'size' => $a->size,
-                'url' => $a->url,
-                'created_at' => $a->created_at,
-            ]),
-        ]);
-    }
 }

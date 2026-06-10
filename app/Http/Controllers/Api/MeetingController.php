@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Meeting\StoreMeetingRequest;
+use App\Http\Requests\Meeting\UpdateMeetingRequest;
 use App\Models\Meeting;
 use App\Models\Project;
 use App\Services\NotificationService;
@@ -26,17 +28,11 @@ class MeetingController extends Controller
         return response()->json($meetings);
     }
 
-    public function store(Request $request, Project $project): JsonResponse
+    public function store(StoreMeetingRequest $request, Project $project): JsonResponse
     {
         $this->authorize('view', $project);
 
-        $data = $request->validate([
-            'title'        => ['required', 'string', 'max:255'],
-            'description'  => ['nullable', 'string'],
-            'scheduled_at' => ['required', 'date'],
-            'location'     => ['nullable', 'string', 'max:255'],
-            'notes'        => ['nullable', 'string'],
-        ]);
+        $data = $request->validated();
 
         $meeting = $project->meetings()->create([
             ...$data,
@@ -64,17 +60,11 @@ class MeetingController extends Controller
         return response()->json($this->resource($meeting), 201);
     }
 
-    public function update(Request $request, Project $project, Meeting $meeting): JsonResponse
+    public function update(UpdateMeetingRequest $request, Project $project, Meeting $meeting): JsonResponse
     {
         $this->authorize('view', $project);
 
-        $data = $request->validate([
-            'title'        => ['sometimes', 'string', 'max:255'],
-            'description'  => ['nullable', 'string'],
-            'scheduled_at' => ['sometimes', 'date'],
-            'location'     => ['nullable', 'string', 'max:255'],
-            'notes'        => ['nullable', 'string'],
-        ]);
+        $data = $request->validated();
 
         $meeting->update($data);
         $meeting->load('creator:id,name,avatar');

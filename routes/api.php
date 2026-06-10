@@ -8,100 +8,96 @@ use App\Http\Controllers\Api\MeetingController;
 use App\Http\Controllers\Api\NoteController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\ProjectController;
+use App\Http\Controllers\Api\TaskChecklistController;
+use App\Http\Controllers\Api\TaskCommentController;
 use App\Http\Controllers\Api\TaskController;
+use App\Http\Controllers\Api\TaskTimeLogController;
 use App\Http\Controllers\Api\WebhookController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Route;
 
 // Public — no auth required
-Route::get('invite/{token}', [InviteController::class, 'info']);
+Route::get('invite/{token}', [InviteController::class, 'info'])->name('invite.info');
 
-Route::prefix('auth')->group(function () {
-    Route::post('register', [AuthController::class, 'register']);
-    Route::post('login', [AuthController::class, 'login']);
+Route::prefix('auth')->name('auth.')->group(function () {
+    Route::post('register', [AuthController::class, 'register'])->name('register');
+    Route::post('login', [AuthController::class, 'login'])->name('login');
 
     Route::middleware('auth:sanctum')->group(function () {
-        Route::post('logout', [AuthController::class, 'logout']);
-        Route::get('me', [AuthController::class, 'me']);
-        Route::post('profile', [AuthController::class, 'updateProfile']);
+        Route::post('logout', [AuthController::class, 'logout'])->name('logout');
+        Route::get('me', [AuthController::class, 'me'])->name('me');
+        Route::post('profile', [AuthController::class, 'updateProfile'])->name('profile');
     });
 });
 
 // Broadcasting auth — lets Echo authenticate private channels using Bearer tokens
 Route::middleware('auth:sanctum')->post('broadcasting/auth', function (Request $request) {
     return Broadcast::auth($request);
-});
+})->name('broadcasting.auth');
 
 Route::middleware('auth:sanctum')->group(function () {
-    Route::get('notifications', [NotificationController::class, 'index']);
-    Route::post('notifications/{notification}/read', [NotificationController::class, 'markRead']);
-    Route::post('notifications/read-all', [NotificationController::class, 'markAllRead']);
+    Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('notifications/{notification}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
+    Route::post('notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');
 
-    Route::get('dashboard', [DashboardController::class, 'index']);
-    Route::get('my-tasks', [DashboardController::class, 'myTasks']);
+    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
+    Route::get('my-tasks', [DashboardController::class, 'myTasks'])->name('dashboard.my-tasks');
+    Route::get('users/search', [DashboardController::class, 'searchUsers'])->name('users.search');
 
-    Route::prefix('projects')->group(function () {
-        Route::get('/', [ProjectController::class, 'index']);
-        Route::post('/', [ProjectController::class, 'store']);
-        Route::get('{project}', [ProjectController::class, 'show']);
-        Route::put('{project}', [ProjectController::class, 'update']);
-        Route::delete('{project}', [ProjectController::class, 'destroy']);
-        Route::get('{project}/dashboard', [ProjectController::class, 'dashboard']);
-        Route::get('{project}/members', [ProjectController::class, 'members']);
-        Route::post('{project}/members', [ProjectController::class, 'addMember']);
-        Route::delete('{project}/members/{userId}', [ProjectController::class, 'removeMember']);
+    Route::prefix('projects')->name('projects.')->group(function () {
+        Route::get('/', [ProjectController::class, 'index'])->name('index');
+        Route::post('/', [ProjectController::class, 'store'])->name('store');
+        Route::get('{project}', [ProjectController::class, 'show'])->name('show');
+        Route::put('{project}', [ProjectController::class, 'update'])->name('update');
+        Route::delete('{project}', [ProjectController::class, 'destroy'])->name('destroy');
+        Route::get('{project}/dashboard', [ProjectController::class, 'dashboard'])->name('dashboard');
+        Route::get('{project}/members', [ProjectController::class, 'members'])->name('members.index');
+        Route::post('{project}/members', [ProjectController::class, 'addMember'])->name('members.store');
+        Route::delete('{project}/members/{userId}', [ProjectController::class, 'removeMember'])->name('members.destroy');
 
-        Route::get('{project}/tasks', [TaskController::class, 'index']);
-        Route::post('{project}/tasks', [TaskController::class, 'store']);
-        Route::get('{project}/tasks/{task}', [TaskController::class, 'show']);
-        Route::put('{project}/tasks/{task}', [TaskController::class, 'update']);
-        Route::delete('{project}/tasks/{task}', [TaskController::class, 'destroy']);
-        Route::post('{project}/tasks/reorder', [TaskController::class, 'reorder']);
-        Route::post('{project}/tasks/{task}/comments', [TaskController::class, 'storeComment']);
-        Route::post('{project}/tasks/{task}/time', [TaskController::class, 'logTime']);
-        Route::post('{project}/tasks/{task}/submit-approval', [TaskController::class, 'submitApproval']);
-        Route::post('{project}/tasks/{task}/approve', [TaskController::class, 'approveTask']);
-        Route::post('{project}/tasks/{task}/reject', [TaskController::class, 'rejectTask']);
-        Route::post('{project}/tasks/{task}/checklists', [TaskController::class, 'storeChecklist']);
-        Route::put('{project}/tasks/{task}/checklists/{checklistId}', [TaskController::class, 'updateChecklist']);
-        Route::delete('{project}/tasks/{task}/checklists/{checklistId}', [TaskController::class, 'destroyChecklist']);
+        Route::get('{project}/tasks', [TaskController::class, 'index'])->name('tasks.index');
+        Route::post('{project}/tasks', [TaskController::class, 'store'])->name('tasks.store');
+        Route::get('{project}/tasks/{task}', [TaskController::class, 'show'])->name('tasks.show');
+        Route::put('{project}/tasks/{task}', [TaskController::class, 'update'])->name('tasks.update');
+        Route::delete('{project}/tasks/{task}', [TaskController::class, 'destroy'])->name('tasks.destroy');
+        Route::post('{project}/tasks/reorder', [TaskController::class, 'reorder'])->name('tasks.reorder');
+        Route::post('{project}/tasks/{task}/comments', [TaskCommentController::class, 'store'])->name('tasks.comments.store');
+        Route::post('{project}/tasks/{task}/time', [TaskTimeLogController::class, 'store'])->name('tasks.time.store');
+        Route::post('{project}/tasks/{task}/submit-approval', [TaskController::class, 'submitApproval'])->name('tasks.approval.submit');
+        Route::post('{project}/tasks/{task}/approve', [TaskController::class, 'approveTask'])->name('tasks.approval.approve');
+        Route::post('{project}/tasks/{task}/reject', [TaskController::class, 'rejectTask'])->name('tasks.approval.reject');
+        Route::post('{project}/tasks/{task}/checklists', [TaskChecklistController::class, 'store'])->name('tasks.checklists.store');
+        Route::put('{project}/tasks/{task}/checklists/{checklistId}', [TaskChecklistController::class, 'update'])->name('tasks.checklists.update');
+        Route::delete('{project}/tasks/{task}/checklists/{checklistId}', [TaskChecklistController::class, 'destroy'])->name('tasks.checklists.destroy');
 
-        Route::post('{project}/invite', [InviteController::class, 'generate']);
+        Route::post('{project}/invite', [InviteController::class, 'generate'])->name('invite.generate');
 
-        Route::get('{project}/attachments', [AttachmentController::class, 'index']);
-        Route::post('{project}/attachments', [AttachmentController::class, 'store']);
-        Route::get('{project}/attachments/{attachment}/view', [AttachmentController::class, 'view']);
-        Route::get('{project}/attachments/{attachment}/download', [AttachmentController::class, 'download']);
-        Route::delete('{project}/attachments/{attachment}', [AttachmentController::class, 'destroy']);
+        Route::get('{project}/attachments', [AttachmentController::class, 'index'])->name('attachments.index');
+        Route::post('{project}/attachments', [AttachmentController::class, 'store'])->name('attachments.store');
+        Route::get('{project}/attachments/{attachment}/view', [AttachmentController::class, 'view'])->name('attachments.view');
+        Route::get('{project}/attachments/{attachment}/download', [AttachmentController::class, 'download'])->name('attachments.download');
+        Route::delete('{project}/attachments/{attachment}', [AttachmentController::class, 'destroy'])->name('attachments.destroy');
 
         // Meetings
-        Route::get('{project}/meetings', [MeetingController::class, 'index']);
-        Route::post('{project}/meetings', [MeetingController::class, 'store']);
-        Route::put('{project}/meetings/{meeting}', [MeetingController::class, 'update']);
-        Route::delete('{project}/meetings/{meeting}', [MeetingController::class, 'destroy']);
+        Route::get('{project}/meetings', [MeetingController::class, 'index'])->name('meetings.index');
+        Route::post('{project}/meetings', [MeetingController::class, 'store'])->name('meetings.store');
+        Route::put('{project}/meetings/{meeting}', [MeetingController::class, 'update'])->name('meetings.update');
+        Route::delete('{project}/meetings/{meeting}', [MeetingController::class, 'destroy'])->name('meetings.destroy');
 
         // Notes
-        Route::get('{project}/notes', [NoteController::class, 'index']);
-        Route::post('{project}/notes', [NoteController::class, 'store']);
-        Route::put('{project}/notes/{note}', [NoteController::class, 'update']);
-        Route::delete('{project}/notes/{note}', [NoteController::class, 'destroy']);
+        Route::get('{project}/notes', [NoteController::class, 'index'])->name('notes.index');
+        Route::post('{project}/notes', [NoteController::class, 'store'])->name('notes.store');
+        Route::put('{project}/notes/{note}', [NoteController::class, 'update'])->name('notes.update');
+        Route::delete('{project}/notes/{note}', [NoteController::class, 'destroy'])->name('notes.destroy');
 
         // Webhooks
-        Route::get('{project}/webhooks', [WebhookController::class, 'index']);
-        Route::post('{project}/webhooks', [WebhookController::class, 'store']);
-        Route::put('{project}/webhooks/{webhook}', [WebhookController::class, 'update']);
-        Route::delete('{project}/webhooks/{webhook}', [WebhookController::class, 'destroy']);
-        Route::post('{project}/webhooks/{webhook}/test', [WebhookController::class, 'test']);
+        Route::get('{project}/webhooks', [WebhookController::class, 'index'])->name('webhooks.index');
+        Route::post('{project}/webhooks', [WebhookController::class, 'store'])->name('webhooks.store');
+        Route::put('{project}/webhooks/{webhook}', [WebhookController::class, 'update'])->name('webhooks.update');
+        Route::delete('{project}/webhooks/{webhook}', [WebhookController::class, 'destroy'])->name('webhooks.destroy');
+        Route::post('{project}/webhooks/{webhook}/test', [WebhookController::class, 'test'])->name('webhooks.test');
     });
 
-    Route::post('invite/{token}/accept', [InviteController::class, 'accept']);
-
-    Route::get('users/search', function (\Illuminate\Http\Request $request) {
-        $users = \App\Models\User::where('name', 'like', '%' . $request->q . '%')
-            ->orWhere('email', 'like', '%' . $request->q . '%')
-            ->take(10)
-            ->get(['id', 'name', 'email', 'avatar']);
-        return response()->json($users);
-    });
+    Route::post('invite/{token}/accept', [InviteController::class, 'accept'])->name('invite.accept');
 });

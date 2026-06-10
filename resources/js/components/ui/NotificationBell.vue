@@ -80,6 +80,7 @@ import { onClickOutside } from '@vueuse/core'
 import { useNotificationsStore } from '@/stores/notifications'
 import { usePolling } from '@/composables/usePolling'
 import type { AppNotification } from '@/api/notifications'
+import { useTimeAgo } from '@/composables/useTimeAgo'
 
 const store  = useNotificationsStore()
 const router = useRouter()
@@ -120,11 +121,5 @@ function iconBg(type: string) {
   return 'bg-accent-500/15'
 }
 
-function timeAgo(date: string) {
-  const diff = (Date.now() - new Date(date).getTime()) / 1000
-  if (diff < 60) return 'agora'
-  if (diff < 3600) return `${Math.floor(diff / 60)}m atrás`
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h atrás`
-  return `${Math.floor(diff / 86400)}d atrás`
-}
+const { timeAgo } = useTimeAgo()
 </script>

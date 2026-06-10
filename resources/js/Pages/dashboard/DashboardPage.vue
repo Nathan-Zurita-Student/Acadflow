@@ -142,6 +142,7 @@ import { useAuthStore } from '@/stores/auth'
 import StatCard from '@/components/ui/StatCard.vue'
 import StatusBadge from '@/components/ui/StatusBadge.vue'
 import UserAvatar from '@/components/ui/UserAvatar.vue'
+import { useTimeAgo } from '@/composables/useTimeAgo'
 
 const auth = useAuthStore()
 const router = useRouter()
@@ -231,11 +232,5 @@ function actionLabel(action: string) {
   return map[action] ?? action
 }
 
-function timeAgo(date: string) {
-  const diff = (Date.now() - new Date(date).getTime()) / 1000
-  if (diff < 60) return 'agora'
-  if (diff < 3600) return `${Math.floor(diff / 60)}m atrás`
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h atrás`
-  return `${Math.floor(diff / 86400)}d atrás`
-}
+const { timeAgo } = useTimeAgo()
 </script>
