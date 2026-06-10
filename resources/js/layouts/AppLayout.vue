@@ -124,7 +124,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useProjectsStore } from '@/stores/projects'
@@ -160,6 +160,12 @@ const isLeaderOfCurrentProject = computed(() => {
 const currentDate = computed(() =>
   new Intl.DateTimeFormat('pt-BR', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date())
 )
+
+// Trigger popups for notifications that arrive via polling
+watch(() => notifStore.popupQueue.length, () => {
+  const queued = notifStore.drainPopupQueue()
+  queued.forEach(n => notifPopupRef.value?.push(n))
+})
 
 let echoChannel: ReturnType<typeof echo.private> | null = null
 
