@@ -176,6 +176,7 @@ import { storeToRefs } from 'pinia'
 import { useRoute } from 'vue-router'
 import { useProjectsStore } from '@/stores/projects'
 import { useAuthStore } from '@/stores/auth'
+import { useToast } from '@/composables/useToast'
 import { projectsApi } from '@/api/projects'
 import type { MemberStats } from '@/types'
 import InviteMemberModal from '@/components/ui/InviteMemberModal.vue'
@@ -186,6 +187,7 @@ const projectId = Number(route.params.id)
 
 const projectsStore = useProjectsStore()
 const authStore = useAuthStore()
+const toast = useToast()
 const { currentProject } = storeToRefs(projectsStore)
 
 const loading = ref(true)
@@ -230,6 +232,7 @@ async function reloadStats() {
 
 async function onMemberInvited() {
   await reloadStats()
+  toast.success('Membro convidado com sucesso.')
 }
 
 function confirmRemove(member: MemberStats) {
@@ -240,11 +243,13 @@ async function removeMember() {
   if (!removing.value) return
   removeLoading.value = true
   try {
+    const name = removing.value.user.name
     await projectsApi.removeMember(projectId, removing.value.user.id)
     removing.value = null
     await reloadStats()
-  } catch (e: any) {
-    // keep modal open on error - user can retry
+    toast.success(`${name} removido do projeto.`)
+  } catch {
+    toast.error('Erro ao remover membro.')
   } finally {
     removeLoading.value = false
   }

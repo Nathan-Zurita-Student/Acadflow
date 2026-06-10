@@ -2,23 +2,45 @@
   <div class="flex h-screen overflow-hidden bg-dark-950">
     <!-- Sidebar -->
     <aside
-      :class="['fixed inset-y-0 left-0 z-50 flex flex-col w-64 bg-dark-900 border-r border-dark-700/60 transition-transform duration-300 lg:static lg:translate-x-0',
-        sidebarOpen ? 'translate-x-0' : '-translate-x-full']"
+      :class="['fixed inset-y-0 left-0 z-50 flex flex-col bg-dark-900 border-r border-dark-700/60 transition-all duration-300 lg:static lg:translate-x-0',
+        sidebarOpen ? 'translate-x-0' : '-translate-x-full',
+        sidebarCollapsed ? 'w-16' : 'w-64']"
     >
-      <!-- Logo -->
-      <div class="flex items-center gap-3 px-5 py-4 border-b border-dark-700/60">
-        <img src="/imagem/acadflow.png" alt="AcadFlow" class="h-10 w-auto object-contain" />
+      <!-- Logo + collapse toggle -->
+      <div class="flex items-center gap-3 px-4 py-4 border-b border-dark-700/60 flex-shrink-0">
+        <img src="/imagem/acadflow.png" alt="AcadFlow" class="h-8 w-8 object-contain flex-shrink-0" />
+        <span v-if="!sidebarCollapsed" class="font-bold text-white text-sm tracking-wide">AcadFlow</span>
+        <button v-if="!sidebarCollapsed" @click="sidebarCollapsed = true"
+          class="ml-auto p-1 rounded-lg text-dark-500 hover:text-dark-300 hover:bg-dark-800 transition-colors lg:flex hidden">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7M18 19l-7-7 7-7" />
+          </svg>
+        </button>
+        <button v-else @click="sidebarCollapsed = false"
+          class="mx-auto p-1 rounded-lg text-dark-500 hover:text-dark-300 hover:bg-dark-800 transition-colors lg:flex hidden">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M6 5l7 7-7 7" />
+          </svg>
+        </button>
       </div>
 
       <!-- Navigation -->
-      <nav class="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
-        <NavItem to="/" icon="home" label="Dashboard" :exact="true" />
-        <NavItem to="/projects" icon="folder" label="Projetos" />
+      <nav class="flex-1 px-2 py-4 space-y-0.5 overflow-y-auto overflow-x-hidden">
+        <NavItem to="/" icon="home" :label="sidebarCollapsed ? '' : 'Dashboard'" :exact="true" :collapsed="sidebarCollapsed" />
+        <NavItem to="/my-tasks" icon="task" :label="sidebarCollapsed ? '' : 'Minhas Tarefas'" :collapsed="sidebarCollapsed">
+          <template #badge>
+            <span v-if="myTasksCount > 0 && !sidebarCollapsed"
+              class="ml-auto text-[10px] font-bold bg-indigo-600 text-white rounded-full px-1.5 py-0.5 leading-none min-w-[18px] text-center">
+              {{ myTasksCount > 99 ? '99+' : myTasksCount }}
+            </span>
+          </template>
+        </NavItem>
+        <NavItem to="/projects" icon="folder" :label="sidebarCollapsed ? '' : 'Projetos'" :collapsed="sidebarCollapsed" />
 
         <!-- Current project sub-nav -->
-        <template v-if="currentProject">
+        <template v-if="currentProject && !sidebarCollapsed">
           <div class="mt-4 mb-2 px-2">
-            <p class="text-xs font-semibold text-dark-500 uppercase tracking-wider">Projeto Atual</p>
+            <p class="text-[10px] font-semibold text-dark-500 uppercase tracking-wider truncate">{{ currentProject.name }}</p>
           </div>
           <div class="ml-2 pl-3 border-l border-dark-700">
             <NavItem v-if="isLeaderOfCurrentProject" :to="`/projects/${currentProject.id}`" icon="chart" label="Visão Geral" :exact="true" />
@@ -30,8 +52,9 @@
       </nav>
 
       <!-- User section -->
-      <div class="px-3 py-3 border-t border-dark-700/60">
-        <div class="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-dark-800 cursor-pointer group"
+      <div class="px-2 py-3 border-t border-dark-700/60 flex-shrink-0">
+        <div class="flex items-center gap-2.5 px-2 py-2 rounded-lg hover:bg-dark-800 cursor-pointer group"
+          :class="sidebarCollapsed ? 'justify-center' : ''"
           @click="showProfile = true">
           <div class="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
             <img v-if="auth.user?.avatar" :src="auth.user.avatar" class="w-full h-full object-cover" alt="Avatar" />
@@ -39,38 +62,44 @@
               {{ userInitial }}
             </div>
           </div>
-          <div class="flex-1 min-w-0">
-            <p class="text-sm font-medium text-dark-100 truncate">{{ auth.user?.display_name || auth.user?.name }}</p>
-            <p class="text-xs text-dark-500 truncate">{{ auth.user?.email }}</p>
-          </div>
-          <button @click.stop="handleLogout" class="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-dark-700 transition-opacity">
-            <svg class="w-4 h-4 text-dark-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-            </svg>
-          </button>
+          <template v-if="!sidebarCollapsed">
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-medium text-dark-100 truncate">{{ auth.user?.display_name || auth.user?.name }}</p>
+              <p class="text-xs text-dark-500 truncate">{{ auth.user?.email }}</p>
+            </div>
+            <button @click.stop="handleLogout" class="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-dark-700 transition-opacity flex-shrink-0">
+              <svg class="w-4 h-4 text-dark-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+            </button>
+          </template>
         </div>
       </div>
     </aside>
 
     <ProfileModal v-if="showProfile" @close="showProfile = false" />
+    <Toast />
 
-    <!-- Overlay -->
+    <!-- Overlay mobile -->
     <div v-if="sidebarOpen" @click="sidebarOpen = false"
       class="fixed inset-0 z-40 bg-black/50 lg:hidden" />
 
     <!-- Main content -->
     <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
       <!-- Topbar -->
-      <header class="flex items-center gap-4 px-6 py-4 bg-dark-900/80 backdrop-blur border-b border-dark-700/60">
+      <header class="flex items-center gap-4 px-6 py-3.5 bg-dark-900/80 backdrop-blur border-b border-dark-700/60 flex-shrink-0">
         <button @click="sidebarOpen = !sidebarOpen" class="lg:hidden p-2 rounded-lg hover:bg-dark-700">
           <svg class="w-5 h-5 text-dark-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
           </svg>
         </button>
-        <div class="flex-1" />
+        <!-- Breadcrumb / page title -->
+        <div class="flex-1 min-w-0">
+          <slot name="title" />
+        </div>
         <div class="flex items-center gap-2">
-          <span class="text-xs text-dark-500 bg-dark-800 border border-dark-700 px-2 py-1 rounded-md">
+          <span class="text-xs text-dark-500 bg-dark-800 border border-dark-700 px-2 py-1 rounded-md hidden sm:block">
             {{ currentDate }}
           </span>
           <NotificationBell />
@@ -86,19 +115,23 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useProjectsStore } from '@/stores/projects'
+import { dashboardApi } from '@/api/projects'
 import NavItem from '@/components/ui/NavItem.vue'
 import ProfileModal from '@/components/ui/ProfileModal.vue'
 import NotificationBell from '@/components/ui/NotificationBell.vue'
+import Toast from '@/components/ui/Toast.vue'
 
 const auth = useAuthStore()
 const projectsStore = useProjectsStore()
 const router = useRouter()
 const sidebarOpen = ref(false)
+const sidebarCollapsed = ref(false)
 const showProfile = ref(false)
+const myTasksCount = ref(0)
 
 const currentProject = computed(() => projectsStore.currentProject)
 const userInitial = computed(() => auth.user?.name?.[0]?.toUpperCase() ?? '?')
@@ -109,9 +142,17 @@ const isLeaderOfCurrentProject = computed(() => {
   const uid = auth.user?.id
   return currentProject.value.members.some(m => m.id === uid && m.role === 'leader')
 })
+
 const currentDate = computed(() =>
   new Intl.DateTimeFormat('pt-BR', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date())
 )
+
+onMounted(async () => {
+  try {
+    const res = await dashboardApi.myTasks()
+    myTasksCount.value = (res.data as any[]).filter((t: any) => t.status !== 'done').length
+  } catch {}
+})
 
 async function handleLogout() {
   await auth.logout()

@@ -3,7 +3,7 @@
     <div class="flex items-center justify-between">
       <div>
         <h1 class="text-xl font-bold text-white">Arquivos</h1>
-        <p class="text-dark-400 text-sm">{{ attachments.length }} arquivo{{ attachments.length !== 1 ? 's' : '' }}</p>
+        <p class="text-dark-400 text-sm">{{ filtered.length }} de {{ attachments.length }} arquivo{{ attachments.length !== 1 ? 's' : '' }}</p>
       </div>
       <button @click="showUploadModal = true" class="btn-primary">
         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -11,6 +11,34 @@
             d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
         </svg>
         Upload
+      </button>
+    </div>
+
+    <!-- Search + type filters -->
+    <div class="flex flex-wrap items-center gap-2">
+      <div class="relative flex-1 min-w-[160px] max-w-xs">
+        <svg class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-dark-500 pointer-events-none"
+          fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+        <input v-model="searchQuery" placeholder="Buscar arquivos..."
+          class="w-full text-xs bg-dark-800 border border-dark-700 rounded-lg pl-7 pr-3 py-1.5 text-dark-200 placeholder-dark-600 focus:outline-none focus:border-indigo-500" />
+      </div>
+      <div class="flex items-center gap-1">
+        <button
+          v-for="ft in fileTypeFilters" :key="ft.value"
+          @click="filterType = filterType === ft.value ? '' : ft.value"
+          :class="['text-xs px-2.5 py-1.5 rounded-lg border transition-colors',
+            filterType === ft.value
+              ? 'bg-indigo-500/15 border-indigo-500/30 text-indigo-400'
+              : 'border-dark-700 text-dark-400 hover:text-dark-200 hover:border-dark-600']">
+          {{ ft.label }}
+        </button>
+      </div>
+      <button v-if="searchQuery || filterType"
+        @click="searchQuery = ''; filterType = ''"
+        class="text-xs text-dark-500 hover:text-dark-300 px-2 py-1.5 rounded-lg hover:bg-dark-700 transition-colors">
+        Limpar
       </button>
     </div>
 
@@ -27,8 +55,8 @@
       <div v-for="i in 6" :key="i" class="card animate-pulse h-20" />
     </div>
 
-    <div v-else-if="attachments.length" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-      <div v-for="a in attachments" :key="a.id"
+    <div v-else-if="filtered.length" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+      <div v-for="a in filtered" :key="a.id"
         class="card hover:border-dark-600 transition-colors flex items-center gap-4 group">
         <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
           :class="fileIconBg(a.mime_type)">
@@ -72,6 +100,12 @@
           </button>
         </div>
       </div>
+    </div>
+
+    <div v-else-if="searchQuery || filterType" class="text-center py-12">
+      <p class="text-dark-300 font-medium">Nenhum arquivo encontrado</p>
+      <p class="text-dark-500 text-sm mt-1">Tente ajustar a busca ou o filtro de tipo</p>
+      <button @click="searchQuery = ''; filterType = ''" class="btn-secondary mt-4">Limpar filtros</button>
     </div>
 
     <div v-else class="text-center py-16">
@@ -167,16 +201,40 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { attachmentsApi } from '@/api/projects'
+import { useToast } from '@/composables/useToast'
 import type { Attachment } from '@/types'
 
 const route = useRoute()
 const projectId = Number(route.params.id)
+const toast = useToast()
 const loading = ref(true)
 const uploading = ref(false)
 const attachments = ref<Attachment[]>([])
+const searchQuery = ref('')
+const filterType = ref('')
+
+const fileTypeFilters = [
+  { value: 'image', label: 'Imagens' },
+  { value: 'pdf',   label: 'PDFs' },
+  { value: 'doc',   label: 'Documentos' },
+  { value: 'video', label: 'Vídeos' },
+]
+
+const filtered = computed(() => {
+  let list = attachments.value
+  if (searchQuery.value.trim()) {
+    const q = searchQuery.value.toLowerCase()
+    list = list.filter(a => a.name.toLowerCase().includes(q) || a.uploader?.name?.toLowerCase().includes(q))
+  }
+  if (filterType.value === 'image') list = list.filter(a => a.mime_type.startsWith('image/'))
+  else if (filterType.value === 'pdf') list = list.filter(a => a.mime_type === 'application/pdf')
+  else if (filterType.value === 'doc') list = list.filter(a => a.mime_type.includes('word') || a.mime_type.includes('document') || a.mime_type.includes('sheet') || a.mime_type.includes('excel') || a.mime_type.includes('presentation'))
+  else if (filterType.value === 'video') list = list.filter(a => a.mime_type.startsWith('video/'))
+  return list
+})
 
 // upload modal
 const showUploadModal = ref(false)
@@ -217,6 +275,9 @@ async function handleUpload() {
     const res = await attachmentsApi.upload(projectId, selectedFile.value, undefined, uploadName.value.trim() || undefined)
     attachments.value.unshift(res.data)
     closeUploadModal()
+    toast.success('Arquivo enviado com sucesso.')
+  } catch {
+    toast.error('Erro ao enviar arquivo.')
   } finally {
     uploading.value = false
     if (fileInput.value) fileInput.value.value = ''
@@ -227,6 +288,7 @@ async function deleteFile(id: number) {
   if (!confirm('Excluir este arquivo?')) return
   await attachmentsApi.delete(projectId, id)
   attachments.value = attachments.value.filter(a => a.id !== id)
+  toast.success('Arquivo excluído.')
 }
 
 function fileExt(name: string) {

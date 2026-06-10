@@ -32,8 +32,8 @@
     </div>
 
     <!-- Filtros -->
-    <div class="flex items-center gap-2 flex-wrap">
-      <div class="relative flex-1 max-w-xs">
+    <div class="flex flex-wrap items-center gap-2">
+      <div class="relative flex-1 min-w-[160px] max-w-xs">
         <svg class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-dark-500 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
@@ -54,12 +54,25 @@
         <option value="">Membro</option>
         <option v-for="m in currentProject?.members ?? []" :key="m.id" :value="m.id">{{ m.name.split(' ')[0] }}</option>
       </select>
+      <!-- Filtros rápidos de urgência -->
+      <div class="flex items-center gap-1">
+        <button
+          v-for="qf in quickFilters" :key="qf.value"
+          @click="filterQuick = filterQuick === qf.value ? '' : qf.value"
+          :class="['text-xs px-2.5 py-1.5 rounded-lg border transition-colors',
+            filterQuick === qf.value
+              ? qf.activeClass
+              : 'border-dark-700 text-dark-400 hover:text-dark-200 hover:border-dark-600']">
+          {{ qf.label }}
+        </button>
+      </div>
       <button
-        v-if="filterSearchInput || filterPriority || filterAssignee"
-        @click="filterSearchInput = ''; filterSearch = ''; filterPriority = ''; filterAssignee = ''"
+        v-if="filterSearchInput || filterPriority || filterAssignee || filterQuick"
+        @click="filterSearchInput = ''; filterSearch = ''; filterPriority = ''; filterAssignee = ''; filterQuick = ''"
         class="text-xs text-dark-500 hover:text-dark-300 px-2 py-1.5 rounded-lg hover:bg-dark-700 transition-colors"
-      >Limpar filtros</button>
+      >Limpar</button>
     </div>
+    <p v-if="!selectedTask && !showCreate" class="text-[10px] text-dark-600">Pressione <kbd class="px-1 py-0.5 rounded bg-dark-700 text-dark-400 font-mono">N</kbd> para nova tarefa</p>
 
     <!-- Board -->
     <div class="flex gap-4 overflow-x-auto pb-4 min-h-[calc(100vh-260px)]">
@@ -96,6 +109,7 @@ import { useRoute } from 'vue-router'
 import { useTasksStore } from '@/stores/tasks'
 import { useProjectsStore } from '@/stores/projects'
 import { useAuthStore } from '@/stores/auth'
+import { useToast } from '@/composables/useToast'
 import { tasksApi } from '@/api/projects'
 import type { Task, TaskStatus } from '@/types'
 import KanbanColumn from '@/components/kanban/KanbanColumn.vue'
@@ -105,6 +119,7 @@ const route         = useRoute()
 const store         = useTasksStore()
 const projectsStore = useProjectsStore()
 const authStore     = useAuthStore()
+const toast         = useToast()
 const projectId     = Number(route.params.id)
 
 const { currentProject } = storeToRefs(projectsStore)
@@ -118,6 +133,13 @@ const filterSearchInput = ref('')
 const filterSearch      = ref('')
 const filterPriority    = ref('')
 const filterAssignee    = ref<number | ''>('')
+const filterQuick       = ref('')
+
+const quickFilters = [
+  { value: 'overdue', label: 'Atrasadas', activeClass: 'bg-red-500/15 border-red-500/30 text-red-400' },
+  { value: 'today',   label: 'Hoje',      activeClass: 'bg-amber-500/15 border-amber-500/30 text-amber-400' },
+  { value: 'week',    label: 'Essa semana', activeClass: 'bg-yellow-500/15 border-yellow-500/30 text-yellow-400' },
+]
 
 let searchDebounce: ReturnType<typeof setTimeout> | null = null
 watch(filterSearchInput, (val) => {
@@ -158,6 +180,20 @@ const filteredTasks = computed(() => {
       t.assignees?.some(a => a.id === filterAssignee.value) || t.assignee?.id === filterAssignee.value
     )
   }
+  if (filterQuick.value === 'overdue') {
+    tasks = tasks.filter(t => t.due_date && new Date(t.due_date + 'T23:59:59') < new Date())
+  } else if (filterQuick.value === 'today') {
+    tasks = tasks.filter(t => {
+      if (!t.due_date) return false
+      return new Date(t.due_date + 'T23:59:59').toDateString() === new Date().toDateString()
+    })
+  } else if (filterQuick.value === 'week') {
+    tasks = tasks.filter(t => {
+      if (!t.due_date) return false
+      const diff = (new Date(t.due_date + 'T23:59:59').getTime() - Date.now()) / 86400000
+      return diff >= 0 && diff <= 7
+    })
+  }
   return tasks
 })
 
@@ -192,6 +228,17 @@ function onVisibilityChange() {
   else { store.fetchTasks(projectId); startPolling() }
 }
 
+function onKeyDown(e: KeyboardEvent) {
+  if (
+    e.key === 'n' && !e.ctrlKey && !e.metaKey && !e.shiftKey &&
+    !(e.target instanceof HTMLInputElement) &&
+    !(e.target instanceof HTMLTextAreaElement) &&
+    !(e.target instanceof HTMLSelectElement)
+  ) {
+    showCreate.value = true
+  }
+}
+
 onMounted(async () => {
   store.fetchTasks(projectId)
   if (!currentProject.value || currentProject.value.id !== projectId) {
@@ -199,11 +246,13 @@ onMounted(async () => {
   }
   startPolling()
   document.addEventListener('visibilitychange', onVisibilityChange)
+  document.addEventListener('keydown', onKeyDown)
 })
 
 onUnmounted(() => {
   stopPolling()
   document.removeEventListener('visibilitychange', onVisibilityChange)
+  document.removeEventListener('keydown', onKeyDown)
 })
 
 async function handleTaskMoved(updates: Array<{ id: number; status: TaskStatus; position: number }>) {

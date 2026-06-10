@@ -15,16 +15,36 @@
         </div>
 
         <!-- Tabs -->
-        <div v-if="isEdit" class="flex gap-1 px-6 pt-3 flex-shrink-0">
+        <div v-if="isEdit" class="flex items-center gap-1 px-6 pt-3 flex-shrink-0">
           <button v-for="tab in tabs" :key="tab.id"
             @click="activeTab = tab.id"
-            :class="['px-3 py-1.5 text-sm rounded-lg transition-colors',
+            :class="['px-3 py-1.5 text-sm rounded-lg transition-colors flex items-center gap-1.5',
               activeTab === tab.id ? 'bg-dark-700 text-white font-medium' : 'text-dark-400 hover:text-dark-200']">
             {{ tab.label }}
             <span v-if="tab.id === 'files' && attachments.length"
-              class="ml-1 text-xs bg-indigo-600/30 text-indigo-400 px-1.5 py-0.5 rounded-full">
+              class="text-xs bg-indigo-600/30 text-indigo-400 px-1.5 py-0.5 rounded-full">
               {{ attachments.length }}
             </span>
+            <span v-if="tab.id === 'comments' && (detail?.comments?.length ?? 0) > 0"
+              class="text-xs bg-dark-600 text-dark-400 px-1.5 py-0.5 rounded-full">
+              {{ detail?.comments?.length }}
+            </span>
+            <span v-if="tab.id === 'checklist' && completedChecklistRatio"
+              class="text-xs bg-dark-600 text-dark-400 px-1.5 py-0.5 rounded-full">
+              {{ completedChecklistRatio }}
+            </span>
+          </button>
+          <div class="flex-1" />
+          <button v-if="isLeader && props.task"
+            @click="duplicateTask"
+            :disabled="duplicating"
+            class="ml-auto text-xs flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-dark-700 text-dark-400 hover:text-dark-200 hover:border-dark-600 transition-colors disabled:opacity-50"
+            title="Duplicar tarefa">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>
+            Duplicar
           </button>
         </div>
 
@@ -321,6 +341,7 @@ import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useTasksStore } from '@/stores/tasks'
 import { useProjectsStore } from '@/stores/projects'
+import { useToast } from '@/composables/useToast'
 import { tasksApi, attachmentsApi } from '@/api/projects'
 import type { Task, TaskStatus, Attachment } from '@/types'
 
@@ -334,10 +355,12 @@ const emit = defineEmits(['close', 'saved'])
 
 const store         = useTasksStore()
 const projectsStore = useProjectsStore()
+const toast         = useToast()
 const { currentProject } = storeToRefs(projectsStore)
 
 const isEdit       = !!props.task
 const saving       = ref(false)
+const duplicating  = ref(false)
 const error        = ref('')
 const activeTab    = ref('form')
 const detail       = ref<Task | null>(null)
@@ -402,6 +425,13 @@ const tabs = [
   { id: 'files',     label: 'Arquivos' },
 ]
 
+const completedChecklistRatio = computed(() => {
+  const items = detail.value?.checklists ?? []
+  if (!items.length) return ''
+  const done = items.filter((i: any) => i.completed).length
+  return `${done}/${items.length}`
+})
+
 const form = ref({
   title:       props.task?.title       ?? '',
   description: props.task?.description ?? '',
@@ -462,14 +492,37 @@ async function submit() {
     }
     if (isEdit && props.task) {
       await store.updateTask(props.projectId, props.task.id, payload)
+      toast.success('Tarefa atualizada.')
     } else {
       await store.createTask(props.projectId, payload)
+      toast.success('Tarefa criada.')
     }
     emit('saved')
   } catch (e: any) {
     error.value = e.response?.data?.message ?? 'Erro ao salvar.'
   } finally {
     saving.value = false
+  }
+}
+
+async function duplicateTask() {
+  if (!props.task) return
+  duplicating.value = true
+  try {
+    await store.createTask(props.projectId, {
+      title: form.value.title + ' (cópia)',
+      description: form.value.description,
+      status: form.value.status,
+      priority: form.value.priority,
+      due_date: form.value.due_date,
+      assignee_ids: selectedIds.value,
+    })
+    toast.success('Tarefa duplicada.')
+    emit('saved')
+  } catch {
+    toast.error('Erro ao duplicar tarefa.')
+  } finally {
+    duplicating.value = false
   }
 }
 

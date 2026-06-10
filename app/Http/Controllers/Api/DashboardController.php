@@ -70,6 +70,28 @@ class DashboardController extends Controller
             'risk_level' => $this->projectService->getRiskLevel($p),
         ]);
 
+        // Próximas entregas do usuário (tarefas com prazo nos próx. 7 dias)
+        $upcoming = \App\Models\Task::with('project:id,name')
+            ->where(function ($q) use ($user) {
+                $q->where('assignee_id', $user->id)
+                  ->orWhereHas('assignees', fn($q2) => $q2->where('users.id', $user->id));
+            })
+            ->whereNotIn('status', ['done'])
+            ->whereNotNull('due_date')
+            ->where('due_date', '<=', now()->addDays(7))
+            ->orderBy('due_date', 'asc')
+            ->limit(5)
+            ->get()
+            ->map(fn($t) => [
+                'id'         => $t->id,
+                'title'      => $t->title,
+                'status'     => $t->status,
+                'priority'   => $t->priority,
+                'due_date'   => $t->due_date?->toDateString(),
+                'is_overdue' => $t->isOverdue(),
+                'project'    => ['id' => $t->project->id, 'name' => $t->project->name],
+            ]);
+
         return response()->json([
             'stats' => [
                 'total_projects' => $projects->count(),
@@ -81,6 +103,36 @@ class DashboardController extends Controller
             'projects' => $projectsWithRisk,
             'weekly_completions' => $weeklyData,
             'recent_activity' => $recentActivity,
+            'upcoming' => $upcoming,
         ]);
+    }
+
+    public function myTasks(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        $tasks = \App\Models\Task::with(['project:id,name', 'tags:id,name,color'])
+            ->where(function ($q) use ($user) {
+                $q->where('assignee_id', $user->id)
+                  ->orWhereHas('assignees', fn($q2) => $q2->where('users.id', $user->id));
+            })
+            ->orderByRaw("CASE WHEN due_date IS NULL THEN 2 WHEN due_date < NOW() THEN 0 ELSE 1 END")
+            ->orderBy('due_date', 'asc')
+            ->orderByRaw("CASE priority WHEN 'urgent' THEN 0 WHEN 'high' THEN 1 WHEN 'medium' THEN 2 ELSE 3 END")
+            ->limit(200)
+            ->get()
+            ->map(fn($t) => [
+                'id'              => $t->id,
+                'title'           => $t->title,
+                'status'          => $t->status,
+                'priority'        => $t->priority,
+                'due_date'        => $t->due_date?->toDateString(),
+                'is_overdue'      => $t->isOverdue(),
+                'approval_status' => $t->approval_status,
+                'project'         => ['id' => $t->project->id, 'name' => $t->project->name],
+                'tags'            => $t->tags->map(fn($tag) => ['id' => $tag->id, 'name' => $tag->name, 'color' => $tag->color]),
+            ]);
+
+        return response()->json($tasks);
     }
 }

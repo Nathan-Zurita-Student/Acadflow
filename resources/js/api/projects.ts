@@ -56,8 +56,9 @@ export const attachmentsApi = {
 }
 
 export const dashboardApi = {
-  global: () => api.get('/dashboard'),
-  users: (q: string) => api.get('/users/search', { params: { q } }),
+  global:   () => api.get('/dashboard'),
+  myTasks:  () => api.get('/my-tasks'),
+  users:    (q: string) => api.get('/users/search', { params: { q } }),
 }
 
 export const inviteApi = {

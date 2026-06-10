@@ -29,6 +29,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('notifications/read-all', [NotificationController::class, 'markAllRead']);
 
     Route::get('dashboard', [DashboardController::class, 'index']);
+    Route::get('my-tasks', [DashboardController::class, 'myTasks']);
 
     Route::prefix('projects')->group(function () {
         Route::get('/', [ProjectController::class, 'index']);
