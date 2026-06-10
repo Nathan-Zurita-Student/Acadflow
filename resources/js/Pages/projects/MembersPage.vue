@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="space-y-6 animate-fade-in">
 
     <!-- Header -->
@@ -51,7 +51,7 @@
         </button>
 
         <div class="flex items-start gap-4">
-          <div class="w-12 h-12 rounded-xl bg-indigo-600/20 flex items-center justify-center text-lg font-bold text-indigo-400 flex-shrink-0">
+          <div class="w-12 h-12 rounded-xl bg-accent-600/20 flex items-center justify-center text-lg font-bold text-accent-400 flex-shrink-0">
             {{ s.user.name[0] }}
           </div>
           <div class="flex-1 min-w-0">

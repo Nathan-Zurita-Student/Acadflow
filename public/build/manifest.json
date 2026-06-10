@@ -18,24 +18,24 @@
       "_client-CeDwlxXH.js"
     ]
   },
-  "_projects-D7M4-yeO.js": {
-    "file": "assets/projects-D7M4-yeO.js",
+  "_projects-BYn5auJR.js": {
+    "file": "assets/projects-BYn5auJR.js",
     "name": "projects",
     "imports": [
       "_client-CeDwlxXH.js"
     ]
   },
-  "_projects-xzn_jh5q.js": {
-    "file": "assets/projects-xzn_jh5q.js",
+  "_projects-Dpp3I-DR.js": {
+    "file": "assets/projects-Dpp3I-DR.js",
     "name": "projects",
     "imports": [
       "_client-CeDwlxXH.js",
       "_pinia-B3Q5YxRG.js",
-      "_projects-D7M4-yeO.js"
+      "_projects-BYn5auJR.js"
     ]
   },
-  "_runtime-dom.esm-bundler-BE36LWml.js": {
-    "file": "assets/runtime-dom.esm-bundler-BE36LWml.js",
+  "_runtime-dom.esm-bundler-B8xpT5LQ.js": {
+    "file": "assets/runtime-dom.esm-bundler-B8xpT5LQ.js",
     "name": "runtime-dom.esm-bundler",
     "imports": [
       "_client-CeDwlxXH.js"
@@ -48,7 +48,7 @@
     "isDynamicEntry": true
   },
   "resources/css/app.css": {
-    "file": "assets/app-CYKO8B86.css",
+    "file": "assets/app-Dfy4Fe8F.css",
     "name": "app",
     "names": [
       "app.css"
@@ -57,17 +57,17 @@
     "isEntry": true
   },
   "resources/js/app.ts": {
-    "file": "assets/app-B2DroIMl.js",
+    "file": "assets/app-BIyeRsRy.js",
     "name": "app",
     "src": "resources/js/app.ts",
     "isEntry": true,
     "imports": [
       "_client-CeDwlxXH.js",
-      "_runtime-dom.esm-bundler-BE36LWml.js",
+      "_runtime-dom.esm-bundler-B8xpT5LQ.js",
       "_pinia-B3Q5YxRG.js",
       "_auth-CRoRFyM-.js",
-      "_projects-D7M4-yeO.js",
-      "_projects-xzn_jh5q.js"
+      "_projects-BYn5auJR.js",
+      "_projects-Dpp3I-DR.js"
     ],
     "dynamicImports": [
       "node_modules/vue3-apexcharts/dist/apexcharts.ssr.esm-fe46cd2d.js",
@@ -76,21 +76,21 @@
     ]
   },
   "resources/js/layouts/AppLayout.vue": {
-    "file": "assets/AppLayout-DgXXBGC8.js",
+    "file": "assets/AppLayout-DpNt7sgj.js",
     "name": "AppLayout",
     "src": "resources/js/layouts/AppLayout.vue",
     "isDynamicEntry": true,
     "imports": [
       "_client-CeDwlxXH.js",
       "resources/js/app.ts",
-      "_runtime-dom.esm-bundler-BE36LWml.js",
+      "_runtime-dom.esm-bundler-B8xpT5LQ.js",
       "_pinia-B3Q5YxRG.js",
       "_auth-CRoRFyM-.js",
-      "_projects-D7M4-yeO.js",
-      "_projects-xzn_jh5q.js"
+      "_projects-BYn5auJR.js",
+      "_projects-Dpp3I-DR.js"
     ],
     "css": [
-      "assets/AppLayout-CWehjpBu.css"
+      "assets/AppLayout-DtnR7Qa_.css"
     ]
   }
 }

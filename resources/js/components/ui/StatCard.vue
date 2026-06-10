@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="card flex items-start gap-4">
     <div :class="['w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0', bgColor]">
       <svg class="w-5 h-5" :class="iconColor" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -25,7 +25,7 @@ const props = defineProps<{
 }>()
 
 const colors = {
-  indigo: { bg: 'bg-indigo-600/20', icon: 'text-indigo-400' },
+  indigo: { bg: 'bg-accent-600/20', icon: 'text-accent-400' },
   blue: { bg: 'bg-blue-600/20', icon: 'text-blue-400' },
   green: { bg: 'bg-emerald-600/20', icon: 'text-emerald-400' },
   red: { bg: 'bg-red-600/20', icon: 'text-red-400' },

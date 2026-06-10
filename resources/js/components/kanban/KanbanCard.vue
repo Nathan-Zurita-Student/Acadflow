@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div
     class="bg-dark-800 border rounded-lg p-3 cursor-pointer transition-all duration-150 group select-none"
     :class="[cardBorderClass, { 'opacity-50': dragging }]"
@@ -70,7 +70,7 @@
       <select
         :value="task.status"
         @change="onStatusChange"
-        class="w-full text-xs rounded-lg px-2 py-1.5 border border-dark-700 bg-dark-900 focus:outline-none focus:border-indigo-500 cursor-pointer transition-colors"
+        class="w-full text-xs rounded-lg px-2 py-1.5 border border-dark-700 bg-dark-900 focus:outline-none focus:border-accent-500 cursor-pointer transition-colors"
         :class="statusClass"
       >
         <option v-for="s in statuses" :key="s.value" :value="s.value">{{ s.label }}</option>
@@ -194,7 +194,7 @@
           <div
             v-for="a in displayAssignees" :key="a.id"
             :title="a.name"
-            class="w-5 h-5 rounded-full bg-indigo-600/40 border border-dark-800 flex items-center justify-center text-xs font-semibold text-indigo-300"
+            class="w-5 h-5 rounded-full bg-accent-600/40 border border-dark-800 flex items-center justify-center text-xs font-semibold text-accent-300"
           >{{ a.name[0] }}</div>
           <div
             v-if="extraAssignees > 0"

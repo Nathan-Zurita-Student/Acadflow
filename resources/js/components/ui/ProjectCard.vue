@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="card hover:border-dark-600 hover:bg-dark-750 cursor-pointer transition-all duration-200 group"
     @click="$emit('click')">
     <div class="flex items-start justify-between mb-3">
@@ -58,7 +58,7 @@
       <div class="flex -space-x-1.5">
         <div v-for="m in project.members.slice(0, 3)" :key="m.id"
           :title="m.name"
-          class="w-6 h-6 rounded-full bg-indigo-600/40 border-2 border-dark-800 flex items-center justify-center text-xs font-medium text-indigo-300">
+          class="w-6 h-6 rounded-full bg-accent-600/40 border-2 border-dark-800 flex items-center justify-center text-xs font-medium text-accent-300">
           {{ m.name[0] }}
         </div>
         <div v-if="project.members.length > 3"
@@ -80,7 +80,7 @@ defineEmits(['click', 'delete'])
 
 const progressColor = computed(() => {
   if (props.project.progress >= 75) return 'bg-emerald-500'
-  if (props.project.progress >= 40) return 'bg-indigo-500'
+  if (props.project.progress >= 40) return 'bg-accent-500'
   return 'bg-amber-500'
 })
 

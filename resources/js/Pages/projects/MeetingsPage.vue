@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="max-w-4xl mx-auto space-y-6 animate-fade-in">
     <!-- Header -->
     <div class="flex items-center justify-between">
@@ -16,7 +16,7 @@
 
     <!-- Loading -->
     <div v-if="loading" class="flex justify-center py-16">
-      <div class="w-8 h-8 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" />
+      <div class="w-8 h-8 border-2 border-accent-500/30 border-t-accent-500 rounded-full animate-spin" />
     </div>
 
     <template v-else>

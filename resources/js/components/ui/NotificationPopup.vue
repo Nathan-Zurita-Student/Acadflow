@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <Teleport to="body">
     <div class="fixed top-16 right-4 z-[200] flex flex-col gap-2 pointer-events-none" style="max-width: 340px; width: calc(100vw - 32px);">
       <TransitionGroup name="popup">
@@ -11,7 +11,7 @@
           <!-- Progress bar -->
           <div class="h-0.5 bg-dark-700">
             <div
-              class="h-full bg-indigo-500 transition-none"
+              class="h-full bg-accent-500 transition-none"
               :style="{ width: popup.progress + '%', transition: `width ${DURATION}ms linear` }"
             />
           </div>
@@ -70,7 +70,7 @@ let nextId = 0
 function typeStyle(type: string) {
   const map: Record<string, { icon: string; bg: string }> = {
     task_comment:       { icon: '💬', bg: 'bg-blue-500/15' },
-    task_assigned:      { icon: '📌', bg: 'bg-indigo-500/15' },
+    task_assigned:      { icon: '📌', bg: 'bg-accent-500/15' },
     task_approved:      { icon: '✅', bg: 'bg-emerald-500/15' },
     task_rejected:      { icon: '❌', bg: 'bg-red-500/15' },
     file_uploaded:      { icon: '📎', bg: 'bg-purple-500/15' },

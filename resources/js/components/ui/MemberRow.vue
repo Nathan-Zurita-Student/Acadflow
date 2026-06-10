@@ -1,6 +1,6 @@
-<template>
+﻿<template>
   <div class="flex items-center gap-3 p-2.5 rounded-lg hover:bg-dark-700/50 transition-colors">
-    <div class="w-8 h-8 rounded-full bg-indigo-600/30 flex items-center justify-center text-sm font-semibold text-indigo-300 flex-shrink-0">
+    <div class="w-8 h-8 rounded-full bg-accent-600/30 flex items-center justify-center text-sm font-semibold text-accent-300 flex-shrink-0">
       {{ stat.user.name[0] }}
     </div>
     <div class="flex-1 min-w-0">

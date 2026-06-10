@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="space-y-4 animate-fade-in">
     <div class="flex items-center justify-between">
       <div>
@@ -40,17 +40,17 @@
         <input
           v-model="filterSearchInput"
           placeholder="Buscar tarefas..."
-          class="w-full text-xs bg-dark-800 border border-dark-700 rounded-lg pl-7 pr-3 py-1.5 text-dark-200 placeholder-dark-600 focus:outline-none focus:border-indigo-500"
+          class="w-full text-xs bg-dark-800 border border-dark-700 rounded-lg pl-7 pr-3 py-1.5 text-dark-200 placeholder-dark-600 focus:outline-none focus:border-accent-500"
         />
       </div>
-      <select v-model="filterPriority" class="text-xs bg-dark-800 border border-dark-700 rounded-lg px-2.5 py-1.5 text-dark-300 focus:outline-none focus:border-indigo-500">
+      <select v-model="filterPriority" class="text-xs bg-dark-800 border border-dark-700 rounded-lg px-2.5 py-1.5 text-dark-300 focus:outline-none focus:border-accent-500">
         <option value="">Prioridade</option>
         <option value="urgent">Urgente</option>
         <option value="high">Alta</option>
         <option value="medium">Média</option>
         <option value="low">Baixa</option>
       </select>
-      <select v-model="filterAssignee" class="text-xs bg-dark-800 border border-dark-700 rounded-lg px-2.5 py-1.5 text-dark-300 focus:outline-none focus:border-indigo-500">
+      <select v-model="filterAssignee" class="text-xs bg-dark-800 border border-dark-700 rounded-lg px-2.5 py-1.5 text-dark-300 focus:outline-none focus:border-accent-500">
         <option value="">Membro</option>
         <option v-for="m in currentProject?.members ?? []" :key="m.id" :value="m.id">{{ m.name.split(' ')[0] }}</option>
       </select>

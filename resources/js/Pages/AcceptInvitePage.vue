@@ -1,9 +1,9 @@
-<template>
+﻿<template>
   <div class="min-h-screen bg-dark-950 flex items-center justify-center p-4">
 
     <!-- Joining automatically (logged in) -->
     <div v-if="autoJoining" class="text-center space-y-3">
-      <div class="w-10 h-10 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin mx-auto" />
+      <div class="w-10 h-10 border-4 border-accent-500/30 border-t-accent-500 rounded-full animate-spin mx-auto" />
       <p class="text-dark-400 text-sm">Entrando no projeto...</p>
     </div>
 
@@ -17,7 +17,7 @@
       </div>
       <h2 class="text-xl font-bold text-white">Link inválido</h2>
       <p class="text-dark-400 text-sm">Este link de convite expirou ou é inválido.</p>
-      <router-link to="/" class="inline-block px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl transition-colors">
+      <router-link to="/" class="inline-block px-6 py-2.5 bg-accent-600 hover:bg-accent-700 text-white text-sm font-semibold rounded-xl transition-colors">
         Ir ao início
       </router-link>
     </div>
@@ -25,8 +25,8 @@
     <!-- Not logged in: show invite preview + login/register buttons -->
     <div v-else-if="invite && !isLoggedIn" class="bg-dark-800 border border-dark-700 rounded-2xl p-8 max-w-md w-full space-y-6">
       <div class="text-center space-y-2">
-        <div class="w-16 h-16 rounded-2xl bg-indigo-600/20 flex items-center justify-center mx-auto mb-4">
-          <svg class="w-8 h-8 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div class="w-16 h-16 rounded-2xl bg-accent-600/20 flex items-center justify-center mx-auto mb-4">
+          <svg class="w-8 h-8 text-accent-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
@@ -42,7 +42,7 @@
           </span>
           <span
             class="text-xs px-2 py-0.5 rounded-full font-medium"
-            :class="invite.role === 'leader' ? 'bg-yellow-500/15 text-yellow-400' : 'bg-indigo-500/15 text-indigo-400'"
+            :class="invite.role === 'leader' ? 'bg-yellow-500/15 text-yellow-400' : 'bg-accent-500/15 text-accent-400'"
           >
             {{ invite.role === 'leader' ? 'Líder' : 'Membro' }}
           </span>
@@ -53,7 +53,7 @@
         <p class="text-sm text-dark-400 text-center">Faça login ou crie uma conta para entrar no projeto automaticamente.</p>
         <router-link
           :to="`/login?redirect=${encodeURIComponent(fullPath)}`"
-          class="block w-full py-2.5 text-center bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl transition-colors"
+          class="block w-full py-2.5 text-center bg-accent-600 hover:bg-accent-700 text-white text-sm font-semibold rounded-xl transition-colors"
         >
           Fazer login
         </router-link>
@@ -81,7 +81,7 @@
       </p>
       <router-link
         :to="`/projects/${joinedProjectId}`"
-        class="inline-block px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl transition-colors"
+        class="inline-block px-6 py-2.5 bg-accent-600 hover:bg-accent-700 text-white text-sm font-semibold rounded-xl transition-colors"
       >
         Abrir projeto
       </router-link>

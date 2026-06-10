@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="space-y-5 animate-fade-in">
     <div class="flex items-center justify-between">
       <div>
@@ -22,12 +22,12 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
         <input v-model="searchQuery" placeholder="Buscar projetos..."
-          class="w-full text-sm bg-dark-800 border border-dark-700 rounded-xl pl-8 pr-3 py-2 text-dark-200 placeholder-dark-600 focus:outline-none focus:border-indigo-500" />
+          class="w-full text-sm bg-dark-800 border border-dark-700 rounded-xl pl-8 pr-3 py-2 text-dark-200 placeholder-dark-600 focus:outline-none focus:border-accent-500" />
       </div>
 
       <!-- Status filter -->
       <select v-model="filterStatus"
-        class="text-sm bg-dark-800 border border-dark-700 rounded-xl px-3 py-2 text-dark-300 focus:outline-none focus:border-indigo-500">
+        class="text-sm bg-dark-800 border border-dark-700 rounded-xl px-3 py-2 text-dark-300 focus:outline-none focus:border-accent-500">
         <option value="">Todos os status</option>
         <option value="active">Ativo</option>
         <option value="planning">Planejamento</option>
@@ -38,7 +38,7 @@
 
       <!-- Sort -->
       <select v-model="sortBy"
-        class="text-sm bg-dark-800 border border-dark-700 rounded-xl px-3 py-2 text-dark-300 focus:outline-none focus:border-indigo-500">
+        class="text-sm bg-dark-800 border border-dark-700 rounded-xl px-3 py-2 text-dark-300 focus:outline-none focus:border-accent-500">
         <option value="name">Nome (A-Z)</option>
         <option value="progress_desc">Progresso ↓</option>
         <option value="progress_asc">Progresso ↑</option>

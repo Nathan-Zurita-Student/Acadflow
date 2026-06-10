@@ -4,6 +4,10 @@ export default {
     './resources/views/**/*.blade.php',
     './resources/js/**/*.{vue,js,ts,jsx,tsx}',
   ],
+  safelist: [
+    { pattern: /^(bg|text|border|ring|fill|from|to)-(accent)-(300|400|500|600|700)$/, variants: ['hover', 'focus', 'focus-within', 'group-hover'] },
+    { pattern: /^(bg|text|border|ring)-(accent)-(300|400|500|600|700)\/(10|20|30)$/, variants: ['hover'] },
+  ],
   theme: {
     extend: {
       colors: {
@@ -22,6 +26,15 @@ export default {
           800: 'rgb(var(--d-800) / <alpha-value>)',
           900: 'rgb(var(--d-900) / <alpha-value>)',
           950: 'rgb(var(--d-950) / <alpha-value>)',
+        },
+        // Per-theme accent: buttons, active nav, focus rings, links.
+        // Each theme defines --accent-300..700 in app.css.
+        accent: {
+          300: 'rgb(var(--accent-300) / <alpha-value>)',
+          400: 'rgb(var(--accent-400) / <alpha-value>)',
+          500: 'rgb(var(--accent-500) / <alpha-value>)',
+          600: 'rgb(var(--accent-600) / <alpha-value>)',
+          700: 'rgb(var(--accent-700) / <alpha-value>)',
         },
       },
       fontFamily: {

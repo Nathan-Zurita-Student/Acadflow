@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="space-y-6 animate-fade-in">
     <!-- Header -->
     <div class="flex items-center justify-between">
@@ -41,7 +41,7 @@
       <div class="card">
         <div class="flex items-center justify-between mb-4">
           <h3 class="text-sm font-semibold text-white">Próximas Entregas</h3>
-          <RouterLink to="/my-tasks" class="text-xs text-indigo-400 hover:text-indigo-300">Ver todas →</RouterLink>
+          <RouterLink to="/my-tasks" class="text-xs text-accent-400 hover:text-accent-300">Ver todas →</RouterLink>
         </div>
         <div v-if="loading" class="space-y-2">
           <div v-for="i in 4" :key="i" class="h-10 animate-pulse bg-dark-700/30 rounded-lg" />
@@ -72,7 +72,7 @@
       <div class="lg:col-span-2 card">
         <div class="flex items-center justify-between mb-4">
           <h3 class="text-sm font-semibold text-white">Projetos</h3>
-          <RouterLink to="/projects" class="text-xs text-indigo-400 hover:text-indigo-300">Ver todos →</RouterLink>
+          <RouterLink to="/projects" class="text-xs text-accent-400 hover:text-accent-300">Ver todos →</RouterLink>
         </div>
         <div v-if="loading" class="space-y-2">
           <div v-for="i in 4" :key="i" class="h-12 animate-pulse bg-dark-700/30 rounded-lg" />
@@ -94,7 +94,7 @@
               </div>
               <div class="h-1.5 bg-dark-700 rounded-full overflow-hidden">
                 <div class="h-full rounded-full transition-all"
-                  :class="p.progress >= 75 ? 'bg-emerald-500' : p.progress >= 40 ? 'bg-indigo-500' : 'bg-amber-500'"
+                  :class="p.progress >= 75 ? 'bg-emerald-500' : p.progress >= 40 ? 'bg-accent-500' : 'bg-amber-500'"
                   :style="{ width: p.progress + '%' }" />
               </div>
             </div>
@@ -102,7 +102,7 @@
           </div>
         </div>
         <div v-else class="py-8 text-center">
-          <p class="text-dark-500 text-sm">Nenhum projeto. <RouterLink to="/projects" class="text-indigo-400">Criar projeto</RouterLink></p>
+          <p class="text-dark-500 text-sm">Nenhum projeto. <RouterLink to="/projects" class="text-accent-400">Criar projeto</RouterLink></p>
         </div>
       </div>
 

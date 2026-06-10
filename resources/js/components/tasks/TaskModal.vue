@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <Teleport to="body">
     <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in"
       @click.self="$emit('close')">
@@ -22,7 +22,7 @@
               activeTab === tab.id ? 'bg-dark-700 text-white font-medium' : 'text-dark-400 hover:text-dark-200']">
             {{ tab.label }}
             <span v-if="tab.id === 'files' && attachments.length"
-              class="text-xs bg-indigo-600/30 text-indigo-400 px-1.5 py-0.5 rounded-full">
+              class="text-xs bg-accent-600/30 text-accent-400 px-1.5 py-0.5 rounded-full">
               {{ attachments.length }}
             </span>
             <span v-if="tab.id === 'comments' && (detail?.comments?.length ?? 0) > 0"
@@ -98,9 +98,9 @@
               <div v-if="selectedIds.length" class="flex flex-wrap gap-2 mb-2">
                 <div
                   v-for="m in selectedMembers" :key="m.id"
-                  class="flex items-center gap-1.5 pl-1.5 pr-2 py-1 rounded-full text-xs font-medium bg-indigo-600/15 border border-indigo-500/25 text-indigo-300"
+                  class="flex items-center gap-1.5 pl-1.5 pr-2 py-1 rounded-full text-xs font-medium bg-accent-600/15 border border-accent-500/25 text-accent-300"
                 >
-                  <span class="w-5 h-5 rounded-full bg-indigo-600/40 flex items-center justify-center text-xs font-bold">
+                  <span class="w-5 h-5 rounded-full bg-accent-600/40 flex items-center justify-center text-xs font-bold">
                     {{ m.name[0] }}
                   </span>
                   {{ m.name.split(' ')[0] }}
@@ -145,7 +145,7 @@
                     <input
                       v-model="memberSearch"
                       placeholder="Buscar membro..."
-                      class="w-full text-sm bg-dark-900 border border-dark-700 rounded-lg px-3 py-2 text-dark-200 placeholder-dark-600 focus:outline-none focus:border-indigo-500"
+                      class="w-full text-sm bg-dark-900 border border-dark-700 rounded-lg px-3 py-2 text-dark-200 placeholder-dark-600 focus:outline-none focus:border-accent-500"
                       @click.stop
                     />
                   </div>
@@ -161,7 +161,7 @@
                       <div
                         class="w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 transition-colors"
                         :class="isSelected(m.id)
-                          ? 'bg-indigo-600 border-indigo-600'
+                          ? 'bg-accent-600 border-accent-600'
                           : 'border-dark-600 bg-dark-800'"
                       >
                         <svg v-if="isSelected(m.id)" class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
@@ -170,7 +170,7 @@
                       </div>
 
                       <!-- Avatar -->
-                      <div class="w-7 h-7 rounded-full bg-indigo-600/30 flex items-center justify-center text-xs font-bold text-indigo-300 flex-shrink-0">
+                      <div class="w-7 h-7 rounded-full bg-accent-600/30 flex items-center justify-center text-xs font-bold text-accent-300 flex-shrink-0">
                         {{ m.name[0] }}
                       </div>
 
@@ -197,7 +197,7 @@
                     <span class="text-xs text-dark-500">{{ selectedIds.length }} selecionado{{ selectedIds.length !== 1 ? 's' : '' }}</span>
                     <button
                       @click="pickerOpen = false"
-                      class="text-xs text-indigo-400 hover:text-indigo-300 font-medium px-2 py-1 rounded-lg hover:bg-indigo-500/10 transition-colors"
+                      class="text-xs text-accent-400 hover:text-accent-300 font-medium px-2 py-1 rounded-lg hover:bg-accent-500/10 transition-colors"
                     >Confirmar</button>
                   </div>
                 </div>
@@ -231,7 +231,7 @@
                 class="flex items-center gap-3 p-2.5 rounded-lg hover:bg-dark-700/50 group">
                 <input type="checkbox" :checked="item.completed"
                   @change="toggleChecklist(item.id, !item.completed)"
-                  class="w-4 h-4 rounded border-dark-600 bg-dark-700 text-indigo-500 focus:ring-indigo-500" />
+                  class="w-4 h-4 rounded border-dark-600 bg-dark-700 text-accent-500 focus:ring-accent-500" />
                 <span :class="['flex-1 text-sm', item.completed ? 'line-through text-dark-500' : 'text-dark-200']">
                   {{ item.title }}
                 </span>
@@ -248,76 +248,130 @@
             </div>
           </div>
 
-          <!-- ── Comments tab ───────────────────────────── -->
-          <div v-if="activeTab === 'comments'" class="flex flex-col" style="height: 420px;">
-            <!-- Scrollable message list -->
-            <div ref="commentsContainer" class="flex-1 overflow-y-auto p-4 space-y-3 min-h-0">
-              <template v-for="c in detail?.comments ?? []" :key="c.id">
-                <!-- Own message — right -->
-                <div v-if="c.user.id === currentUserId" class="flex justify-end items-end gap-2">
-                  <div class="max-w-[72%]">
-                    <div class="bg-indigo-600 text-white px-3.5 py-2 rounded-2xl rounded-br-sm shadow-sm">
-                      <p class="text-sm leading-relaxed whitespace-pre-wrap">{{ c.content }}</p>
-                    </div>
-                    <time class="text-[10px] text-dark-500 mt-0.5 block text-right pr-1">{{ timeAgo(c.created_at) }}</time>
-                  </div>
-                  <div class="w-7 h-7 rounded-full bg-indigo-500/30 flex items-center justify-center text-xs font-bold text-indigo-300 flex-shrink-0">
-                    {{ c.user.name[0] }}
-                  </div>
-                </div>
+          <!-- ── Comments tab (WhatsApp-style) ───────────── -->
+          <div v-if="activeTab === 'comments'" class="flex flex-col" style="height: 460px;">
 
-                <!-- Other user — left -->
-                <div v-else class="flex items-end gap-2">
-                  <div
-                    class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
-                    :style="{ background: userBubbleBg(c.user.id), color: userNameColor(c.user.id) }"
-                  >
-                    {{ c.user.name[0] }}
-                  </div>
-                  <div class="max-w-[72%]">
-                    <p class="text-[10px] font-semibold mb-0.5 pl-1" :style="{ color: userNameColor(c.user.id) }">
-                      {{ c.user.name.split(' ')[0] }}
-                    </p>
-                    <div class="bg-dark-700 text-dark-200 px-3.5 py-2 rounded-2xl rounded-bl-sm shadow-sm">
-                      <p class="text-sm leading-relaxed whitespace-pre-wrap">{{ c.content }}</p>
-                    </div>
-                    <time class="text-[10px] text-dark-500 mt-0.5 block pl-1">{{ timeAgo(c.created_at) }}</time>
-                  </div>
-                </div>
-              </template>
+            <!-- Messages -->
+            <div ref="commentsContainer" class="flex-1 overflow-y-auto min-h-0 px-3 py-3 space-y-0.5 bg-dark-900/30">
 
-              <div v-if="!detail?.comments?.length" class="flex flex-col items-center gap-2 py-10 text-dark-600">
-                <svg class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+              <div v-if="!groupedComments.length" class="flex flex-col items-center gap-2 py-14 text-dark-600">
+                <svg class="w-9 h-9" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                  <path stroke-linecap="round" stroke-linejoin="round"
                     d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                 </svg>
-                <p class="text-sm">Sem comentários ainda. Seja o primeiro!</p>
+                <p class="text-sm">Nenhuma mensagem ainda.</p>
               </div>
+
+              <template v-for="item in groupedComments" :key="item.comment.id">
+
+                <!-- Date separator -->
+                <div v-if="item.dateSeparator" class="flex items-center gap-2 py-2 my-1">
+                  <div class="flex-1 h-px bg-dark-700/50" />
+                  <span class="text-[10px] text-dark-500 bg-dark-800 border border-dark-700 px-2.5 py-0.5 rounded-full">
+                    {{ item.dateSeparator }}
+                  </span>
+                  <div class="flex-1 h-px bg-dark-700/50" />
+                </div>
+
+                <!-- Own message (right) -->
+                <div v-if="item.isOwn" class="flex justify-end items-end gap-1.5"
+                  :class="item.isFirstInGroup ? 'mt-3' : 'mt-0.5'">
+                  <div class="max-w-[78%]">
+                    <div class="px-3.5 py-2 shadow-sm"
+                      :class="[
+                        'bg-accent-600 text-white',
+                        item.isFirstInGroup ? 'rounded-2xl rounded-br-sm' : 'rounded-2xl',
+                        item.pending ? 'opacity-70' : '',
+                      ]">
+                      <p class="text-sm leading-relaxed break-words" v-html="renderMd(item.comment.content)" />
+                      <div class="flex items-center justify-end gap-1 mt-0.5">
+                        <time class="text-[10px] text-white/55">{{ msgTime(item.comment.created_at) }}</time>
+                        <svg v-if="item.pending" class="w-3 h-3 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                        <svg v-else class="w-3.5 h-3.5 text-white/60" viewBox="0 0 16 11" fill="currentColor">
+                          <path d="M11.071.653a.75.75 0 0 1 .025 1.06l-6.5 7a.75.75 0 0 1-1.085.008l-3-3.2a.75.75 0 0 1 1.078-1.042l2.445 2.608 5.977-6.409a.75.75 0 0 1 1.06-.025zM14.621.653a.75.75 0 0 1 .025 1.06l-6.5 7a.75.75 0 0 1-1.083.01L5.96 7.19a.75.75 0 1 1 1.08-1.04l.606.628 5.915-6.1a.75.75 0 0 1 1.06-.025z"/>
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Other user message (left) -->
+                <div v-else class="flex items-end gap-1.5"
+                  :class="item.isFirstInGroup ? 'mt-3' : 'mt-0.5'">
+                  <!-- Avatar placeholder to keep alignment -->
+                  <div class="w-7 flex-shrink-0">
+                    <div v-if="item.isLastInGroup"
+                      class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold"
+                      :style="{ background: userBubbleBg(item.comment.user.id), color: userNameColor(item.comment.user.id) }">
+                      {{ item.comment.user.name[0].toUpperCase() }}
+                    </div>
+                  </div>
+                  <div class="max-w-[78%]">
+                    <p v-if="item.isFirstInGroup" class="text-[11px] font-semibold mb-0.5 pl-1"
+                      :style="{ color: userNameColor(item.comment.user.id) }">
+                      {{ item.comment.user.name.split(' ')[0] }}
+                    </p>
+                    <div class="px-3.5 py-2 shadow-sm border border-dark-600/20"
+                      :class="[
+                        'bg-dark-700 text-dark-100',
+                        item.isFirstInGroup ? 'rounded-2xl rounded-bl-sm' : 'rounded-2xl',
+                      ]">
+                      <p class="text-sm leading-relaxed break-words" v-html="renderMd(item.comment.content)" />
+                      <time class="text-[10px] text-dark-500 mt-0.5 block text-right">{{ msgTime(item.comment.created_at) }}</time>
+                    </div>
+                  </div>
+                </div>
+
+              </template>
             </div>
 
-            <!-- Message input -->
-            <div class="border-t border-dark-700 p-3 flex-shrink-0">
-              <div class="flex gap-2 items-end">
+            <!-- Mention dropdown (above input) -->
+            <div v-if="mentionOpen && filteredMentions.length"
+              class="border-t border-dark-700 bg-dark-800 max-h-36 overflow-y-auto">
+              <button v-for="m in filteredMentions" :key="m.id"
+                type="button"
+                @mousedown.prevent="selectMention(m)"
+                class="w-full flex items-center gap-2.5 px-4 py-2.5 hover:bg-dark-700 transition-colors text-left">
+                <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                  :style="{ background: userBubbleBg(m.id), color: userNameColor(m.id) }">
+                  {{ m.name[0].toUpperCase() }}
+                </div>
+                <div>
+                  <p class="text-sm font-medium text-dark-200">{{ m.name }}</p>
+                  <p class="text-[11px] text-dark-500">{{ m.email }}</p>
+                </div>
+              </button>
+            </div>
+
+            <!-- Input bar -->
+            <div class="border-t border-dark-700 bg-dark-800 flex-shrink-0">
+              <div class="flex items-end gap-2 px-3 py-2.5">
                 <textarea
+                  ref="commentInputRef"
                   v-model="newComment"
                   :rows="commentRows"
-                  class="input resize-none flex-1 py-2"
-                  placeholder="Escreva um comentário..."
+                  class="input resize-none flex-1 py-2 text-sm min-h-0"
+                  placeholder="Mensagem... (@mencionar, **negrito**, *itálico*, `código`)"
                   @keydown.enter.exact.prevent="addComment"
                   @keydown.shift.enter.exact="appendNewline"
-                  @input="adjustCommentRows"
+                  @keydown.escape="mentionOpen = false"
+                  @input="onCommentInput"
                 />
-                <button
-                  @click="addComment"
-                  :disabled="!newComment.trim()"
-                  class="btn-primary self-end flex-shrink-0 px-3"
-                >
-                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                <button @click="addComment"
+                  :disabled="!newComment.trim() || sending"
+                  class="btn-primary flex-shrink-0 w-9 h-9 p-0 flex items-center justify-center rounded-full self-end disabled:opacity-40">
+                  <svg v-if="sending" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                  </svg>
+                  <svg v-else class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
                   </svg>
                 </button>
               </div>
-              <p class="text-[10px] text-dark-600 mt-1 pl-0.5">Enter envia · Shift+Enter nova linha</p>
+              <p class="text-[10px] text-dark-600 px-3 pb-2">Enter envia · Shift+Enter nova linha · @ para mencionar</p>
             </div>
           </div>
 
@@ -325,7 +379,7 @@
           <div v-if="activeTab === 'files'" class="p-6 space-y-4">
             <div
               class="border-2 border-dashed rounded-xl p-6 text-center transition-colors cursor-pointer"
-              :class="isDraggingFile ? 'border-indigo-500 bg-indigo-500/5' : 'border-dark-600 hover:border-dark-500 hover:bg-dark-700/30'"
+              :class="isDraggingFile ? 'border-accent-500 bg-accent-500/5' : 'border-dark-600 hover:border-dark-500 hover:bg-dark-700/30'"
               @dragover.prevent="isDraggingFile = true"
               @dragleave.self="isDraggingFile = false"
               @drop.prevent="onFileDrop"
@@ -337,14 +391,14 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                     d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                 </svg>
-                <p class="text-sm text-dark-400">Arraste arquivos aqui ou <span class="text-indigo-400 font-medium">clique para selecionar</span></p>
+                <p class="text-sm text-dark-400">Arraste arquivos aqui ou <span class="text-accent-400 font-medium">clique para selecionar</span></p>
                 <p class="text-xs text-dark-600 mt-1">Imagens, PDFs, documentos — qualquer formato, até 50MB</p>
               </div>
               <div v-else class="flex flex-col items-center gap-2">
-                <div class="w-6 h-6 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" />
+                <div class="w-6 h-6 border-2 border-accent-500/30 border-t-accent-500 rounded-full animate-spin" />
                 <p class="text-sm text-dark-400">Enviando {{ uploadQueue.length > 1 ? uploadQueue.length + ' arquivos' : 'arquivo' }}...</p>
                 <div class="w-48 h-1.5 bg-dark-700 rounded-full overflow-hidden">
-                  <div class="h-full bg-indigo-500 rounded-full transition-all" :style="{ width: uploadProgress + '%' }" />
+                  <div class="h-full bg-accent-500 rounded-full transition-all" :style="{ width: uploadProgress + '%' }" />
                 </div>
               </div>
             </div>
@@ -445,10 +499,14 @@ const duplicating  = ref(false)
 const error        = ref('')
 const activeTab    = ref('form')
 const detail       = ref<Task | null>(null)
-const newComment   = ref('')
-const commentRows  = ref(1)
-const newCheckItem = ref('')
+const newComment        = ref('')
+const commentRows       = ref(1)
+const sending           = ref(false)
+const newCheckItem      = ref('')
 const commentsContainer = ref<HTMLElement | null>(null)
+const commentInputRef   = ref<HTMLTextAreaElement | null>(null)
+const mentionOpen       = ref(false)
+const mentionQuery      = ref('')
 let commentsPollInterval: ReturnType<typeof setInterval> | null = null
 
 // ── member picker ─────────────────────────────────────
@@ -508,6 +566,76 @@ const tabs = [
   { id: 'pomodoro',  label: '🍅 Pomodoro' },
 ]
 
+// ── chat helpers ──────────────────────────────────────
+function renderMd(text: string): string {
+  const e = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+  return e
+    .replace(/\*\*(.+?)\*\*/gs, '<strong>$1</strong>')
+    .replace(/\*([^*\n]+?)\*/g, '<em>$1</em>')
+    .replace(/`([^`\n]+?)`/g, '<code class="bg-black/25 px-1 rounded text-xs font-mono">$1</code>')
+    .replace(/~~(.+?)~~/gs, '<del class="opacity-60">$1</del>')
+    .replace(/@([\wÀ-ſ]+)/g, '<span class="font-semibold text-accent-300">@$1</span>')
+    .replace(/\n/g, '<br>')
+}
+
+function msgTime(dateStr: string): string {
+  return new Date(dateStr).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+}
+
+function formatDateSep(dateStr: string): string {
+  const d = new Date(dateStr)
+  const today = new Date(); today.setHours(0,0,0,0)
+  const yest  = new Date(today); yest.setDate(yest.getDate()-1)
+  d.setHours(0,0,0,0)
+  if (d.getTime() === today.getTime()) return 'Hoje'
+  if (d.getTime() === yest.getTime())  return 'Ontem'
+  return new Date(dateStr).toLocaleDateString('pt-BR', { day: 'numeric', month: 'long' })
+}
+
+const groupedComments = computed(() => {
+  const comments: any[] = detail.value?.comments ?? []
+  return comments.map((c, i) => {
+    const prev = comments[i - 1]
+    const next = comments[i + 1]
+    const isOwn = c.user?.id === currentUserId.value
+    const prevDateStr = prev ? new Date(prev.created_at).toDateString() : null
+    const currDateStr = new Date(c.created_at).toDateString()
+    const dateSeparator = prevDateStr !== currDateStr ? formatDateSep(c.created_at) : null
+    const closeEnough = (a: any, b: any) =>
+      a?.user?.id === b?.user?.id &&
+      Math.abs(new Date(b.created_at).getTime() - new Date(a.created_at).getTime()) < 5 * 60 * 1000
+    const isFirstInGroup = !prev || !!dateSeparator || !closeEnough(prev, c)
+    const isLastInGroup  = !next || new Date(next.created_at).toDateString() !== currDateStr || !closeEnough(c, next)
+    return { comment: c, isOwn, dateSeparator, isFirstInGroup, isLastInGroup, pending: !!c.pending }
+  })
+})
+
+const filteredMentions = computed(() => {
+  if (!mentionOpen.value) return []
+  const q = mentionQuery.value.toLowerCase()
+  return projectMembers.value
+    .filter(m => !q || m.name.toLowerCase().includes(q))
+    .slice(0, 5)
+})
+
+function onCommentInput() {
+  adjustCommentRows()
+  const match = newComment.value.match(/@([\wÀ-ſ]*)$/)
+  if (match) {
+    mentionQuery.value = match[1].toLowerCase()
+    mentionOpen.value = true
+  } else {
+    mentionOpen.value = false
+  }
+}
+
+function selectMention(member: any) {
+  const first = member.name.split(' ')[0]
+  newComment.value = newComment.value.replace(/@[\wÀ-ſ]*$/, `@${first} `)
+  mentionOpen.value = false
+  nextTick(() => commentInputRef.value?.focus())
+}
+
 const completedChecklistRatio = computed(() => {
   const items = detail.value?.checklists ?? []
   if (!items.length) return ''
@@ -524,9 +652,11 @@ const form = ref({
 })
 
 async function refreshComments() {
-  if (!props.task) return
-  const res = await tasksApi.get(props.projectId, props.task.id)
-  if (detail.value) detail.value.comments = res.data.comments ?? []
+  if (!props.task || sending.value) return
+  try {
+    const res = await tasksApi.get(props.projectId, props.task.id)
+    if (detail.value) detail.value.comments = res.data.comments ?? []
+  } catch {}
 }
 
 function startCommentsPolling() {
@@ -633,12 +763,37 @@ async function deleteChecklist(id: number) {
 
 // ── comments ──────────────────────────────────────────
 async function addComment() {
-  if (!newComment.value.trim() || !props.task) return
-  const res = await tasksApi.addComment(props.projectId, props.task.id, newComment.value)
-  detail.value?.comments?.push(res.data)
+  const text = newComment.value.trim()
+  if (!text || !props.task || sending.value) return
+  mentionOpen.value = false
   newComment.value = ''
   commentRows.value = 1
+  sending.value = true
+
+  // Optimistic update — message appears instantly
+  const tempId = `pending-${Date.now()}`
+  const optimistic: any = {
+    id: tempId,
+    content: text,
+    user: { id: currentUserId.value, name: authStore.user?.name ?? 'Você' },
+    created_at: new Date().toISOString(),
+    pending: true,
+  }
+  if (!detail.value!.comments) detail.value!.comments = []
+  detail.value!.comments.push(optimistic)
   nextTick(() => scrollCommentsToBottom())
+
+  try {
+    const res = await tasksApi.addComment(props.projectId, props.task.id, text)
+    const idx = detail.value!.comments.findIndex((c: any) => c.id === tempId)
+    if (idx !== -1) detail.value!.comments.splice(idx, 1, res.data)
+  } catch {
+    newComment.value = text
+    commentRows.value = Math.min(text.split('\n').length, 4)
+    detail.value!.comments = detail.value!.comments.filter((c: any) => c.id !== tempId)
+  } finally {
+    sending.value = false
+  }
 }
 
 function appendNewline() {

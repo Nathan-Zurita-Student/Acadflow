@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="relative" ref="containerRef">
     <!-- Botão sino -->
     <button
@@ -35,7 +35,7 @@
           <button
             v-if="store.hasUnread"
             @click="store.markAllRead()"
-            class="text-xs text-indigo-400 hover:text-indigo-300 transition-colors"
+            class="text-xs text-accent-400 hover:text-accent-300 transition-colors"
           >Marcar todas como lidas</button>
         </div>
 
@@ -53,7 +53,7 @@
             v-for="n in store.items" :key="n.id"
             @click="handleClick(n)"
             class="flex items-start gap-3 px-4 py-3 hover:bg-dark-700/60 cursor-pointer transition-colors border-b border-dark-700/40 last:border-0"
-            :class="{ 'bg-indigo-500/5': !n.read_at }"
+            :class="{ 'bg-accent-500/5': !n.read_at }"
           >
             <!-- Ícone por tipo -->
             <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-base mt-0.5"
@@ -65,7 +65,7 @@
               <p class="text-xs text-dark-400 mt-0.5 leading-relaxed line-clamp-2">{{ n.message }}</p>
               <p class="text-[10px] text-dark-600 mt-1">{{ timeAgo(n.created_at) }}</p>
             </div>
-            <div v-if="!n.read_at" class="w-2 h-2 rounded-full bg-indigo-500 flex-shrink-0 mt-1.5" />
+            <div v-if="!n.read_at" class="w-2 h-2 rounded-full bg-accent-500 flex-shrink-0 mt-1.5" />
           </div>
         </div>
       </div>
@@ -117,7 +117,7 @@ function iconBg(type: string) {
   if (type === 'task_comment') return 'bg-blue-500/15'
   if (type === 'file_uploaded') return 'bg-purple-500/15'
   if (type === 'meeting_scheduled') return 'bg-teal-500/15'
-  return 'bg-indigo-500/15'
+  return 'bg-accent-500/15'
 }
 
 function timeAgo(date: string) {

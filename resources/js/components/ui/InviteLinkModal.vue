@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <Teleport to="body">
     <div
       class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
@@ -25,7 +25,7 @@
                 @click="selectedRole = opt.value"
                 class="flex-1 py-2.5 px-4 rounded-xl text-sm font-medium border transition-all"
                 :class="selectedRole === opt.value
-                  ? 'bg-indigo-600/20 border-indigo-500 text-indigo-300'
+                  ? 'bg-accent-600/20 border-accent-500 text-accent-300'
                   : 'bg-dark-900 border-dark-700 text-dark-400 hover:border-dark-500'"
               >{{ opt.label }}</button>
             </div>
@@ -41,7 +41,7 @@
           <button
             @click="generate"
             :disabled="loading"
-            class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-xl text-sm font-semibold transition-colors"
+            class="w-full py-2.5 bg-accent-600 hover:bg-accent-700 disabled:opacity-50 text-white rounded-xl text-sm font-semibold transition-colors"
           >
             {{ loading ? 'Gerando...' : 'Gerar link' }}
           </button>
@@ -57,7 +57,7 @@
               <button
                 @click="copyLink"
                 class="flex-shrink-0 px-3 py-1 text-xs font-semibold rounded-lg transition-colors"
-                :class="copied ? 'bg-emerald-600/20 text-emerald-400' : 'bg-indigo-600/20 text-indigo-400 hover:bg-indigo-600/30'"
+                :class="copied ? 'bg-emerald-600/20 text-emerald-400' : 'bg-accent-600/20 text-accent-400 hover:bg-accent-600/30'"
               >
                 {{ copied ? 'Copiado!' : 'Copiar' }}
               </button>

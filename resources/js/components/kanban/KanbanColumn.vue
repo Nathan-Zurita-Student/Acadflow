@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="flex-shrink-0 w-72 flex flex-col">
     <!-- Column header -->
     <div class="flex items-center justify-between mb-3 px-1">
@@ -23,7 +23,7 @@
     <!-- Drop zone -->
     <div
       class="flex-1 bg-dark-900/50 border border-dark-700/60 rounded-xl p-2 space-y-2 transition-colors"
-      :class="{ 'border-indigo-500/50 bg-indigo-500/5': isDraggingOver }"
+      :class="{ 'border-accent-500/50 bg-accent-500/5': isDraggingOver }"
       @dragover.prevent="isDraggingOver = true"
       @dragleave.self="isDraggingOver = false"
       @drop.prevent="onDrop"

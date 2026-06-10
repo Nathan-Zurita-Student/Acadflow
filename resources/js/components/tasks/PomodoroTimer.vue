@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="p-6 space-y-6">
     <!-- Cycle indicator -->
     <div class="flex justify-center gap-1.5">
@@ -6,7 +6,7 @@
         v-for="i in 4" :key="i"
         class="w-2.5 h-2.5 rounded-full transition-all"
         :class="i <= completedCycles % 4
-          ? 'bg-indigo-500 scale-110'
+          ? 'bg-accent-500 scale-110'
           : 'bg-dark-700'"
       />
     </div>

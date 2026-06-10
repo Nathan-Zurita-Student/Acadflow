@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="relative">
     <!-- Sidebar expandida: exibe os swatches inline -->
     <template v-if="!collapsed">
@@ -13,7 +13,7 @@
             class="w-6 h-6 rounded-full border-2 transition-all duration-150 hover:scale-110 focus:outline-none"
             :style="{ background: t.preview }"
             :class="themeStore.current === t.name
-              ? 'border-indigo-400 scale-110 shadow-lg'
+              ? 'border-accent-400 scale-110 shadow-lg'
               : 'border-dark-600 hover:border-dark-400'"
           />
         </div>
@@ -55,7 +55,7 @@
               >
                 <span class="w-4 h-4 rounded-full border-2 flex-shrink-0"
                   :style="{ background: t.preview }"
-                  :class="themeStore.current === t.name ? 'border-indigo-400' : 'border-dark-600'" />
+                  :class="themeStore.current === t.name ? 'border-accent-400' : 'border-dark-600'" />
                 <span class="text-xs" :class="themeStore.current === t.name ? 'text-dark-100 font-medium' : 'text-dark-400'">
                   {{ t.label }}
                 </span>

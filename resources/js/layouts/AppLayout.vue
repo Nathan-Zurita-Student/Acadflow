@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="flex h-screen overflow-hidden bg-dark-950">
     <!-- Sidebar -->
     <aside
@@ -30,7 +30,7 @@
         <NavItem to="/my-tasks" icon="task" :label="sidebarCollapsed ? '' : 'Minhas Tarefas'" :collapsed="sidebarCollapsed">
           <template #badge>
             <span v-if="myTasksCount > 0 && !sidebarCollapsed"
-              class="ml-auto text-[10px] font-bold bg-indigo-600 text-white rounded-full px-1.5 py-0.5 leading-none min-w-[18px] text-center">
+              class="ml-auto text-[10px] font-bold bg-accent-600 text-white rounded-full px-1.5 py-0.5 leading-none min-w-[18px] text-center">
               {{ myTasksCount > 99 ? '99+' : myTasksCount }}
             </span>
           </template>
@@ -61,7 +61,7 @@
           @click="showProfile = true">
           <div class="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
             <img v-if="auth.user?.avatar" :src="auth.user.avatar" class="w-full h-full object-cover" alt="Avatar" />
-            <div v-else class="w-full h-full bg-indigo-600/30 flex items-center justify-center text-indigo-400 text-sm font-semibold">
+            <div v-else class="w-full h-full bg-accent-600/30 flex items-center justify-center text-accent-400 text-sm font-semibold">
               {{ userInitial }}
             </div>
           </div>

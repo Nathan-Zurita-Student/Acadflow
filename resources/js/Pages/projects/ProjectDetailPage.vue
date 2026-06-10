@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="space-y-6 animate-fade-in" v-if="dashboard">
     <!-- Header -->
     <div class="flex items-start justify-between">
@@ -46,7 +46,7 @@
         <p class="text-xs text-dark-400 mb-1">Progresso</p>
         <p class="text-2xl font-bold text-white">{{ dashboard.project.progress }}%</p>
         <div class="h-1.5 bg-dark-700 rounded-full overflow-hidden mt-2">
-          <div class="h-full bg-indigo-500 rounded-full transition-all duration-700"
+          <div class="h-full bg-accent-500 rounded-full transition-all duration-700"
             :style="{ width: dashboard.project.progress + '%' }" />
         </div>
       </div>

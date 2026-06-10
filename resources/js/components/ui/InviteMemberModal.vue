@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <Teleport to="body">
     <div
       class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in"
@@ -33,7 +33,7 @@
                 :class="[
                   'flex items-center gap-2 p-3 rounded-xl border text-sm font-medium transition-all',
                   selectedRole === opt.value
-                    ? 'border-indigo-500 bg-indigo-500/10 text-indigo-400'
+                    ? 'border-accent-500 bg-accent-500/10 text-accent-400'
                     : 'border-dark-700 text-dark-400 hover:border-dark-600 hover:text-dark-300'
                 ]"
               >
@@ -67,7 +67,7 @@
           <div class="space-y-2 min-h-[80px] max-h-64 overflow-y-auto">
 
             <div v-if="searching" class="flex items-center justify-center gap-2 py-8 text-dark-500 text-sm">
-              <span class="w-4 h-4 border-2 border-dark-600 border-t-indigo-500 rounded-full animate-spin" />
+              <span class="w-4 h-4 border-2 border-dark-600 border-t-accent-500 rounded-full animate-spin" />
               Buscando...
             </div>
 
@@ -89,7 +89,7 @@
               :key="user.id"
               class="flex items-center gap-3 p-3 rounded-xl border border-dark-700 hover:border-dark-600 hover:bg-dark-700/30 transition-colors"
             >
-              <div class="w-9 h-9 rounded-full bg-indigo-600/20 flex items-center justify-center text-indigo-400 font-semibold text-sm flex-shrink-0">
+              <div class="w-9 h-9 rounded-full bg-accent-600/20 flex items-center justify-center text-accent-400 font-semibold text-sm flex-shrink-0">
                 {{ user.name[0].toUpperCase() }}
               </div>
               <div class="flex-1 min-w-0">

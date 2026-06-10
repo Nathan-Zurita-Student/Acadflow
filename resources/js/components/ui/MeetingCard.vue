@@ -1,11 +1,11 @@
-<template>
+﻿<template>
   <div class="card group hover:border-dark-600 transition-colors">
     <div class="flex items-start gap-4">
       <!-- Date badge -->
       <div class="flex-shrink-0 w-14 text-center">
-        <div class="bg-indigo-600/20 border border-indigo-500/30 rounded-xl px-2 py-2">
-          <p class="text-[10px] font-semibold text-indigo-400 uppercase">{{ monthAbbr }}</p>
-          <p class="text-2xl font-bold text-indigo-300 leading-none">{{ day }}</p>
+        <div class="bg-accent-600/20 border border-accent-500/30 rounded-xl px-2 py-2">
+          <p class="text-[10px] font-semibold text-accent-400 uppercase">{{ monthAbbr }}</p>
+          <p class="text-2xl font-bold text-accent-300 leading-none">{{ day }}</p>
         </div>
       </div>
 
@@ -54,13 +54,13 @@
           {{ meeting.description }}
         </p>
 
-        <div v-if="meeting.notes" class="mt-3 px-3 py-2 bg-dark-900/60 rounded-lg border-l-2 border-indigo-500/40">
+        <div v-if="meeting.notes" class="mt-3 px-3 py-2 bg-dark-900/60 rounded-lg border-l-2 border-accent-500/40">
           <p class="text-xs font-semibold text-dark-500 mb-1">Ata</p>
           <p class="text-xs text-dark-400 leading-relaxed whitespace-pre-wrap line-clamp-3">{{ meeting.notes }}</p>
         </div>
 
         <div class="flex items-center gap-2 mt-3">
-          <div class="w-5 h-5 rounded-full bg-indigo-600/30 flex items-center justify-center text-[10px] font-bold text-indigo-300">
+          <div class="w-5 h-5 rounded-full bg-accent-600/30 flex items-center justify-center text-[10px] font-bold text-accent-300">
             {{ meeting.creator?.name[0] }}
           </div>
           <span class="text-xs text-dark-600">{{ meeting.creator?.name }}</span>

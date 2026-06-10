@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <Teleport to="body">
     <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in"
       @click.self="$emit('close')">
@@ -19,12 +19,12 @@
           <!-- Avatar -->
           <div class="flex items-center gap-4">
             <div class="relative flex-shrink-0">
-              <div class="w-16 h-16 rounded-full overflow-hidden bg-indigo-600/30 flex items-center justify-center">
+              <div class="w-16 h-16 rounded-full overflow-hidden bg-accent-600/30 flex items-center justify-center">
                 <img v-if="avatarPreview" :src="avatarPreview" class="w-full h-full object-cover" alt="Avatar" />
-                <span v-else class="text-2xl font-bold text-indigo-400">{{ displayInitial }}</span>
+                <span v-else class="text-2xl font-bold text-accent-400">{{ displayInitial }}</span>
               </div>
               <label
-                class="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-indigo-600 flex items-center justify-center cursor-pointer hover:bg-indigo-500 transition-colors">
+                class="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-accent-600 flex items-center justify-center cursor-pointer hover:bg-accent-500 transition-colors">
                 <svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
@@ -80,27 +80,6 @@
             </button>
           </div>
 
-          <!-- Divider -->
-          <div class="border-t border-dark-700 pt-4 mt-2">
-            <p class="text-xs font-semibold text-dark-500 uppercase tracking-wider mb-3">Aparência</p>
-            <div class="grid grid-cols-5 gap-2">
-              <button
-                v-for="t in THEMES"
-                :key="t.name"
-                @click="themeStore.setTheme(t.name)"
-                class="flex flex-col items-center gap-1.5 p-2 rounded-xl border-2 transition-all"
-                :class="themeStore.current === t.name
-                  ? 'border-indigo-500 bg-indigo-500/10'
-                  : 'border-dark-700 hover:border-dark-600'"
-                :title="t.label"
-              >
-                <span class="w-8 h-8 rounded-full border-2 block"
-                  :style="{ background: t.preview }"
-                  :class="themeStore.current === t.name ? 'border-indigo-400' : 'border-dark-600'" />
-                <span class="text-[9px] text-dark-500 leading-tight text-center">{{ t.label }}</span>
-              </button>
-            </div>
-          </div>
         </div>
       </div>
     </div>
@@ -110,12 +89,10 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useAuthStore } from '@/stores/auth'
-import { useThemeStore, THEMES } from '@/stores/theme'
 
 const emit = defineEmits(['close'])
 
 const auth = useAuthStore()
-const themeStore = useThemeStore()
 const saving = ref(false)
 const error = ref('')
 const success = ref(false)

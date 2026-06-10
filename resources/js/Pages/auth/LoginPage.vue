@@ -1,9 +1,9 @@
-<template>
+﻿<template>
   <div class="min-h-screen flex items-center justify-center bg-dark-950 px-4">
     <div class="w-full max-w-md animate-slide-up">
       <!-- Logo -->
       <div class="text-center mb-8">
-        <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-indigo-600 mb-4">
+        <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-accent-600 mb-4">
           <svg class="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
@@ -36,7 +36,7 @@
 
         <p class="mt-4 text-center text-sm text-dark-400">
           Não tem conta?
-          <RouterLink :to="route.query.redirect ? `/register?redirect=${encodeURIComponent(String(route.query.redirect))}` : '/register'" class="text-indigo-400 hover:text-indigo-300 font-medium ml-1">Cadastre-se</RouterLink>
+          <RouterLink :to="route.query.redirect ? `/register?redirect=${encodeURIComponent(String(route.query.redirect))}` : '/register'" class="text-accent-400 hover:text-accent-300 font-medium ml-1">Cadastre-se</RouterLink>
         </p>
       </div>
 

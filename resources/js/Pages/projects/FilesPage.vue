@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="space-y-6 animate-fade-in">
     <div class="flex items-center justify-between">
       <div>
@@ -22,7 +22,7 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
         <input v-model="searchQuery" placeholder="Buscar arquivos..."
-          class="w-full text-xs bg-dark-800 border border-dark-700 rounded-lg pl-7 pr-3 py-1.5 text-dark-200 placeholder-dark-600 focus:outline-none focus:border-indigo-500" />
+          class="w-full text-xs bg-dark-800 border border-dark-700 rounded-lg pl-7 pr-3 py-1.5 text-dark-200 placeholder-dark-600 focus:outline-none focus:border-accent-500" />
       </div>
       <div class="flex items-center gap-1">
         <button
@@ -30,7 +30,7 @@
           @click="filterType = filterType === ft.value ? '' : ft.value"
           :class="['text-xs px-2.5 py-1.5 rounded-lg border transition-colors',
             filterType === ft.value
-              ? 'bg-indigo-500/15 border-indigo-500/30 text-indigo-400'
+              ? 'bg-accent-500/15 border-accent-500/30 text-accent-400'
               : 'border-dark-700 text-dark-400 hover:text-dark-200 hover:border-dark-600']">
           {{ ft.label }}
         </button>
@@ -45,7 +45,7 @@
     <!-- Upload progress -->
     <div v-if="uploading" class="card">
       <div class="flex items-center gap-3">
-        <div class="w-4 h-4 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin flex-shrink-0" />
+        <div class="w-4 h-4 border-2 border-accent-500/30 border-t-accent-500 rounded-full animate-spin flex-shrink-0" />
         <span class="text-sm text-dark-300">Enviando arquivo...</span>
       </div>
     </div>
@@ -139,7 +139,7 @@
           <!-- File picker -->
           <div
             class="border-2 border-dashed rounded-xl p-6 text-center transition-colors cursor-pointer"
-            :class="isDragging ? 'border-indigo-500 bg-indigo-500/5' : 'border-dark-600 hover:border-dark-500'"
+            :class="isDragging ? 'border-accent-500 bg-accent-500/5' : 'border-dark-600 hover:border-dark-500'"
             @dragover.prevent="isDragging = true"
             @dragleave.self="isDragging = false"
             @drop.prevent="onDrop"
@@ -151,7 +151,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                   d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
               </svg>
-              <p class="text-sm text-dark-400">Arraste um arquivo ou <span class="text-indigo-400 font-medium">clique para selecionar</span></p>
+              <p class="text-sm text-dark-400">Arraste um arquivo ou <span class="text-accent-400 font-medium">clique para selecionar</span></p>
               <p class="text-xs text-dark-600 mt-1">Até 50MB</p>
             </div>
             <div v-else class="flex items-center gap-3 text-left">
@@ -298,7 +298,7 @@ function fileExt(name: string) {
 function fileIconBg(mime: string) {
   if (mime.includes('pdf')) return 'bg-red-600/20'
   if (mime.includes('image')) return 'bg-blue-600/20'
-  if (mime.includes('word') || mime.includes('document')) return 'bg-indigo-600/20'
+  if (mime.includes('word') || mime.includes('document')) return 'bg-accent-600/20'
   if (mime.includes('sheet') || mime.includes('excel')) return 'bg-emerald-600/20'
   return 'bg-dark-700'
 }
@@ -306,7 +306,7 @@ function fileIconBg(mime: string) {
 function fileIconColor(mime: string) {
   if (mime.includes('pdf')) return 'text-red-400'
   if (mime.includes('image')) return 'text-blue-400'
-  if (mime.includes('word') || mime.includes('document')) return 'text-indigo-400'
+  if (mime.includes('word') || mime.includes('document')) return 'text-accent-400'
   if (mime.includes('sheet') || mime.includes('excel')) return 'text-emerald-400'
   return 'text-dark-400'
 }

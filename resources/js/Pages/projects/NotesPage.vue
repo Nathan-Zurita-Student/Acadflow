@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="flex gap-0 h-[calc(100vh-112px)] animate-fade-in">
     <!-- Sidebar: notes list -->
     <aside class="w-64 flex-shrink-0 border-r border-dark-700 flex flex-col">
@@ -13,14 +13,14 @@
 
       <div class="flex-1 overflow-y-auto">
         <div v-if="loading" class="flex justify-center py-8">
-          <div class="w-5 h-5 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" />
+          <div class="w-5 h-5 border-2 border-accent-500/30 border-t-accent-500 rounded-full animate-spin" />
         </div>
 
         <div
           v-for="note in notes" :key="note.id"
           @click="select(note)"
           class="px-3 py-3 cursor-pointer border-b border-dark-700/50 hover:bg-dark-700/40 transition-colors"
-          :class="selected?.id === note.id ? 'bg-indigo-600/10 border-l-2 border-l-indigo-500' : ''"
+          :class="selected?.id === note.id ? 'bg-accent-600/10 border-l-2 border-l-accent-500' : ''"
         >
           <p class="text-sm font-medium text-dark-200 truncate">{{ note.title }}</p>
           <p class="text-xs text-dark-600 mt-0.5 line-clamp-2 leading-relaxed">
