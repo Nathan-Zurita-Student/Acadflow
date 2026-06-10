@@ -59,6 +59,22 @@ export const dashboardApi = {
   users:    (q: string) => api.get('/users/search', { params: { q } }),
 }
 
+export const projectInvitationsApi = {
+  send:    (projectId: number, userId: number, role?: string) =>
+    api.post(`/projects/${projectId}/invitations`, { user_id: userId, role }),
+  respond: (invitationId: number, action: 'accept' | 'decline') =>
+    api.post(`/invitations/${invitationId}/respond`, { action }),
+  pending: () =>
+    api.get<Array<{
+      id: number
+      project: { id: number; name: string }
+      role: string
+      invited_by: { id: number; name: string; avatar: string | null }
+      expires_at: string
+      created_at: string
+    }>>('/invitations/pending'),
+}
+
 export const inviteApi = {
   generate: (projectId: number, role: 'member' | 'leader') =>
     api.post<{ token: string; role: string; expires_at: string }>(`/projects/${projectId}/invite`, { role }),

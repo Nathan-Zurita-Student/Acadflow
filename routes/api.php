@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\MeetingController;
 use App\Http\Controllers\Api\NoteController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\ProjectController;
+use App\Http\Controllers\Api\ProjectInvitationController;
 use App\Http\Controllers\Api\TaskChecklistController;
 use App\Http\Controllers\Api\TaskCommentController;
 use App\Http\Controllers\Api\TaskController;
@@ -72,6 +73,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('{project}/tasks/{task}/checklists/{checklistId}', [TaskChecklistController::class, 'destroy'])->name('tasks.checklists.destroy');
 
         Route::post('{project}/invite', [InviteController::class, 'generate'])->name('invite.generate');
+        Route::post('{project}/invitations', [ProjectInvitationController::class, 'store'])->name('invitations.store');
 
         Route::get('{project}/attachments', [AttachmentController::class, 'index'])->name('attachments.index');
         Route::post('{project}/attachments', [AttachmentController::class, 'store'])->name('attachments.store');
@@ -100,4 +102,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     Route::post('invite/{token}/accept', [InviteController::class, 'accept'])->name('invite.accept');
+
+    Route::get('invitations/pending', [ProjectInvitationController::class, 'pending'])->name('invitations.pending');
+    Route::post('invitations/{invitation}/respond', [ProjectInvitationController::class, 'respond'])->name('invitations.respond');
 });

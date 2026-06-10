@@ -42,6 +42,30 @@
                 </button>
               </div>
               <p class="text-xs text-dark-400 mt-0.5 leading-relaxed line-clamp-2">{{ item.message }}</p>
+              <!-- Accept / Decline for project_invitation -->
+              <div v-if="item.type === 'project_invitation' && item.data?.invitation_id" class="flex gap-2 mt-2.5">
+                <button
+                  @click.stop="respondInvite(item, 'accept')"
+                  :disabled="!!item.responding"
+                  class="flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 transition-colors disabled:opacity-50"
+                >
+                  <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                  Aceitar
+                </button>
+                <button
+                  @click.stop="respondInvite(item, 'decline')"
+                  :disabled="!!item.responding"
+                  class="flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-colors disabled:opacity-50"
+                >
+                  <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                  Recusar
+                </button>
+              </div>
+
               <div class="flex items-center gap-1.5 mt-2">
                 <svg class="w-3 h-3 text-dark-600 flex-shrink-0" viewBox="0 0 32 32" fill="none">
                   <path d="M16 6L2 13l14 7 14-7-14-7z" fill="currentColor" fill-opacity="0.9"/>
@@ -69,8 +93,11 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { projectInvitationsApi } from '@/api/projects'
+import { useNotificationsStore } from '@/stores/notifications'
 
 export interface PushPayload {
+  id?: number           // database notification id (for markRead)
   type: string
   title: string
   message: string
@@ -79,11 +106,13 @@ export interface PushPayload {
 
 interface PopupItem {
   id: number
+  notificationId: number | null
   type: string
   title: string
   message: string
   data: Record<string, unknown> | null
   paused: boolean
+  responding: boolean
   startTime: number
   remaining: number
   timer: ReturnType<typeof setTimeout> | null
@@ -92,19 +121,23 @@ interface PopupItem {
 const DURATION = 6000
 const MAX      = 4
 
-const router = useRouter()
-const items  = ref<PopupItem[]>([])
+const router     = useRouter()
+const notifStore = useNotificationsStore()
+const items      = ref<PopupItem[]>([])
 let   nextId = 0
 
 function typeStyle(type: string) {
   const map: Record<string, { icon: string; bg: string; accent: string; bar: string }> = {
-    task_comment:          { icon: '💬', bg: 'bg-blue-500/15',    accent: 'bg-blue-500',    bar: 'bg-blue-500' },
-    task_assigned:         { icon: '📌', bg: 'bg-accent-500/15',  accent: 'bg-accent-500',  bar: 'bg-accent-500' },
-    task_approved:         { icon: '✅', bg: 'bg-emerald-500/15', accent: 'bg-emerald-500', bar: 'bg-emerald-500' },
-    task_rejected:         { icon: '❌', bg: 'bg-red-500/15',     accent: 'bg-red-500',     bar: 'bg-red-500' },
-    file_uploaded:         { icon: '📎', bg: 'bg-purple-500/15',  accent: 'bg-purple-500',  bar: 'bg-purple-500' },
-    project_member_added:  { icon: '🎓', bg: 'bg-amber-500/15',   accent: 'bg-amber-500',   bar: 'bg-amber-500' },
-    meeting_scheduled:     { icon: '📅', bg: 'bg-teal-500/15',    accent: 'bg-teal-500',    bar: 'bg-teal-500' },
+    task_comment:                  { icon: '💬', bg: 'bg-blue-500/15',    accent: 'bg-blue-500',    bar: 'bg-blue-500' },
+    task_assigned:                 { icon: '📌', bg: 'bg-accent-500/15',  accent: 'bg-accent-500',  bar: 'bg-accent-500' },
+    task_approved:                 { icon: '✅', bg: 'bg-emerald-500/15', accent: 'bg-emerald-500', bar: 'bg-emerald-500' },
+    task_rejected:                 { icon: '❌', bg: 'bg-red-500/15',     accent: 'bg-red-500',     bar: 'bg-red-500' },
+    file_uploaded:                 { icon: '📎', bg: 'bg-purple-500/15',  accent: 'bg-purple-500',  bar: 'bg-purple-500' },
+    project_member_added:          { icon: '🎓', bg: 'bg-amber-500/15',   accent: 'bg-amber-500',   bar: 'bg-amber-500' },
+    meeting_scheduled:             { icon: '📅', bg: 'bg-teal-500/15',    accent: 'bg-teal-500',    bar: 'bg-teal-500' },
+    project_invitation:            { icon: '✉️', bg: 'bg-amber-500/15',   accent: 'bg-amber-500',   bar: 'bg-amber-500' },
+    project_invitation_accepted:   { icon: '🎉', bg: 'bg-emerald-500/15', accent: 'bg-emerald-500', bar: 'bg-emerald-500' },
+    project_invitation_declined:   { icon: '😔', bg: 'bg-red-500/15',     accent: 'bg-red-500',     bar: 'bg-red-500' },
   }
   return map[type] ?? { icon: '🔔', bg: 'bg-dark-700', accent: 'bg-accent-500', bar: 'bg-accent-500' }
 }
@@ -119,14 +152,16 @@ function push(payload: PushPayload) {
   const id = ++nextId
   const item: PopupItem = {
     id,
-    type:      payload.type,
-    title:     payload.title,
-    message:   payload.message,
-    data:      payload.data ?? null,
-    paused:    false,
-    startTime: Date.now(),
-    remaining: DURATION,
-    timer:     null,
+    notificationId: payload.id ?? null,
+    type:           payload.type,
+    title:          payload.title,
+    message:        payload.message,
+    data:           payload.data ?? null,
+    paused:         false,
+    responding:     false,
+    startTime:      Date.now(),
+    remaining:      DURATION,
+    timer:          null,
   }
 
   item.timer = setTimeout(() => dismiss(id), DURATION)
@@ -160,10 +195,28 @@ function clearTimers(item: PopupItem) {
 }
 
 function navigate(item: PopupItem) {
+  if (item.type === 'project_invitation') return // handled by action buttons
   dismiss(item.id)
   const d = item.data
   if (d?.task_id && d?.project_id) router.push(`/projects/${d.project_id}/kanban`)
   else if (d?.project_id) router.push(`/projects/${d.project_id}`)
+}
+
+async function respondInvite(item: PopupItem, action: 'accept' | 'decline') {
+  if (!item.data?.invitation_id) return
+  item.responding = true
+  pauseItem(item)
+  try {
+    await projectInvitationsApi.respond(item.data.invitation_id as number, action)
+    if (item.notificationId) notifStore.markRead(item.notificationId)
+    dismiss(item.id)
+    if (action === 'accept' && item.data?.project_id) {
+      router.push(`/projects/${item.data.project_id}`)
+    }
+  } catch {
+    item.responding = false
+    resumeItem(item)
+  }
 }
 
 defineExpose({ push })

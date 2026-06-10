@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="relative" ref="containerRef">
     <!-- Botão sino -->
     <button
@@ -51,9 +51,12 @@
 
           <div
             v-for="n in store.items" :key="n.id"
-            @click="handleClick(n)"
-            class="flex items-start gap-3 px-4 py-3 hover:bg-dark-700/60 cursor-pointer transition-colors border-b border-dark-700/40 last:border-0"
-            :class="{ 'bg-accent-500/5': !n.read_at }"
+            class="flex items-start gap-3 px-4 py-3 border-b border-dark-700/40 last:border-0 transition-colors"
+            :class="[
+              n.type === 'project_invitation' ? 'cursor-default' : 'hover:bg-dark-700/60 cursor-pointer',
+              { 'bg-accent-500/5': !n.read_at }
+            ]"
+            @click="n.type !== 'project_invitation' && handleClick(n)"
           >
             <!-- Ícone por tipo -->
             <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-base mt-0.5"
@@ -63,9 +66,37 @@
             <div class="flex-1 min-w-0">
               <p class="text-xs font-semibold text-dark-100 leading-tight">{{ n.title }}</p>
               <p class="text-xs text-dark-400 mt-0.5 leading-relaxed line-clamp-2">{{ n.message }}</p>
+
+              <!-- Accept / Decline for project invitations -->
+              <div v-if="n.type === 'project_invitation' && !n.read_at && n.data?.invitation_id" class="flex gap-2 mt-2">
+                <button
+                  @click.stop="respondToInvite(n, 'accept')"
+                  :disabled="respondingId === n.id"
+                  class="flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg bg-emerald-500/15 text-emerald-400 hover:bg-emerald-500/25 transition-colors disabled:opacity-50"
+                >
+                  <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                  Aceitar
+                </button>
+                <button
+                  @click.stop="respondToInvite(n, 'decline')"
+                  :disabled="respondingId === n.id"
+                  class="flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg bg-red-500/15 text-red-400 hover:bg-red-500/25 transition-colors disabled:opacity-50"
+                >
+                  <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                  Recusar
+                </button>
+              </div>
+              <p v-else-if="n.type === 'project_invitation' && n.read_at" class="text-[10px] text-dark-600 mt-1 italic">
+                Convite respondido
+              </p>
+
               <p class="text-[10px] text-dark-600 mt-1">{{ timeAgo(n.created_at) }}</p>
             </div>
-            <div v-if="!n.read_at" class="w-2 h-2 rounded-full bg-accent-500 flex-shrink-0 mt-1.5" />
+            <div v-if="!n.read_at && n.type !== 'project_invitation'" class="w-2 h-2 rounded-full bg-accent-500 flex-shrink-0 mt-1.5" />
           </div>
         </div>
       </div>
@@ -81,11 +112,13 @@ import { useNotificationsStore } from '@/stores/notifications'
 import { usePolling } from '@/composables/usePolling'
 import type { AppNotification } from '@/api/notifications'
 import { useTimeAgo } from '@/composables/useTimeAgo'
+import { projectInvitationsApi } from '@/api/projects'
 
 const store  = useNotificationsStore()
 const router = useRouter()
 const open   = ref(false)
 const containerRef = ref<HTMLElement | null>(null)
+const respondingId = ref<number | null>(null)
 
 // Fallback polling every 60s — real-time handled by Reverb WebSocket
 usePolling(() => store.fetch(), 60_000)
@@ -103,21 +136,40 @@ function handleClick(n: AppNotification) {
   open.value = false
 }
 
+async function respondToInvite(n: AppNotification, action: 'accept' | 'decline') {
+  if (!n.data?.invitation_id) return
+  respondingId.value = n.id
+  try {
+    await projectInvitationsApi.respond(n.data.invitation_id as number, action)
+    store.markRead(n.id)
+    if (action === 'accept' && n.data?.project_id) {
+      router.push(`/projects/${n.data.project_id}`)
+      open.value = false
+    }
+  } catch {
+    // silently ignore — the invite may have expired
+  } finally {
+    respondingId.value = null
+  }
+}
+
 function typeEmoji(type: string) {
   const map: Record<string, string> = {
     task_comment: '💬', task_assigned: '📌', task_approved: '✅',
     task_rejected: '❌', file_uploaded: '📎', project_member_added: '🎓',
-    meeting_scheduled: '📅',
+    meeting_scheduled: '📅', project_invitation: '✉️',
+    project_invitation_accepted: '🎉', project_invitation_declined: '😔',
   }
   return map[type] ?? '🔔'
 }
 
 function iconBg(type: string) {
-  if (type === 'task_approved') return 'bg-emerald-500/15'
-  if (type === 'task_rejected') return 'bg-red-500/15'
+  if (type === 'task_approved' || type === 'project_invitation_accepted') return 'bg-emerald-500/15'
+  if (type === 'task_rejected' || type === 'project_invitation_declined') return 'bg-red-500/15'
   if (type === 'task_comment') return 'bg-blue-500/15'
   if (type === 'file_uploaded') return 'bg-purple-500/15'
   if (type === 'meeting_scheduled') return 'bg-teal-500/15'
+  if (type === 'project_invitation') return 'bg-amber-500/15'
   return 'bg-accent-500/15'
 }
 

@@ -100,7 +100,7 @@
                 class="btn-primary text-xs px-3 py-1.5 flex-shrink-0 min-w-[80px] flex items-center justify-center gap-1.5"
               >
                 <span v-if="adding === user.id" class="w-3 h-3 border border-white/30 border-t-white rounded-full animate-spin" />
-                <span v-else>Convidar</span>
+                <span v-else>Enviar convite</span>
               </button>
             </div>
           </div>
@@ -108,7 +108,7 @@
           <p v-if="error" class="text-sm text-red-400 bg-red-400/10 border border-red-400/20 rounded-lg px-3 py-2">{{ error }}</p>
 
           <p v-if="successCount > 0" class="text-sm text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 rounded-lg px-3 py-2">
-            {{ successCount }} membro{{ successCount > 1 ? 's' : '' }} convidado{{ successCount > 1 ? 's' : '' }} com sucesso.
+            {{ successCount }} convite{{ successCount > 1 ? 's' : '' }} enviado{{ successCount > 1 ? 's' : '' }}. O usuário precisa aceitar para entrar no projeto.
           </p>
         </div>
       </div>
@@ -118,7 +118,7 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { dashboardApi, projectsApi } from '@/api/projects'
+import { dashboardApi, projectInvitationsApi } from '@/api/projects'
 import type { MemberStats } from '@/types'
 import UserAvatar from './UserAvatar.vue'
 
@@ -174,12 +174,12 @@ async function invite(user: SearchUser) {
   adding.value = user.id
   error.value = ''
   try {
-    await projectsApi.addMember(props.projectId, user.id, selectedRole.value)
+    await projectInvitationsApi.send(props.projectId, user.id, selectedRole.value)
     results.value = results.value.filter(u => u.id !== user.id)
     successCount.value++
     emit('invited')
   } catch (e: any) {
-    error.value = e.response?.data?.message ?? 'Erro ao convidar membro.'
+    error.value = e.response?.data?.message ?? 'Erro ao enviar convite.'
   } finally {
     adding.value = null
   }
