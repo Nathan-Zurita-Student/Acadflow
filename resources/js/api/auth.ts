@@ -7,7 +7,7 @@ export interface AuthResponse { user: User; token: string }
 
 export const authApi = {
   login: (data: LoginPayload) => api.post<AuthResponse>('/auth/login', data),
-  register: (data: RegisterPayload) => api.post<AuthResponse>('/auth/register', data),
+  register: (data: RegisterPayload | FormData) => api.post<AuthResponse>('/auth/register', data),
   logout: () => api.post('/auth/logout'),
   me: () => api.get<User>('/auth/me'),
   updateProfile: (data: FormData) => api.post<User>('/auth/profile', data),

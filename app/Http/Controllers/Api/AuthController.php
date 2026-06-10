@@ -16,11 +16,18 @@ class AuthController extends Controller
 {
     public function register(RegisterRequest $request): JsonResponse
     {
+        $avatarUrl = null;
+        if ($request->hasFile('avatar')) {
+            $path = $request->file('avatar')->store('avatars', 'public');
+            $avatarUrl = Storage::url($path);
+        }
+
         $user = User::create([
             'name'     => $request->name,
             'email'    => $request->email,
             'password' => $request->password,
             'role'     => 'member',
+            'avatar'   => $avatarUrl,
         ]);
 
         $token = $user->createToken('auth_token')->plainTextToken;

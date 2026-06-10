@@ -33,13 +33,17 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  async function register(name: string, email: string, password: string) {
+  async function register(name: string, email: string, password: string, avatar?: File | null) {
     loading.value = true
     try {
-      const { data } = await authApi.register({
-        name, email, password,
-        password_confirmation: password,
-      })
+      const payload = new FormData()
+      payload.append('name', name)
+      payload.append('email', email)
+      payload.append('password', password)
+      payload.append('password_confirmation', password)
+      if (avatar) payload.append('avatar', avatar)
+
+      const { data } = await authApi.register(payload)
       setToken(data.token)
       user.value = data.user
       return data

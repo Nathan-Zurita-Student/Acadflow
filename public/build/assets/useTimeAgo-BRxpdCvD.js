@@ -1,0 +1,1 @@
+function e(){function e(e){let t=(Date.now()-new Date(e).getTime())/1e3;return t<60?`agora`:t<3600?`${Math.floor(t/60)}m atrás`:t<86400?`${Math.floor(t/3600)}h atrás`:`${Math.floor(t/86400)}d atrás`}return{timeAgo:e}}export{e as t};
