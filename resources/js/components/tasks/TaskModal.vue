@@ -562,7 +562,7 @@ const tabs = [
   { id: 'checklist', label: 'Checklist' },
   { id: 'comments',  label: 'Comentários' },
   { id: 'files',     label: 'Arquivos' },
-  { id: 'pomodoro',  label: '🍅 Pomodoro' },
+  { id: 'pomodoro',  label: 'Método de Pomodoro' },
 ]
 
 // ── chat helpers ──────────────────────────────────────

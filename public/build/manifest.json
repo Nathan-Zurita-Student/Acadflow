@@ -1,11 +1,11 @@
 {
-  "_ProjectModal-eCUmrMUJ.js": {
-    "file": "assets/ProjectModal-eCUmrMUJ.js",
+  "_ProjectModal-BGjrUn8s.js": {
+    "file": "assets/ProjectModal-BGjrUn8s.js",
     "name": "ProjectModal",
     "imports": [
       "resources/js/app.ts",
       "_runtime-core.esm-bundler-T1N56SXR.js",
-      "_projects-BzODr7oc.js"
+      "_projects-DrOoXcSa.js"
     ]
   },
   "_StatCard-BxuP3BYP.js": {
@@ -22,16 +22,16 @@
       "_runtime-core.esm-bundler-T1N56SXR.js"
     ]
   },
-  "_TaskModal-aN3K0hJs.js": {
-    "file": "assets/TaskModal-aN3K0hJs.js",
+  "_TaskModal-CIwMbJQj.js": {
+    "file": "assets/TaskModal-CIwMbJQj.js",
     "name": "TaskModal",
     "imports": [
       "resources/js/app.ts",
       "_runtime-core.esm-bundler-T1N56SXR.js",
-      "_projects-DBI4M6wd.js",
+      "_projects-CN5Qf94y.js",
       "_UserAvatar-C7FhChpr.js",
       "_useToast-DDCL1Iq2.js",
-      "_projects-BzODr7oc.js"
+      "_projects-DrOoXcSa.js"
     ]
   },
   "_UserAvatar-C7FhChpr.js": {
@@ -45,20 +45,20 @@
     "file": "assets/_plugin-vue_export-helper-BDNMzG2s.js",
     "name": "_plugin-vue_export-helper"
   },
-  "_projects-BzODr7oc.js": {
-    "file": "assets/projects-BzODr7oc.js",
+  "_projects-CN5Qf94y.js": {
+    "file": "assets/projects-CN5Qf94y.js",
+    "name": "projects",
+    "imports": [
+      "resources/js/app.ts"
+    ]
+  },
+  "_projects-DrOoXcSa.js": {
+    "file": "assets/projects-DrOoXcSa.js",
     "name": "projects",
     "imports": [
       "resources/js/app.ts",
       "_runtime-core.esm-bundler-T1N56SXR.js",
-      "_projects-DBI4M6wd.js"
-    ]
-  },
-  "_projects-DBI4M6wd.js": {
-    "file": "assets/projects-DBI4M6wd.js",
-    "name": "projects",
-    "imports": [
-      "resources/js/app.ts"
+      "_projects-CN5Qf94y.js"
     ]
   },
   "_runtime-core.esm-bundler-T1N56SXR.js": {
@@ -88,14 +88,14 @@
     "isEntry": true
   },
   "resources/js/Pages/AcceptInvitePage.vue": {
-    "file": "assets/AcceptInvitePage-D5LjClxu.js",
+    "file": "assets/AcceptInvitePage-BrkqGcjY.js",
     "name": "AcceptInvitePage",
     "src": "resources/js/Pages/AcceptInvitePage.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.ts",
       "_runtime-core.esm-bundler-T1N56SXR.js",
-      "_projects-DBI4M6wd.js"
+      "_projects-CN5Qf94y.js"
     ]
   },
   "resources/js/Pages/App.vue": {
@@ -109,19 +109,19 @@
     ]
   },
   "resources/js/Pages/MyTasksPage.vue": {
-    "file": "assets/MyTasksPage-HmtJQmpq.js",
+    "file": "assets/MyTasksPage-Cqpw6rUj.js",
     "name": "MyTasksPage",
     "src": "resources/js/Pages/MyTasksPage.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.ts",
       "_runtime-core.esm-bundler-T1N56SXR.js",
-      "_projects-DBI4M6wd.js",
-      "_TaskModal-aN3K0hJs.js"
+      "_projects-CN5Qf94y.js",
+      "_TaskModal-CIwMbJQj.js"
     ]
   },
   "resources/js/Pages/auth/LoginPage.vue": {
-    "file": "assets/LoginPage-d8DpCSJp.js",
+    "file": "assets/LoginPage-BtWeYVmy.js",
     "name": "LoginPage",
     "src": "resources/js/Pages/auth/LoginPage.vue",
     "isDynamicEntry": true,
@@ -131,7 +131,7 @@
     ]
   },
   "resources/js/Pages/auth/RegisterPage.vue": {
-    "file": "assets/RegisterPage-1SN5be3S.js",
+    "file": "assets/RegisterPage-CX7ZFX1L.js",
     "name": "RegisterPage",
     "src": "resources/js/Pages/auth/RegisterPage.vue",
     "isDynamicEntry": true,
@@ -141,118 +141,118 @@
     ]
   },
   "resources/js/Pages/dashboard/DashboardPage.vue": {
-    "file": "assets/DashboardPage-D8Cmqb7F.js",
+    "file": "assets/DashboardPage-yMTs63Xd.js",
     "name": "DashboardPage",
     "src": "resources/js/Pages/dashboard/DashboardPage.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.ts",
       "_runtime-core.esm-bundler-T1N56SXR.js",
-      "_projects-DBI4M6wd.js",
+      "_projects-CN5Qf94y.js",
       "_StatCard-BxuP3BYP.js",
       "_StatusBadge-C8wytjnZ.js",
       "_UserAvatar-C7FhChpr.js"
     ]
   },
   "resources/js/Pages/projects/FilesPage.vue": {
-    "file": "assets/FilesPage-Di-NW9j3.js",
+    "file": "assets/FilesPage-C9q-kvLn.js",
     "name": "FilesPage",
     "src": "resources/js/Pages/projects/FilesPage.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.ts",
       "_runtime-core.esm-bundler-T1N56SXR.js",
-      "_projects-DBI4M6wd.js",
+      "_projects-CN5Qf94y.js",
       "_useToast-DDCL1Iq2.js"
     ]
   },
   "resources/js/Pages/projects/KanbanPage.vue": {
-    "file": "assets/KanbanPage-DWMVgCjV.js",
+    "file": "assets/KanbanPage-DaKl70dN.js",
     "name": "KanbanPage",
     "src": "resources/js/Pages/projects/KanbanPage.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.ts",
       "_runtime-core.esm-bundler-T1N56SXR.js",
-      "_projects-DBI4M6wd.js",
-      "_TaskModal-aN3K0hJs.js",
+      "_projects-CN5Qf94y.js",
+      "_TaskModal-CIwMbJQj.js",
       "_UserAvatar-C7FhChpr.js",
       "_useToast-DDCL1Iq2.js",
-      "_projects-BzODr7oc.js"
+      "_projects-DrOoXcSa.js"
     ]
   },
   "resources/js/Pages/projects/MeetingsPage.vue": {
-    "file": "assets/MeetingsPage-CF3DfMrv.js",
+    "file": "assets/MeetingsPage-DwWtwK7K.js",
     "name": "MeetingsPage",
     "src": "resources/js/Pages/projects/MeetingsPage.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.ts",
       "_runtime-core.esm-bundler-T1N56SXR.js",
-      "_projects-DBI4M6wd.js",
+      "_projects-CN5Qf94y.js",
       "_UserAvatar-C7FhChpr.js",
       "_useToast-DDCL1Iq2.js",
-      "_projects-BzODr7oc.js"
+      "_projects-DrOoXcSa.js"
     ]
   },
   "resources/js/Pages/projects/MembersPage.vue": {
-    "file": "assets/MembersPage-D5GlRQod.js",
+    "file": "assets/MembersPage-DFGCeabm.js",
     "name": "MembersPage",
     "src": "resources/js/Pages/projects/MembersPage.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.ts",
       "_runtime-core.esm-bundler-T1N56SXR.js",
-      "_projects-DBI4M6wd.js",
+      "_projects-CN5Qf94y.js",
       "_UserAvatar-C7FhChpr.js",
       "_useToast-DDCL1Iq2.js",
-      "_projects-BzODr7oc.js"
+      "_projects-DrOoXcSa.js"
     ]
   },
   "resources/js/Pages/projects/NotesPage.vue": {
-    "file": "assets/NotesPage-Cuyi5L8a.js",
+    "file": "assets/NotesPage-De_hGtDj.js",
     "name": "NotesPage",
     "src": "resources/js/Pages/projects/NotesPage.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.ts",
       "_runtime-core.esm-bundler-T1N56SXR.js",
-      "_projects-DBI4M6wd.js",
+      "_projects-CN5Qf94y.js",
       "_useToast-DDCL1Iq2.js",
-      "_projects-BzODr7oc.js"
+      "_projects-DrOoXcSa.js"
     ]
   },
   "resources/js/Pages/projects/ProjectDetailPage.vue": {
-    "file": "assets/ProjectDetailPage-DHObAIqE.js",
+    "file": "assets/ProjectDetailPage-DFSjqJUn.js",
     "name": "ProjectDetailPage",
     "src": "resources/js/Pages/projects/ProjectDetailPage.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.ts",
       "_runtime-core.esm-bundler-T1N56SXR.js",
-      "_ProjectModal-eCUmrMUJ.js",
+      "_ProjectModal-BGjrUn8s.js",
       "_StatCard-BxuP3BYP.js",
       "_UserAvatar-C7FhChpr.js",
-      "_projects-BzODr7oc.js"
+      "_projects-DrOoXcSa.js"
     ]
   },
   "resources/js/Pages/projects/ProjectsPage.vue": {
-    "file": "assets/ProjectsPage-Ba0cmxv0.js",
+    "file": "assets/ProjectsPage-CxuT1TuD.js",
     "name": "ProjectsPage",
     "src": "resources/js/Pages/projects/ProjectsPage.vue",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.ts",
       "_runtime-core.esm-bundler-T1N56SXR.js",
-      "_ProjectModal-eCUmrMUJ.js",
+      "_ProjectModal-BGjrUn8s.js",
       "_StatusBadge-C8wytjnZ.js",
       "_UserAvatar-C7FhChpr.js",
       "_useToast-DDCL1Iq2.js",
-      "_projects-BzODr7oc.js"
+      "_projects-DrOoXcSa.js"
     ]
   },
   "resources/js/Pages/projects/SettingsPage.vue": {
-    "file": "assets/SettingsPage-CHxg36al.js",
+    "file": "assets/SettingsPage-BOAY5V7K.js",
     "name": "SettingsPage",
     "src": "resources/js/Pages/projects/SettingsPage.vue",
     "isDynamicEntry": true,
@@ -260,11 +260,11 @@
       "resources/js/app.ts",
       "_runtime-core.esm-bundler-T1N56SXR.js",
       "_useToast-DDCL1Iq2.js",
-      "_projects-BzODr7oc.js"
+      "_projects-DrOoXcSa.js"
     ]
   },
   "resources/js/app.ts": {
-    "file": "assets/app-BUClBLkB.js",
+    "file": "assets/app-C4Vam-uT.js",
     "name": "app",
     "src": "resources/js/app.ts",
     "isEntry": true,
@@ -291,7 +291,7 @@
     ]
   },
   "resources/js/layouts/AppLayout.vue": {
-    "file": "assets/AppLayout-lmNBRdSi.js",
+    "file": "assets/AppLayout-BI8ig0lD.js",
     "name": "AppLayout",
     "src": "resources/js/layouts/AppLayout.vue",
     "isDynamicEntry": true,
@@ -299,10 +299,10 @@
       "__plugin-vue_export-helper-BDNMzG2s.js",
       "resources/js/app.ts",
       "_runtime-core.esm-bundler-T1N56SXR.js",
-      "_projects-DBI4M6wd.js",
+      "_projects-CN5Qf94y.js",
       "_UserAvatar-C7FhChpr.js",
       "_useToast-DDCL1Iq2.js",
-      "_projects-BzODr7oc.js"
+      "_projects-DrOoXcSa.js"
     ],
     "css": [
       "assets/AppLayout-DtnR7Qa_.css"

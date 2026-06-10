@@ -144,9 +144,9 @@ const display = computed(() => {
 })
 
 const phaseLabel = computed(() => ({
-  'work':        '🍅 Foco',
-  'short-break': '☕ Pausa curta',
-  'long-break':  '🌿 Pausa longa',
+  'work':        'Em foco',
+  'short-break': 'Pausa curta',
+  'long-break':  'Pausa longa',
 }[phase.value]))
 
 const phaseStyle = computed(() => ({
