@@ -93,9 +93,7 @@
         <h3 class="text-sm font-semibold text-white mb-4">Atividade Recente</h3>
         <div class="space-y-3">
           <div v-for="log in dashboard.recent_activity" :key="log.id" class="flex items-start gap-2.5">
-            <div class="w-6 h-6 rounded-full bg-dark-700 flex items-center justify-center text-xs font-semibold text-dark-300 flex-shrink-0 mt-0.5">
-              {{ log.user?.name?.[0] ?? '?' }}
-            </div>
+            <UserAvatar :user="log.user" class="w-6 h-6 rounded-full bg-dark-700 text-xs font-semibold text-dark-300 flex-shrink-0 mt-0.5" />
             <div>
               <p class="text-xs text-dark-300">
                 <span class="font-medium text-dark-100">{{ log.user?.name }}</span>
@@ -145,6 +143,7 @@ import RiskBadge from '@/components/ui/RiskBadge.vue'
 import MemberRow from '@/components/ui/MemberRow.vue'
 import TimelineItem from '@/components/ui/TimelineItem.vue'
 import ProjectModal from '@/components/ui/ProjectModal.vue'
+import UserAvatar from '@/components/ui/UserAvatar.vue'
 
 const route = useRoute()
 const router = useRouter()

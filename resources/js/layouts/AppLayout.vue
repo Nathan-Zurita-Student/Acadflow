@@ -69,12 +69,7 @@
         <div class="flex items-center gap-2.5 px-2 py-2 rounded-lg hover:bg-dark-800 cursor-pointer group"
           :class="sidebarCollapsed ? 'justify-center' : ''"
           @click="showProfile = true">
-          <div class="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
-            <img v-if="auth.user?.avatar" :src="auth.user.avatar" class="w-full h-full object-cover" alt="Avatar" />
-            <div v-else class="w-full h-full bg-accent-600/30 flex items-center justify-center text-accent-400 text-sm font-semibold">
-              {{ userInitial }}
-            </div>
-          </div>
+          <UserAvatar :user="auth.user" class="w-8 h-8 rounded-full bg-accent-600/30 text-accent-400 text-sm font-semibold flex-shrink-0" />
           <template v-if="!sidebarCollapsed">
             <div class="flex-1 min-w-0">
               <p class="text-sm font-medium text-dark-100 truncate">{{ auth.user?.display_name || auth.user?.name }}</p>
@@ -137,6 +132,7 @@ import { useNotificationsStore } from '@/stores/notifications'
 import { dashboardApi } from '@/api/projects'
 import echo from '@/echo'
 import NavItem from '@/components/ui/NavItem.vue'
+import UserAvatar from '@/components/ui/UserAvatar.vue'
 import ProfileModal from '@/components/ui/ProfileModal.vue'
 import NotificationBell from '@/components/ui/NotificationBell.vue'
 import NotificationPopup from '@/components/ui/NotificationPopup.vue'
@@ -153,7 +149,6 @@ const myTasksCount = ref(0)
 const notifPopupRef = ref<InstanceType<typeof NotificationPopup> | null>(null)
 
 const currentProject = computed(() => projectsStore.currentProject)
-const userInitial = computed(() => auth.user?.name?.[0]?.toUpperCase() ?? '?')
 
 const isLeaderOfCurrentProject = computed(() => {
   if (!currentProject.value) return false

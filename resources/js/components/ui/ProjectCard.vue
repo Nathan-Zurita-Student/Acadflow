@@ -56,11 +56,11 @@
 
       <!-- Members avatars -->
       <div class="flex -space-x-1.5">
-        <div v-for="m in project.members.slice(0, 3)" :key="m.id"
+        <UserAvatar v-for="m in project.members.slice(0, 3)" :key="m.id"
+          :user="m"
           :title="m.name"
-          class="w-6 h-6 rounded-full bg-accent-600/40 border-2 border-dark-800 flex items-center justify-center text-xs font-medium text-accent-300">
-          {{ m.name[0] }}
-        </div>
+          class="w-6 h-6 rounded-full bg-accent-600/40 border-2 border-dark-800 text-xs font-medium text-accent-300"
+        />
         <div v-if="project.members.length > 3"
           class="w-6 h-6 rounded-full bg-dark-600 border-2 border-dark-800 flex items-center justify-center text-xs text-dark-400">
           +{{ project.members.length - 3 }}
@@ -74,6 +74,7 @@
 import { computed } from 'vue'
 import type { Project } from '@/types'
 import StatusBadge from './StatusBadge.vue'
+import UserAvatar from './UserAvatar.vue'
 
 const props = defineProps<{ project: Project }>()
 defineEmits(['click', 'delete'])

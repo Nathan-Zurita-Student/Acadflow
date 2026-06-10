@@ -100,9 +100,7 @@
                   v-for="m in selectedMembers" :key="m.id"
                   class="flex items-center gap-1.5 pl-1.5 pr-2 py-1 rounded-full text-xs font-medium bg-accent-600/15 border border-accent-500/25 text-accent-300"
                 >
-                  <span class="w-5 h-5 rounded-full bg-accent-600/40 flex items-center justify-center text-xs font-bold">
-                    {{ m.name[0] }}
-                  </span>
+                  <UserAvatar :user="m" class="w-5 h-5 rounded-full bg-accent-600/40 text-xs font-bold" />
                   {{ m.name.split(' ')[0] }}
                   <button
                     v-if="isLeader"
@@ -170,9 +168,7 @@
                       </div>
 
                       <!-- Avatar -->
-                      <div class="w-7 h-7 rounded-full bg-accent-600/30 flex items-center justify-center text-xs font-bold text-accent-300 flex-shrink-0">
-                        {{ m.name[0] }}
-                      </div>
+                      <UserAvatar :user="m" class="w-7 h-7 rounded-full bg-accent-600/30 text-xs font-bold text-accent-300 flex-shrink-0" />
 
                       <!-- Info -->
                       <div class="flex-1 min-w-0">
@@ -302,11 +298,12 @@
                   :class="item.isFirstInGroup ? 'mt-3' : 'mt-0.5'">
                   <!-- Avatar placeholder to keep alignment -->
                   <div class="w-7 flex-shrink-0">
-                    <div v-if="item.isLastInGroup"
-                      class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold"
-                      :style="{ background: userBubbleBg(item.comment.user.id), color: userNameColor(item.comment.user.id) }">
-                      {{ item.comment.user.name[0].toUpperCase() }}
-                    </div>
+                    <UserAvatar
+                      v-if="item.isLastInGroup"
+                      :user="item.comment.user"
+                      class="w-7 h-7 rounded-full text-xs font-bold"
+                      :style="{ background: userBubbleBg(item.comment.user.id), color: userNameColor(item.comment.user.id) }"
+                    />
                   </div>
                   <div class="max-w-[78%]">
                     <p v-if="item.isFirstInGroup" class="text-[11px] font-semibold mb-0.5 pl-1"
@@ -334,10 +331,11 @@
                 type="button"
                 @mousedown.prevent="selectMention(m)"
                 class="w-full flex items-center gap-2.5 px-4 py-2.5 hover:bg-dark-700 transition-colors text-left">
-                <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
-                  :style="{ background: userBubbleBg(m.id), color: userNameColor(m.id) }">
-                  {{ m.name[0].toUpperCase() }}
-                </div>
+                <UserAvatar
+                  :user="m"
+                  class="w-7 h-7 rounded-full text-xs font-bold flex-shrink-0"
+                  :style="{ background: userBubbleBg(m.id), color: userNameColor(m.id) }"
+                />
                 <div>
                   <p class="text-sm font-medium text-dark-200">{{ m.name }}</p>
                   <p class="text-[11px] text-dark-500">{{ m.email }}</p>
@@ -462,6 +460,7 @@ import { useToast } from '@/composables/useToast'
 import { tasksApi, attachmentsApi } from '@/api/projects'
 import PomodoroTimer from '@/components/tasks/PomodoroTimer.vue'
 import type { Task, TaskStatus, Attachment } from '@/types'
+import UserAvatar from '@/components/ui/UserAvatar.vue'
 
 const props = defineProps<{
   projectId: number

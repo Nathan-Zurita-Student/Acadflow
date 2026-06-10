@@ -89,9 +89,7 @@
               :key="user.id"
               class="flex items-center gap-3 p-3 rounded-xl border border-dark-700 hover:border-dark-600 hover:bg-dark-700/30 transition-colors"
             >
-              <div class="w-9 h-9 rounded-full bg-accent-600/20 flex items-center justify-center text-accent-400 font-semibold text-sm flex-shrink-0">
-                {{ user.name[0].toUpperCase() }}
-              </div>
+              <UserAvatar :user="user" class="w-9 h-9 rounded-full bg-accent-600/20 text-accent-400 font-semibold text-sm flex-shrink-0" />
               <div class="flex-1 min-w-0">
                 <p class="text-sm font-medium text-white truncate">{{ user.name }}</p>
                 <p class="text-xs text-dark-500 truncate">{{ user.email }}</p>
@@ -122,6 +120,7 @@
 import { ref, watch } from 'vue'
 import { dashboardApi, projectsApi } from '@/api/projects'
 import type { MemberStats } from '@/types'
+import UserAvatar from './UserAvatar.vue'
 
 const props = defineProps<{
   projectId: number

@@ -1,8 +1,6 @@
 ﻿<template>
   <div class="flex items-center gap-3 p-2.5 rounded-lg hover:bg-dark-700/50 transition-colors">
-    <div class="w-8 h-8 rounded-full bg-accent-600/30 flex items-center justify-center text-sm font-semibold text-accent-300 flex-shrink-0">
-      {{ stat.user.name[0] }}
-    </div>
+    <UserAvatar :user="stat.user" class="w-8 h-8 rounded-full bg-accent-600/30 text-sm font-semibold text-accent-300 flex-shrink-0" />
     <div class="flex-1 min-w-0">
       <p class="text-sm font-medium text-dark-100 truncate">{{ stat.user.name }}</p>
       <p class="text-xs text-dark-500">{{ stat.completed_tasks }}/{{ stat.total_tasks }} tarefas</p>
@@ -26,6 +24,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { MemberStats } from '@/types'
+import UserAvatar from './UserAvatar.vue'
 
 const props = defineProps<{ stat: MemberStats }>()
 

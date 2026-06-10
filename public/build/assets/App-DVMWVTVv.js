@@ -1,1 +1,0 @@
-import{N as e,h as t,k as n,u as r}from"./runtime-core.esm-bundler-C1-clqtM.js";import{t as i}from"./_plugin-vue_export-helper-BDNMzG2s.js";var a={},o={class:`min-h-screen bg-dark-950`};function s(i,a){let s=e(`RouterView`);return n(),r(`div`,o,[t(s)])}var c=i(a,[[`render`,s]]);export{c as default};

@@ -39,10 +39,6 @@
           <RouterLink :to="route.query.redirect ? `/register?redirect=${encodeURIComponent(String(route.query.redirect))}` : '/register'" class="text-accent-400 hover:text-accent-300 font-medium ml-1">Cadastre-se</RouterLink>
         </p>
       </div>
-
-      <p class="mt-6 text-center text-xs text-dark-600">
-        Demo: admin@acadflow.com / password
-      </p>
     </div>
   </div>
 </template>

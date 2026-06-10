@@ -116,9 +116,7 @@
           <template v-if="data?.recent_activity.length">
             <div v-for="log in data.recent_activity.slice(0, 8)" :key="log.id"
               class="flex items-start gap-2.5">
-              <div class="w-6 h-6 rounded-full bg-dark-700 flex items-center justify-center flex-shrink-0 text-xs font-semibold text-dark-300 mt-0.5">
-                {{ log.user?.name?.[0] ?? '?' }}
-              </div>
+              <UserAvatar :user="log.user" class="w-6 h-6 rounded-full bg-dark-700 flex-shrink-0 text-xs font-semibold text-dark-300 mt-0.5" />
               <div class="flex-1 min-w-0">
                 <p class="text-xs text-dark-300 leading-snug">
                   <span class="font-medium text-dark-100">{{ log.user?.name }}</span>
@@ -143,6 +141,7 @@ import { dashboardApi } from '@/api/projects'
 import { useAuthStore } from '@/stores/auth'
 import StatCard from '@/components/ui/StatCard.vue'
 import StatusBadge from '@/components/ui/StatusBadge.vue'
+import UserAvatar from '@/components/ui/UserAvatar.vue'
 
 const auth = useAuthStore()
 const router = useRouter()

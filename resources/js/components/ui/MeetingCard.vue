@@ -60,9 +60,7 @@
         </div>
 
         <div class="flex items-center gap-2 mt-3">
-          <div class="w-5 h-5 rounded-full bg-accent-600/30 flex items-center justify-center text-[10px] font-bold text-accent-300">
-            {{ meeting.creator?.name[0] }}
-          </div>
+          <UserAvatar :user="meeting.creator" class="w-5 h-5 rounded-full bg-accent-600/30 text-[10px] font-bold text-accent-300" />
           <span class="text-xs text-dark-600">{{ meeting.creator?.name }}</span>
         </div>
       </div>
@@ -73,6 +71,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { Meeting } from '@/types'
+import UserAvatar from '@/components/ui/UserAvatar.vue'
 
 const props = defineProps<{
   meeting: Meeting

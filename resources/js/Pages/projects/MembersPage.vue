@@ -52,9 +52,7 @@
         </button>
 
         <div class="flex items-start gap-4">
-          <div class="w-12 h-12 rounded-xl bg-accent-600/20 flex items-center justify-center text-lg font-bold text-accent-400 flex-shrink-0">
-            {{ s.user.name[0] }}
-          </div>
+          <UserAvatar :user="s.user" class="w-12 h-12 rounded-xl bg-accent-600/20 text-lg font-bold text-accent-400 flex-shrink-0" />
           <div class="flex-1 min-w-0">
             <div class="flex items-start justify-between gap-2">
               <div class="min-w-0">
@@ -181,6 +179,7 @@ import { useToast } from '@/composables/useToast'
 import { projectsApi } from '@/api/projects'
 import type { MemberStats } from '@/types'
 import InviteMemberModal from '@/components/ui/InviteMemberModal.vue'
+import UserAvatar from '@/components/ui/UserAvatar.vue'
 import InviteLinkModal from '@/components/ui/InviteLinkModal.vue'
 
 const route = useRoute()

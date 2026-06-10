@@ -191,11 +191,12 @@
 
         <!-- Assignees (up to 3) -->
         <div class="flex -space-x-1" @click="$emit('click')">
-          <div
+          <UserAvatar
             v-for="a in displayAssignees" :key="a.id"
+            :user="a"
             :title="a.name"
-            class="w-5 h-5 rounded-full bg-accent-600/40 border border-dark-800 flex items-center justify-center text-xs font-semibold text-accent-300"
-          >{{ a.name[0] }}</div>
+            class="w-5 h-5 rounded-full bg-accent-600/40 border border-dark-800 text-xs font-semibold text-accent-300"
+          />
           <div
             v-if="extraAssignees > 0"
             class="w-5 h-5 rounded-full bg-dark-600 border border-dark-800 flex items-center justify-center text-xs text-dark-400"
@@ -211,6 +212,7 @@ import { ref, computed } from 'vue'
 import { tasksApi } from '@/api/projects'
 import type { Task, TaskStatus } from '@/types'
 import PriorityDot from '@/components/ui/PriorityDot.vue'
+import UserAvatar from '@/components/ui/UserAvatar.vue'
 
 const props = defineProps<{
   task: Task
