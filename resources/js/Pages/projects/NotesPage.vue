@@ -1,7 +1,13 @@
 ﻿<template>
-  <div class="flex gap-0 h-[calc(100vh-112px)] animate-fade-in">
-    <!-- Sidebar: notes list -->
-    <aside class="w-64 flex-shrink-0 border-r border-dark-700 flex flex-col">
+  <div class="flex h-[calc(100vh-112px)] animate-fade-in overflow-hidden">
+    <!-- Sidebar: notes list (hidden on mobile when a note is selected) -->
+    <aside
+      :class="[
+        'flex-shrink-0 border-r border-dark-700 flex flex-col transition-all duration-200',
+        'md:w-64 md:flex',
+        selected ? 'hidden md:flex' : 'flex w-full md:w-64',
+      ]"
+    >
       <div class="p-3 border-b border-dark-700">
         <button @click="createNote" class="btn-primary w-full justify-center text-sm">
           <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -39,19 +45,30 @@
       </div>
     </aside>
 
-    <!-- Main: editor -->
-    <main class="flex-1 flex flex-col min-w-0">
+    <!-- Main: editor (hidden on mobile when no note is selected) -->
+    <main
+      :class="[
+        'flex-1 flex flex-col min-w-0',
+        !selected ? 'hidden md:flex' : 'flex',
+      ]"
+    >
       <template v-if="selected">
         <!-- Toolbar -->
-        <div class="flex items-center justify-between px-5 py-3 border-b border-dark-700 flex-shrink-0">
+        <div class="flex items-center gap-2 px-4 py-3 border-b border-dark-700 flex-shrink-0">
+          <!-- Mobile: back to list -->
+          <button @click="selected = null" class="md:hidden p-1.5 rounded-lg hover:bg-dark-700 text-dark-400 hover:text-dark-200 transition-colors flex-shrink-0">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
           <input
             v-model="selected.title"
             class="flex-1 bg-transparent text-lg font-bold text-dark-100 border-none outline-none placeholder-dark-600"
             placeholder="Título da nota"
             @change="saveNote"
           />
-          <div class="flex items-center gap-2 ml-3">
-            <span class="text-[10px] text-dark-600">{{ saveStatus }}</span>
+          <div class="flex items-center gap-2 flex-shrink-0">
+            <span class="text-[10px] text-dark-600 hidden sm:block">{{ saveStatus }}</span>
             <button @click="deleteNote(selected)" class="p-1.5 rounded-lg hover:bg-red-600/20 text-dark-500 hover:text-red-400 transition-colors">
               <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

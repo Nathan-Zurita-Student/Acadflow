@@ -154,6 +154,11 @@ const projectId = Number(route.params.id)
 const loading = ref(true)
 const showEdit = ref(false)
 
+function chartAccent(): string {
+  const raw = getComputedStyle(document.documentElement).getPropertyValue('--accent-600').trim()
+  return raw ? `rgb(${raw.split(/\s+/).join(',')})` : '#6366f1'
+}
+
 const dashboard = computed(() => store.currentDashboard)
 
 const isLeader = computed(() => {
@@ -209,7 +214,7 @@ const barSeries = computed(() => [{
 const barOptions = computed(() => ({
   chart: { background: 'transparent', toolbar: { show: false } },
   theme: { mode: 'dark' },
-  colors: ['#6366f1'],
+  colors: [chartAccent()],
   xaxis: {
     categories: dashboard.value?.weekly_completions.map((d: WeeklyEntry) =>
       new Date(d.date).toLocaleDateString('pt-BR', { day: 'numeric', month: 'short' })

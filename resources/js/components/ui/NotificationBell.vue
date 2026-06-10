@@ -27,7 +27,7 @@
     >
       <div
         v-if="open"
-        class="absolute right-0 top-full mt-2 w-80 bg-dark-800 border border-dark-700 rounded-2xl shadow-2xl z-50 overflow-hidden origin-top-right"
+        class="absolute right-0 top-full mt-2 w-80 max-w-[calc(100vw-1.5rem)] bg-dark-800 border border-dark-700 rounded-2xl shadow-2xl z-50 overflow-hidden origin-top-right"
       >
         <!-- Header -->
         <div class="flex items-center justify-between px-4 py-3 border-b border-dark-700">

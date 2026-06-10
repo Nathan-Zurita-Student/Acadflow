@@ -149,6 +149,11 @@ const router = useRouter()
 const loading = ref(true)
 const data = ref<any>(null)
 
+function chartAccent(): string {
+  const raw = getComputedStyle(document.documentElement).getPropertyValue('--accent-600').trim()
+  return raw ? `rgb(${raw.split(/\s+/).join(',')})` : '#6366f1'
+}
+
 onMounted(async () => {
   try {
     const res = await dashboardApi.global()
@@ -168,7 +173,7 @@ const weeklyOptions = computed(() => {
   return {
     chart: { toolbar: { show: false }, background: 'transparent' },
     theme: { mode: 'dark' },
-    colors: ['#6366f1'],
+    colors: [chartAccent()],
     fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.4, opacityTo: 0, stops: [0, 100] } },
     stroke: { curve: 'smooth', width: 2 },
     xaxis: {

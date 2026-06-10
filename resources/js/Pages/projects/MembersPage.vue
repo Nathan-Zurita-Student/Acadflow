@@ -8,7 +8,8 @@
         <p class="text-dark-400 text-sm">{{ stats.length }} membro{{ stats.length !== 1 ? 's' : '' }}</p>
       </div>
       <div v-if="canManage" class="flex items-center gap-2">
-        <button v-if="currentProject?.is_owner" @click="showLinkModal = true" class="btn-secondary">
+        <button v-if="currentProject?.is_owner" @click="showLinkModal = true"
+          class="inline-flex items-center gap-2 px-4 py-2 bg-accent-600/15 hover:bg-accent-600/25 text-accent-400 text-sm font-medium rounded-lg border border-accent-600/25 transition-all duration-150">
           <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
@@ -189,6 +190,11 @@ const projectsStore = useProjectsStore()
 const authStore = useAuthStore()
 const toast = useToast()
 const { currentProject } = storeToRefs(projectsStore)
+
+function chartAccent(): string {
+  const raw = getComputedStyle(document.documentElement).getPropertyValue('--accent-600').trim()
+  return raw ? `rgb(${raw.split(/\s+/).join(',')})` : '#6366f1'
+}
 
 const loading = ref(true)
 const stats = ref<MemberStats[]>([])

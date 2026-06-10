@@ -9,15 +9,25 @@
       <!-- Logo + collapse toggle -->
       <div class="flex items-center gap-3 px-4 py-4 border-b border-dark-700/60 flex-shrink-0">
         <img src="/imagem/acadflow.png" alt="AcadFlow" class="h-8 w-8 object-contain flex-shrink-0" />
-        <span v-if="!sidebarCollapsed" class="font-bold text-white text-sm tracking-wide">AcadFlow</span>
-        <button v-if="!sidebarCollapsed" @click="sidebarCollapsed = true"
-          class="ml-auto p-1 rounded-lg text-dark-500 hover:text-dark-300 hover:bg-dark-800 transition-colors lg:flex hidden">
-          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7M18 19l-7-7 7-7" />
-          </svg>
-        </button>
+        <template v-if="!sidebarCollapsed">
+          <span class="font-bold text-white text-sm tracking-wide">AcadFlow</span>
+          <!-- Desktop: collapse -->
+          <button @click="sidebarCollapsed = true"
+            class="ml-auto p-1 rounded-lg text-dark-500 hover:text-dark-300 hover:bg-dark-800 transition-colors hidden lg:flex">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7M18 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <!-- Mobile: close sidebar -->
+          <button @click="sidebarOpen = false"
+            class="ml-auto p-1 rounded-lg text-dark-500 hover:text-dark-300 hover:bg-dark-800 transition-colors lg:hidden">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </template>
         <button v-else @click="sidebarCollapsed = false"
-          class="mx-auto p-1 rounded-lg text-dark-500 hover:text-dark-300 hover:bg-dark-800 transition-colors lg:flex hidden">
+          class="mx-auto p-1 rounded-lg text-dark-500 hover:text-dark-300 hover:bg-dark-800 transition-colors hidden lg:flex">
           <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M6 5l7 7-7 7" />
           </svg>
@@ -119,12 +129,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, watchEffect } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useProjectsStore } from '@/stores/projects'
 import { useNotificationsStore } from '@/stores/notifications'
-import { useThemeStore } from '@/stores/theme'
 import { dashboardApi } from '@/api/projects'
 import echo from '@/echo'
 import NavItem from '@/components/ui/NavItem.vue'
@@ -137,12 +146,6 @@ const auth = useAuthStore()
 const projectsStore = useProjectsStore()
 const notifStore = useNotificationsStore()
 const router = useRouter()
-const themeStore = useThemeStore()
-
-// Keep data-theme in sync with the Pinia store (belt-and-suspenders on top of app.ts init)
-watchEffect(() => {
-  document.documentElement.setAttribute('data-theme', themeStore.current)
-})
 const sidebarOpen = ref(false)
 const sidebarCollapsed = ref(false)
 const showProfile = ref(false)

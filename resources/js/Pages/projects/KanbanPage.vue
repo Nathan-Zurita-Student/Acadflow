@@ -75,7 +75,7 @@
     <p v-if="!selectedTask && !showCreate" class="text-[10px] text-dark-600">Pressione <kbd class="px-1 py-0.5 rounded bg-dark-700 text-dark-400 font-mono">N</kbd> para nova tarefa</p>
 
     <!-- Board -->
-    <div class="flex gap-4 overflow-x-auto pb-4 min-h-[calc(100vh-260px)]">
+    <div class="kanban-board min-h-[60vh]" style="-webkit-overflow-scrolling:touch">
       <KanbanColumn
         v-for="col in columns" :key="col.status"
         :column="col"
