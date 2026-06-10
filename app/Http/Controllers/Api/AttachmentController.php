@@ -81,9 +81,7 @@ class AttachmentController extends Controller
     {
         $this->authorize('view', $project);
 
-        $fullPath = Storage::disk('public')->path($attachment->path);
-
-        return response()->file($fullPath, [
+        return Storage::disk('public')->response($attachment->path, $attachment->name, [
             'Content-Type'        => $attachment->mime_type,
             'Content-Disposition' => 'inline; filename="' . $attachment->name . '"',
         ]);
@@ -93,9 +91,7 @@ class AttachmentController extends Controller
     {
         $this->authorize('view', $project);
 
-        $fullPath = Storage::disk('public')->path($attachment->path);
-
-        return response()->download($fullPath, $attachment->name);
+        return Storage::disk('public')->download($attachment->path, $attachment->name);
     }
 
     public function destroy(Request $request, Project $project, Attachment $attachment): JsonResponse
