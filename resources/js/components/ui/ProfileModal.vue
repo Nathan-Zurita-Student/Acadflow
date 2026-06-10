@@ -2,7 +2,7 @@
   <Teleport to="body">
     <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in"
       @click.self="$emit('close')">
-      <div class="w-full max-w-md bg-dark-800 border border-dark-700 rounded-2xl shadow-2xl">
+      <div class="w-full max-w-md bg-dark-800 border border-dark-700 rounded-2xl shadow-2xl max-h-[90vh] overflow-y-auto">
 
         <!-- Header -->
         <div class="flex items-center justify-between px-6 py-4 border-b border-dark-700">
@@ -79,6 +79,28 @@
               <span v-else>Salvar</span>
             </button>
           </div>
+
+          <!-- Divider -->
+          <div class="border-t border-dark-700 pt-4 mt-2">
+            <p class="text-xs font-semibold text-dark-500 uppercase tracking-wider mb-3">Aparência</p>
+            <div class="grid grid-cols-5 gap-2">
+              <button
+                v-for="t in THEMES"
+                :key="t.name"
+                @click="themeStore.setTheme(t.name)"
+                class="flex flex-col items-center gap-1.5 p-2 rounded-xl border-2 transition-all"
+                :class="themeStore.current === t.name
+                  ? 'border-indigo-500 bg-indigo-500/10'
+                  : 'border-dark-700 hover:border-dark-600'"
+                :title="t.label"
+              >
+                <span class="w-8 h-8 rounded-full border-2 block"
+                  :style="{ background: t.preview }"
+                  :class="themeStore.current === t.name ? 'border-indigo-400' : 'border-dark-600'" />
+                <span class="text-[9px] text-dark-500 leading-tight text-center">{{ t.label }}</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -88,10 +110,12 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useAuthStore } from '@/stores/auth'
+import { useThemeStore, THEMES } from '@/stores/theme'
 
 const emit = defineEmits(['close'])
 
 const auth = useAuthStore()
+const themeStore = useThemeStore()
 const saving = ref(false)
 const error = ref('')
 const success = ref(false)

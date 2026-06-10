@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Events\NotificationSent;
 use App\Models\Notification;
 use App\Models\User;
 use Illuminate\Support\Collection;
@@ -12,26 +13,31 @@ class NotificationService
     {
         $userId = $user instanceof User ? $user->id : $user;
 
-        return Notification::create([
+        $notification = Notification::create([
             'user_id' => $userId,
             'type'    => $type,
             'title'   => $title,
             'message' => $message,
             'data'    => $data,
         ]);
+
+        broadcast(new NotificationSent($userId, $notification))->toOthers();
+
+        return $notification;
     }
 
     public function notifyMany(Collection|array $users, string $type, string $title, string $message, array $data = []): void
     {
         foreach ($users as $user) {
             $userId = $user instanceof User ? $user->id : $user;
-            Notification::create([
+            $notification = Notification::create([
                 'user_id' => $userId,
                 'type'    => $type,
                 'title'   => $title,
                 'message' => $message,
                 'data'    => $data,
             ]);
+            broadcast(new NotificationSent($userId, $notification))->toOthers();
         }
     }
 }

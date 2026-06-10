@@ -61,6 +61,21 @@ const router = createRouter({
           name: 'project-files',
           component: () => import('@/Pages/projects/FilesPage.vue'),
         },
+        {
+          path: 'projects/:id/meetings',
+          name: 'project-meetings',
+          component: () => import('@/Pages/projects/MeetingsPage.vue'),
+        },
+        {
+          path: 'projects/:id/notes',
+          name: 'project-notes',
+          component: () => import('@/Pages/projects/NotesPage.vue'),
+        },
+        {
+          path: 'projects/:id/settings',
+          name: 'project-settings',
+          component: () => import('@/Pages/projects/SettingsPage.vue'),
+        },
       ],
     },
     { path: '/:pathMatch(.*)*', redirect: '/' },

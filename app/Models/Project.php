@@ -67,6 +67,16 @@ class Project extends Model
         return $this->hasMany(ActivityLog::class);
     }
 
+    public function notes(): HasMany
+    {
+        return $this->hasMany(ProjectNote::class);
+    }
+
+    public function webhooks(): HasMany
+    {
+        return $this->hasMany(ProjectWebhook::class);
+    }
+
     public function recalculateProgress(): void
     {
         $total = $this->tasks()->count();

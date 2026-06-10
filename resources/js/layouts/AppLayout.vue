@@ -47,6 +47,9 @@
             <NavItem :to="`/projects/${currentProject.id}/kanban`" icon="kanban" label="Kanban" />
             <NavItem :to="`/projects/${currentProject.id}/members`" icon="users" label="Membros" />
             <NavItem :to="`/projects/${currentProject.id}/files`" icon="paperclip" label="Arquivos" />
+            <NavItem :to="`/projects/${currentProject.id}/meetings`" icon="calendar" label="Reuniões" />
+            <NavItem :to="`/projects/${currentProject.id}/notes`" icon="notes" label="Notas" />
+            <NavItem v-if="isLeaderOfCurrentProject" :to="`/projects/${currentProject.id}/settings`" icon="settings" label="Configurações" />
           </div>
         </template>
       </nav>
@@ -80,6 +83,7 @@
 
     <ProfileModal v-if="showProfile" @close="showProfile = false" />
     <Toast />
+    <NotificationPopup ref="notifPopupRef" />
 
     <!-- Overlay mobile -->
     <div v-if="sidebarOpen" @click="sidebarOpen = false"
@@ -115,23 +119,28 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useProjectsStore } from '@/stores/projects'
+import { useNotificationsStore } from '@/stores/notifications'
 import { dashboardApi } from '@/api/projects'
+import echo from '@/echo'
 import NavItem from '@/components/ui/NavItem.vue'
 import ProfileModal from '@/components/ui/ProfileModal.vue'
 import NotificationBell from '@/components/ui/NotificationBell.vue'
+import NotificationPopup from '@/components/ui/NotificationPopup.vue'
 import Toast from '@/components/ui/Toast.vue'
 
 const auth = useAuthStore()
 const projectsStore = useProjectsStore()
+const notifStore = useNotificationsStore()
 const router = useRouter()
 const sidebarOpen = ref(false)
 const sidebarCollapsed = ref(false)
 const showProfile = ref(false)
 const myTasksCount = ref(0)
+const notifPopupRef = ref<InstanceType<typeof NotificationPopup> | null>(null)
 
 const currentProject = computed(() => projectsStore.currentProject)
 const userInitial = computed(() => auth.user?.name?.[0]?.toUpperCase() ?? '?')
@@ -147,11 +156,34 @@ const currentDate = computed(() =>
   new Intl.DateTimeFormat('pt-BR', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date())
 )
 
+let echoChannel: ReturnType<typeof echo.private> | null = null
+
 onMounted(async () => {
   try {
     const res = await dashboardApi.myTasks()
     myTasksCount.value = (res.data as any[]).filter((t: any) => t.status !== 'done').length
   } catch {}
+
+  // Subscribe to personal real-time notification channel
+  if (auth.user?.id) {
+    try {
+      echoChannel = echo.private(`App.Models.User.${auth.user.id}`)
+        .listen('.notification.sent', (e: any) => {
+          notifStore.addIncoming(e)
+          notifPopupRef.value?.push(e)
+        })
+    } catch (err) {
+      // Reverb may not be running in dev — gracefully degrade to polling
+      console.warn('[AcadFlow] Reverb not available, falling back to polling', err)
+    }
+  }
+})
+
+onUnmounted(() => {
+  if (echoChannel) {
+    echo.leave(`App.Models.User.${auth.user?.id}`)
+    echoChannel = null
+  }
 })
 
 async function handleLogout() {

@@ -249,25 +249,75 @@
           </div>
 
           <!-- ── Comments tab ───────────────────────────── -->
-          <div v-if="activeTab === 'comments'" class="p-6 space-y-4">
-            <div ref="commentsContainer" class="space-y-3 max-h-64 overflow-y-auto">
-              <div v-for="c in detail?.comments ?? []" :key="c.id" class="flex gap-2.5">
-                <div class="w-7 h-7 rounded-full bg-indigo-600/30 flex items-center justify-center text-xs font-semibold text-indigo-300 flex-shrink-0">
-                  {{ c.user.name[0] }}
-                </div>
-                <div class="flex-1 bg-dark-700/50 rounded-lg p-3">
-                  <div class="flex items-center gap-2 mb-1">
-                    <span class="text-xs font-semibold text-dark-200">{{ c.user.name }}</span>
-                    <span class="text-xs text-dark-600">{{ timeAgo(c.created_at) }}</span>
+          <div v-if="activeTab === 'comments'" class="flex flex-col" style="height: 420px;">
+            <!-- Scrollable message list -->
+            <div ref="commentsContainer" class="flex-1 overflow-y-auto p-4 space-y-3 min-h-0">
+              <template v-for="c in detail?.comments ?? []" :key="c.id">
+                <!-- Own message — right -->
+                <div v-if="c.user.id === currentUserId" class="flex justify-end items-end gap-2">
+                  <div class="max-w-[72%]">
+                    <div class="bg-indigo-600 text-white px-3.5 py-2 rounded-2xl rounded-br-sm shadow-sm">
+                      <p class="text-sm leading-relaxed whitespace-pre-wrap">{{ c.content }}</p>
+                    </div>
+                    <time class="text-[10px] text-dark-500 mt-0.5 block text-right pr-1">{{ timeAgo(c.created_at) }}</time>
                   </div>
-                  <p class="text-sm text-dark-300">{{ c.content }}</p>
+                  <div class="w-7 h-7 rounded-full bg-indigo-500/30 flex items-center justify-center text-xs font-bold text-indigo-300 flex-shrink-0">
+                    {{ c.user.name[0] }}
+                  </div>
                 </div>
+
+                <!-- Other user — left -->
+                <div v-else class="flex items-end gap-2">
+                  <div
+                    class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                    :style="{ background: userBubbleBg(c.user.id), color: userNameColor(c.user.id) }"
+                  >
+                    {{ c.user.name[0] }}
+                  </div>
+                  <div class="max-w-[72%]">
+                    <p class="text-[10px] font-semibold mb-0.5 pl-1" :style="{ color: userNameColor(c.user.id) }">
+                      {{ c.user.name.split(' ')[0] }}
+                    </p>
+                    <div class="bg-dark-700 text-dark-200 px-3.5 py-2 rounded-2xl rounded-bl-sm shadow-sm">
+                      <p class="text-sm leading-relaxed whitespace-pre-wrap">{{ c.content }}</p>
+                    </div>
+                    <time class="text-[10px] text-dark-500 mt-0.5 block pl-1">{{ timeAgo(c.created_at) }}</time>
+                  </div>
+                </div>
+              </template>
+
+              <div v-if="!detail?.comments?.length" class="flex flex-col items-center gap-2 py-10 text-dark-600">
+                <svg class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                    d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+                <p class="text-sm">Sem comentários ainda. Seja o primeiro!</p>
               </div>
-              <p v-if="!detail?.comments?.length" class="text-sm text-dark-500 text-center py-4">Sem comentários</p>
             </div>
-            <div class="flex gap-2 border-t border-dark-700 pt-4">
-              <input v-model="newComment" class="input flex-1" placeholder="Escreva um comentário..." @keyup.enter="addComment" />
-              <button @click="addComment" :disabled="!newComment.trim()" class="btn-primary">Enviar</button>
+
+            <!-- Message input -->
+            <div class="border-t border-dark-700 p-3 flex-shrink-0">
+              <div class="flex gap-2 items-end">
+                <textarea
+                  v-model="newComment"
+                  :rows="commentRows"
+                  class="input resize-none flex-1 py-2"
+                  placeholder="Escreva um comentário..."
+                  @keydown.enter.exact.prevent="addComment"
+                  @keydown.shift.enter.exact="appendNewline"
+                  @input="adjustCommentRows"
+                />
+                <button
+                  @click="addComment"
+                  :disabled="!newComment.trim()"
+                  class="btn-primary self-end flex-shrink-0 px-3"
+                >
+                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                  </svg>
+                </button>
+              </div>
+              <p class="text-[10px] text-dark-600 mt-1 pl-0.5">Enter envia · Shift+Enter nova linha</p>
             </div>
           </div>
 
@@ -330,6 +380,18 @@
             <p v-else-if="!uploading" class="text-sm text-dark-600 text-center py-2">Nenhum arquivo anexado ainda</p>
           </div>
 
+          <!-- ── Pomodoro tab ────────────────────────────── -->
+          <div v-if="activeTab === 'pomodoro'">
+            <PomodoroTimer
+              v-if="props.task"
+              :project-id="props.projectId"
+              :task-id="props.task.id"
+            />
+            <div v-else class="p-6 text-center text-dark-500 text-sm">
+              Salve a tarefa primeiro para usar o Pomodoro Timer.
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
@@ -341,8 +403,10 @@ import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useTasksStore } from '@/stores/tasks'
 import { useProjectsStore } from '@/stores/projects'
+import { useAuthStore } from '@/stores/auth'
 import { useToast } from '@/composables/useToast'
 import { tasksApi, attachmentsApi } from '@/api/projects'
+import PomodoroTimer from '@/components/tasks/PomodoroTimer.vue'
 import type { Task, TaskStatus, Attachment } from '@/types'
 
 const props = defineProps<{
@@ -355,8 +419,25 @@ const emit = defineEmits(['close', 'saved'])
 
 const store         = useTasksStore()
 const projectsStore = useProjectsStore()
+const authStore     = useAuthStore()
 const toast         = useToast()
 const { currentProject } = storeToRefs(projectsStore)
+
+const currentUserId = computed(() => authStore.user?.id)
+
+// Per-user chat bubble colors (hashed by user id)
+const CHAT_COLORS = [
+  { name: '#6366f1', bg: 'rgba(99,102,241,0.18)' },
+  { name: '#10b981', bg: 'rgba(16,185,129,0.18)' },
+  { name: '#f59e0b', bg: 'rgba(245,158,11,0.18)' },
+  { name: '#3b82f6', bg: 'rgba(59,130,246,0.18)' },
+  { name: '#ec4899', bg: 'rgba(236,72,153,0.18)' },
+  { name: '#8b5cf6', bg: 'rgba(139,92,246,0.18)' },
+  { name: '#14b8a6', bg: 'rgba(20,184,166,0.18)' },
+  { name: '#f97316', bg: 'rgba(249,115,22,0.18)' },
+]
+function userNameColor(id: number) { return CHAT_COLORS[id % CHAT_COLORS.length].name }
+function userBubbleBg(id: number)  { return CHAT_COLORS[id % CHAT_COLORS.length].bg }
 
 const isEdit       = !!props.task
 const saving       = ref(false)
@@ -365,6 +446,7 @@ const error        = ref('')
 const activeTab    = ref('form')
 const detail       = ref<Task | null>(null)
 const newComment   = ref('')
+const commentRows  = ref(1)
 const newCheckItem = ref('')
 const commentsContainer = ref<HTMLElement | null>(null)
 let commentsPollInterval: ReturnType<typeof setInterval> | null = null
@@ -423,6 +505,7 @@ const tabs = [
   { id: 'checklist', label: 'Checklist' },
   { id: 'comments',  label: 'Comentários' },
   { id: 'files',     label: 'Arquivos' },
+  { id: 'pomodoro',  label: '🍅 Pomodoro' },
 ]
 
 const completedChecklistRatio = computed(() => {
@@ -554,7 +637,18 @@ async function addComment() {
   const res = await tasksApi.addComment(props.projectId, props.task.id, newComment.value)
   detail.value?.comments?.push(res.data)
   newComment.value = ''
+  commentRows.value = 1
   nextTick(() => scrollCommentsToBottom())
+}
+
+function appendNewline() {
+  newComment.value += '\n'
+  nextTick(adjustCommentRows)
+}
+
+function adjustCommentRows() {
+  const lines = newComment.value.split('\n').length
+  commentRows.value = Math.min(Math.max(lines, 1), 4)
 }
 
 // ── file upload ───────────────────────────────────────

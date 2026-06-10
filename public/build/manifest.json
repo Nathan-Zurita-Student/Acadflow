@@ -1,36 +1,44 @@
 {
-  "_client-D6OZBcNr.js": {
-    "file": "assets/client-D6OZBcNr.js",
+  "_auth-CeujZsbU.js": {
+    "file": "assets/auth-CeujZsbU.js",
+    "name": "auth",
+    "imports": [
+      "_client-BjvYXM8w.js",
+      "_pinia-BEuR69pO.js"
+    ]
+  },
+  "_client-BjvYXM8w.js": {
+    "file": "assets/client-BjvYXM8w.js",
     "name": "client"
   },
-  "_pinia-M3S5fqhn.js": {
-    "file": "assets/pinia-M3S5fqhn.js",
+  "_pinia-BEuR69pO.js": {
+    "file": "assets/pinia-BEuR69pO.js",
     "name": "pinia",
     "imports": [
-      "_client-D6OZBcNr.js"
+      "_client-BjvYXM8w.js"
     ]
   },
-  "_projects-DFx_ziJ5.js": {
-    "file": "assets/projects-DFx_ziJ5.js",
+  "_projects-B5cmPjH_.js": {
+    "file": "assets/projects-B5cmPjH_.js",
     "name": "projects",
     "imports": [
-      "_client-D6OZBcNr.js"
+      "_client-BjvYXM8w.js"
     ]
   },
-  "_projects-DMyjuyuB.js": {
-    "file": "assets/projects-DMyjuyuB.js",
+  "_projects-YB6LmFWP.js": {
+    "file": "assets/projects-YB6LmFWP.js",
     "name": "projects",
     "imports": [
-      "_client-D6OZBcNr.js",
-      "_pinia-M3S5fqhn.js",
-      "_projects-DFx_ziJ5.js"
+      "_client-BjvYXM8w.js",
+      "_pinia-BEuR69pO.js",
+      "_projects-B5cmPjH_.js"
     ]
   },
-  "_runtime-dom.esm-bundler-CiVBgqwI.js": {
-    "file": "assets/runtime-dom.esm-bundler-CiVBgqwI.js",
+  "_runtime-dom.esm-bundler-kHdh8LER.js": {
+    "file": "assets/runtime-dom.esm-bundler-kHdh8LER.js",
     "name": "runtime-dom.esm-bundler",
     "imports": [
-      "_client-D6OZBcNr.js"
+      "_client-BjvYXM8w.js"
     ]
   },
   "node_modules/vue3-apexcharts/dist/apexcharts.ssr.esm-fe46cd2d.js": {
@@ -40,7 +48,7 @@
     "isDynamicEntry": true
   },
   "resources/css/app.css": {
-    "file": "assets/app-Da2zysC7.css",
+    "file": "assets/app-CYKO8B86.css",
     "name": "app",
     "names": [
       "app.css"
@@ -49,16 +57,17 @@
     "isEntry": true
   },
   "resources/js/app.ts": {
-    "file": "assets/app-DuEtx54c.js",
+    "file": "assets/app-Bv5ADVVZ.js",
     "name": "app",
     "src": "resources/js/app.ts",
     "isEntry": true,
     "imports": [
-      "_client-D6OZBcNr.js",
-      "_runtime-dom.esm-bundler-CiVBgqwI.js",
-      "_pinia-M3S5fqhn.js",
-      "_projects-DFx_ziJ5.js",
-      "_projects-DMyjuyuB.js"
+      "_client-BjvYXM8w.js",
+      "_runtime-dom.esm-bundler-kHdh8LER.js",
+      "_pinia-BEuR69pO.js",
+      "_auth-CeujZsbU.js",
+      "_projects-B5cmPjH_.js",
+      "_projects-YB6LmFWP.js"
     ],
     "dynamicImports": [
       "node_modules/vue3-apexcharts/dist/apexcharts.ssr.esm-fe46cd2d.js",
@@ -67,17 +76,21 @@
     ]
   },
   "resources/js/layouts/AppLayout.vue": {
-    "file": "assets/AppLayout-DqX6AB6x.js",
+    "file": "assets/AppLayout-DUmp0JvF.js",
     "name": "AppLayout",
     "src": "resources/js/layouts/AppLayout.vue",
     "isDynamicEntry": true,
     "imports": [
-      "_client-D6OZBcNr.js",
+      "_client-BjvYXM8w.js",
       "resources/js/app.ts",
-      "_runtime-dom.esm-bundler-CiVBgqwI.js",
-      "_pinia-M3S5fqhn.js",
-      "_projects-DFx_ziJ5.js",
-      "_projects-DMyjuyuB.js"
+      "_runtime-dom.esm-bundler-kHdh8LER.js",
+      "_pinia-BEuR69pO.js",
+      "_auth-CeujZsbU.js",
+      "_projects-B5cmPjH_.js",
+      "_projects-YB6LmFWP.js"
+    ],
+    "css": [
+      "assets/AppLayout-CWehjpBu.css"
     ]
   }
 }

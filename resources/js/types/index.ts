@@ -110,6 +110,35 @@ export interface DashboardStats {
   completion_rate: number
 }
 
+export interface Meeting {
+  id: number
+  title: string
+  description: string | null
+  scheduled_at: string
+  location: string | null
+  notes: string | null
+  creator: Pick<User, 'id' | 'name' | 'avatar'> | null
+  is_past: boolean
+  created_at: string
+}
+
+export interface ProjectNote {
+  id: number
+  title: string
+  content: string | null
+  author: Pick<User, 'id' | 'name' | 'avatar'> | null
+  created_at: string
+  updated_at: string
+}
+
+export interface ProjectWebhook {
+  id: number
+  url: string
+  events: string[]
+  active: boolean
+  created_at: string
+}
+
 export interface ProjectDashboard {
   project: Project
   tasks_total: number

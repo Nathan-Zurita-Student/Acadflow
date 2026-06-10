@@ -14,6 +14,15 @@ export const useNotificationsStore = defineStore('notifications', () => {
     unread.value = data.unread
   }
 
+  // Called by real-time WebSocket when a new notification arrives
+  function addIncoming(n: Omit<AppNotification, 'read_at'> & { read_at?: string | null }) {
+    const notification: AppNotification = { ...n, read_at: null }
+    items.value.unshift(notification)
+    // keep list to 30 most recent
+    if (items.value.length > 30) items.value.splice(30)
+    unread.value++
+  }
+
   async function markRead(id: number) {
     await notificationsApi.markRead(id)
     const n = items.value.find(i => i.id === id)
@@ -26,5 +35,5 @@ export const useNotificationsStore = defineStore('notifications', () => {
     unread.value = 0
   }
 
-  return { items, unread, hasUnread, fetch, markRead, markAllRead }
+  return { items, unread, hasUnread, fetch, addIncoming, markRead, markAllRead }
 })

@@ -3,6 +3,107 @@
 @tailwind components;
 @tailwind utilities;
 
+/* =====================================================================
+   THEME PALETTES
+   Variables hold space-separated RGB channels so Tailwind's opacity
+   modifiers (e.g. bg-dark-800/50) work correctly via:
+     rgb(var(--d-800) / 0.5)
+   ===================================================================== */
+
+/* Theme 1 — Dark Ocean (default) */
+:root,
+[data-theme="ocean"] {
+  --d-50:  248 250 252;
+  --d-100: 241 245 249;
+  --d-200: 226 232 240;
+  --d-300: 203 213 225;
+  --d-400: 148 163 184;
+  --d-500: 100 116 139;
+  --d-600:  71  85 105;
+  --d-700:  51  65  85;
+  --d-750:  41  53  72;
+  --d-800:  30  41  59;
+  --d-900:  15  23  42;
+  --d-950:   8  15  30;
+  --scrollbar-track: 15 23 42;
+  --scrollbar-thumb: 71 85 105;
+}
+
+/* Theme 2 — Light Cloud */
+[data-theme="light"] {
+  --d-50:   15  23  42;
+  --d-100:  30  41  59;
+  --d-200:  51  65  85;
+  --d-300:  71  85 105;
+  --d-400: 100 116 139;
+  --d-500: 148 163 184;
+  --d-600: 203 213 225;
+  --d-700: 226 232 240;
+  --d-750: 234 240 246;
+  --d-800: 241 245 249;
+  --d-900: 248 250 252;
+  --d-950: 255 255 255;
+  --scrollbar-track: 241 245 249;
+  --scrollbar-thumb: 203 213 225;
+}
+
+/* Theme 3 — Dark Forest */
+[data-theme="forest"] {
+  --d-50:  236 251 240;
+  --d-100: 209 241 218;
+  --d-200: 167 220 183;
+  --d-300: 122 193 143;
+  --d-400:  78 160 100;
+  --d-500:  55 120  74;
+  --d-600:  38  90  55;
+  --d-700:  26  62  38;
+  --d-750:  20  48  29;
+  --d-800:  15  37  24;
+  --d-900:  10  26  15;
+  --d-950:   5  13  10;
+  --scrollbar-track: 10 26 15;
+  --scrollbar-thumb: 38 90 55;
+}
+
+/* Theme 4 — Midnight Purple */
+[data-theme="purple"] {
+  --d-50:  244 242 251;
+  --d-100: 229 224 245;
+  --d-200: 205 195 237;
+  --d-300: 176 155 222;
+  --d-400: 143 114 204;
+  --d-500: 107  75 181;
+  --d-600:  74  40 148;
+  --d-700:  50  27 107;
+  --d-750:  39  21  88;
+  --d-800:  30  16  69;
+  --d-900:  21  10  48;
+  --d-950:  13   5  32;
+  --scrollbar-track: 21 10 48;
+  --scrollbar-thumb: 74 40 148;
+}
+
+/* Theme 5 — Amber Sunset */
+[data-theme="sunset"] {
+  --d-50:  250 242 232;
+  --d-100: 240 220 197;
+  --d-200: 223 192 160;
+  --d-300: 196 152 104;
+  --d-400: 160 112  64;
+  --d-500: 122  77  35;
+  --d-600:  94  53  21;
+  --d-700:  66  37  14;
+  --d-750:  52  28  10;
+  --d-800:  40  22   8;
+  --d-900:  28  16   5;
+  --d-950:  21  10   3;
+  --scrollbar-track: 28 16 5;
+  --scrollbar-thumb: 94 53 21;
+}
+
+/* =====================================================================
+   BASE
+   ===================================================================== */
 @layer base {
   * { @apply border-dark-700; }
   body {
@@ -10,11 +111,14 @@
     font-feature-settings: "cv11", "ss01";
   }
   ::-webkit-scrollbar { width: 6px; height: 6px; }
-  ::-webkit-scrollbar-track { @apply bg-dark-900; }
-  ::-webkit-scrollbar-thumb { @apply bg-dark-600 rounded-full; }
-  ::-webkit-scrollbar-thumb:hover { @apply bg-dark-500; }
+  ::-webkit-scrollbar-track  { background: rgb(var(--scrollbar-track)); }
+  ::-webkit-scrollbar-thumb  { background: rgb(var(--scrollbar-thumb)); border-radius: 9999px; }
+  ::-webkit-scrollbar-thumb:hover { filter: brightness(1.2); }
 }
 
+/* =====================================================================
+   COMPONENTS
+   ===================================================================== */
 @layer components {
   .btn-primary {
     @apply inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500

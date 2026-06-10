@@ -1,5 +1,5 @@
 import api from './client'
-import type { Project, ProjectDashboard, MemberStats, Task, Attachment } from '@/types'
+import type { Project, ProjectDashboard, MemberStats, Task, Attachment, Meeting, ProjectNote, ProjectWebhook } from '@/types'
 
 export const projectsApi = {
   list: () => api.get<Project[]>('/projects'),
@@ -77,4 +77,26 @@ export const inviteApi = {
 export const timeApi = {
   log: (projectId: number, taskId: number, seconds: number) =>
     api.post<{ time_seconds: number }>(`/projects/${projectId}/tasks/${taskId}/time`, { seconds }),
+}
+
+export const meetingsApi = {
+  list:   (projectId: number) => api.get<Meeting[]>(`/projects/${projectId}/meetings`),
+  create: (projectId: number, data: Partial<Meeting>) => api.post<Meeting>(`/projects/${projectId}/meetings`, data),
+  update: (projectId: number, id: number, data: Partial<Meeting>) => api.put<Meeting>(`/projects/${projectId}/meetings/${id}`, data),
+  delete: (projectId: number, id: number) => api.delete(`/projects/${projectId}/meetings/${id}`),
+}
+
+export const notesApi = {
+  list:   (projectId: number) => api.get<ProjectNote[]>(`/projects/${projectId}/notes`),
+  create: (projectId: number, data: { title: string; content?: string }) => api.post<ProjectNote>(`/projects/${projectId}/notes`, data),
+  update: (projectId: number, id: number, data: { title?: string; content?: string }) => api.put<ProjectNote>(`/projects/${projectId}/notes/${id}`, data),
+  delete: (projectId: number, id: number) => api.delete(`/projects/${projectId}/notes/${id}`),
+}
+
+export const webhooksApi = {
+  list:   (projectId: number) => api.get<ProjectWebhook[]>(`/projects/${projectId}/webhooks`),
+  create: (projectId: number, data: { url: string; events: string[] }) => api.post<ProjectWebhook>(`/projects/${projectId}/webhooks`, data),
+  update: (projectId: number, id: number, data: Partial<ProjectWebhook>) => api.put<ProjectWebhook>(`/projects/${projectId}/webhooks/${id}`, data),
+  delete: (projectId: number, id: number) => api.delete(`/projects/${projectId}/webhooks/${id}`),
+  test:   (projectId: number, id: number) => api.post<{ success: boolean; message: string }>(`/projects/${projectId}/webhooks/${id}/test`),
 }

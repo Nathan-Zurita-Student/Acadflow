@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Project;
+use App\Models\Task;
 use App\Services\ProjectService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class DashboardController extends Controller
 {
@@ -16,6 +18,16 @@ class DashboardController extends Controller
     {
         $user = $request->user();
 
+        // Cache dashboard stats for 5 minutes — invalidated by TaskObserver on changes
+        $data = Cache::remember("dashboard:{$user->id}", 300, function () use ($user) {
+            return $this->buildDashboard($user);
+        });
+
+        return response()->json($data);
+    }
+
+    private function buildDashboard($user): array
+    {
         $projectIds = Project::where('owner_id', $user->id)
             ->orWhereHas('members', fn($q) => $q->where('users.id', $user->id))
             ->pluck('id');
@@ -25,16 +37,11 @@ class DashboardController extends Controller
             ->withCount('tasks')
             ->get();
 
-        $totalTasks = 0;
-        $doneTasks = 0;
-        $overdueTasks = 0;
-
-        foreach ($projects as $project) {
-            $tasks = $project->tasks()->get();
-            $totalTasks += $tasks->count();
-            $doneTasks += $tasks->where('status', 'done')->count();
-            $overdueTasks += $tasks->filter(fn($t) => $t->isOverdue())->count();
-        }
+        // Eager load all tasks in one query instead of N queries inside foreach
+        $allTasks = \App\Models\Task::whereIn('project_id', $projectIds)->get();
+        $totalTasks   = $allTasks->count();
+        $doneTasks    = $allTasks->where('status', 'done')->count();
+        $overdueTasks = $allTasks->filter(fn($t) => $t->isOverdue())->count();
 
         $weeklyData = [];
         for ($i = 6; $i >= 0; $i--) {
@@ -92,19 +99,19 @@ class DashboardController extends Controller
                 'project'    => ['id' => $t->project->id, 'name' => $t->project->name],
             ]);
 
-        return response()->json([
+        return [
             'stats' => [
-                'total_projects' => $projects->count(),
-                'total_tasks' => $totalTasks,
-                'done_tasks' => $doneTasks,
-                'overdue_tasks' => $overdueTasks,
+                'total_projects'  => $projects->count(),
+                'total_tasks'     => $totalTasks,
+                'done_tasks'      => $doneTasks,
+                'overdue_tasks'   => $overdueTasks,
                 'completion_rate' => $totalTasks > 0 ? round(($doneTasks / $totalTasks) * 100) : 0,
             ],
-            'projects' => $projectsWithRisk,
+            'projects'           => $projectsWithRisk,
             'weekly_completions' => $weeklyData,
-            'recent_activity' => $recentActivity,
-            'upcoming' => $upcoming,
-        ]);
+            'recent_activity'    => $recentActivity,
+            'upcoming'           => $upcoming,
+        ];
     }
 
     public function myTasks(Request $request): JsonResponse

@@ -4,9 +4,14 @@ use App\Http\Controllers\Api\AttachmentController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\InviteController;
+use App\Http\Controllers\Api\MeetingController;
+use App\Http\Controllers\Api\NoteController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\ProjectController;
 use App\Http\Controllers\Api\TaskController;
+use App\Http\Controllers\Api\WebhookController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Route;
 
 // Public — no auth required
@@ -21,6 +26,11 @@ Route::prefix('auth')->group(function () {
         Route::get('me', [AuthController::class, 'me']);
         Route::post('profile', [AuthController::class, 'updateProfile']);
     });
+});
+
+// Broadcasting auth — lets Echo authenticate private channels using Bearer tokens
+Route::middleware('auth:sanctum')->post('broadcasting/auth', function (Request $request) {
+    return Broadcast::auth($request);
 });
 
 Route::middleware('auth:sanctum')->group(function () {
@@ -64,6 +74,25 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('{project}/attachments/{attachment}/view', [AttachmentController::class, 'view']);
         Route::get('{project}/attachments/{attachment}/download', [AttachmentController::class, 'download']);
         Route::delete('{project}/attachments/{attachment}', [AttachmentController::class, 'destroy']);
+
+        // Meetings
+        Route::get('{project}/meetings', [MeetingController::class, 'index']);
+        Route::post('{project}/meetings', [MeetingController::class, 'store']);
+        Route::put('{project}/meetings/{meeting}', [MeetingController::class, 'update']);
+        Route::delete('{project}/meetings/{meeting}', [MeetingController::class, 'destroy']);
+
+        // Notes
+        Route::get('{project}/notes', [NoteController::class, 'index']);
+        Route::post('{project}/notes', [NoteController::class, 'store']);
+        Route::put('{project}/notes/{note}', [NoteController::class, 'update']);
+        Route::delete('{project}/notes/{note}', [NoteController::class, 'destroy']);
+
+        // Webhooks
+        Route::get('{project}/webhooks', [WebhookController::class, 'index']);
+        Route::post('{project}/webhooks', [WebhookController::class, 'store']);
+        Route::put('{project}/webhooks/{webhook}', [WebhookController::class, 'update']);
+        Route::delete('{project}/webhooks/{webhook}', [WebhookController::class, 'destroy']);
+        Route::post('{project}/webhooks/{webhook}/test', [WebhookController::class, 'test']);
     });
 
     Route::post('invite/{token}/accept', [InviteController::class, 'accept']);

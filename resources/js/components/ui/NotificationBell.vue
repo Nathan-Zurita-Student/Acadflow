@@ -74,16 +74,22 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { onClickOutside } from '@vueuse/core'
 import { useNotificationsStore } from '@/stores/notifications'
+import { usePolling } from '@/composables/usePolling'
 import type { AppNotification } from '@/api/notifications'
 
 const store  = useNotificationsStore()
 const router = useRouter()
 const open   = ref(false)
 const containerRef = ref<HTMLElement | null>(null)
-let pollInterval: ReturnType<typeof setInterval> | null = null
+
+// Fallback polling every 60s — real-time handled by Reverb WebSocket
+usePolling(() => store.fetch(), 60_000)
+
+onClickOutside(containerRef, () => { open.value = false })
 
 function toggle() { open.value = !open.value }
 
@@ -96,16 +102,11 @@ function handleClick(n: AppNotification) {
   open.value = false
 }
 
-function onOutsideClick(e: MouseEvent) {
-  if (containerRef.value && !containerRef.value.contains(e.target as Node)) {
-    open.value = false
-  }
-}
-
 function typeEmoji(type: string) {
   const map: Record<string, string> = {
     task_comment: '💬', task_assigned: '📌', task_approved: '✅',
     task_rejected: '❌', file_uploaded: '📎', project_member_added: '🎓',
+    meeting_scheduled: '📅',
   }
   return map[type] ?? '🔔'
 }
@@ -115,6 +116,7 @@ function iconBg(type: string) {
   if (type === 'task_rejected') return 'bg-red-500/15'
   if (type === 'task_comment') return 'bg-blue-500/15'
   if (type === 'file_uploaded') return 'bg-purple-500/15'
+  if (type === 'meeting_scheduled') return 'bg-teal-500/15'
   return 'bg-indigo-500/15'
 }
 
@@ -125,29 +127,4 @@ function timeAgo(date: string) {
   if (diff < 86400) return `${Math.floor(diff / 3600)}h atrás`
   return `${Math.floor(diff / 86400)}d atrás`
 }
-
-function startPoll() {
-  if (pollInterval) return
-  pollInterval = setInterval(() => store.fetch(), 30000)
-}
-function stopPoll() {
-  if (pollInterval) { clearInterval(pollInterval); pollInterval = null }
-}
-function onVisibilityChange() {
-  if (document.hidden) stopPoll()
-  else { store.fetch(); startPoll() }
-}
-
-onMounted(() => {
-  store.fetch()
-  document.addEventListener('mousedown', onOutsideClick)
-  document.addEventListener('visibilitychange', onVisibilityChange)
-  startPoll()
-})
-
-onUnmounted(() => {
-  document.removeEventListener('mousedown', onOutsideClick)
-  document.removeEventListener('visibilitychange', onVisibilityChange)
-  stopPoll()
-})
 </script>
