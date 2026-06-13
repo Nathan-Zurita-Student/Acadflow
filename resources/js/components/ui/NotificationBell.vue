@@ -204,6 +204,7 @@ function typeEmoji(type: string) {
     meeting_scheduled: '📅', project_invitation: '✉️',
     project_invitation_accepted: '🎉', project_invitation_declined: '😔',
     task_mention: '📣', task_status: '🔄', task_priority: '⚡', project_removed: '🚪',
+    task_approval_requested: '⏳', project_status: '🚦', project_member_joined: '👋',
   }
   return map[type] ?? '🔔'
 }
@@ -215,9 +216,11 @@ function iconBg(type: string) {
   if (type === 'task_mention') return 'bg-accent-500/15'
   if (type === 'task_priority') return 'bg-orange-500/15'
   if (type === 'project_removed') return 'bg-red-500/15'
+  if (type === 'task_approval_requested') return 'bg-yellow-500/15'
+  if (type === 'project_status') return 'bg-teal-500/15'
   if (type === 'file_uploaded') return 'bg-purple-500/15'
   if (type === 'meeting_scheduled') return 'bg-teal-500/15'
-  if (type === 'project_invitation') return 'bg-amber-500/15'
+  if (type === 'project_invitation' || type === 'project_member_joined' || type === 'project_member_added') return 'bg-amber-500/15'
   return 'bg-accent-500/15'
 }
 

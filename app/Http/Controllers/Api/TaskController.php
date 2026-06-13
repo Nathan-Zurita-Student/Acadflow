@@ -194,6 +194,16 @@ class TaskController extends Controller
 
         $this->projectService->logActivity($project, $request->user(), 'submitted_approval', 'Task', $task->id, ['title' => $task->title]);
 
+        // Notifica o dono e os líderes de que há uma tarefa aguardando aprovação
+        $leaderIds = collect([$project->owner_id])
+            ->merge($project->members()->wherePivot('role', 'leader')->pluck('users.id'))
+            ->unique()->filter(fn($id) => $id && $id !== $request->user()->id);
+        foreach ($leaderIds as $uid) {
+            $this->notifications->notify($uid, 'task_approval_requested', 'Tarefa aguardando aprovação ⏳',
+                "{$request->user()->name} enviou \"{$task->title}\" para sua aprovação.",
+                ['project_id' => $project->id, 'task_id' => $task->id]);
+        }
+
         $this->broadcastTaskUpdated($project, $task);
 
         return response()->json(['approval_status' => 'pending']);

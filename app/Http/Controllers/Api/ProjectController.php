@@ -56,10 +56,25 @@ class ProjectController extends Controller
 
         $data = $request->validated();
 
+        $oldStatus = $project->status;
+
         $project = $this->projectService->updateProject($project, $data);
         $project->load(['owner', 'members']);
 
         $this->projectService->logActivity($project, $request->user(), 'updated_project', 'Project', $project->id);
+
+        // Notifica membros quando o status do projeto muda
+        if (array_key_exists('status', $data) && $data['status'] && $data['status'] !== $oldStatus) {
+            $memberIds = $project->members->pluck('id')->push($project->owner_id)
+                ->unique()->filter(fn($id) => $id && $id !== $request->user()->id);
+            $label = $this->projectStatusLabel($project->status);
+            foreach ($memberIds as $uid) {
+                $this->notifications->notify($uid, 'project_status', 'Status do projeto alterado 🚦',
+                    "O projeto \"{$project->name}\" mudou para {$label}.",
+                    ['project_id' => $project->id]);
+            }
+            $this->projectService->broadcastDashboardStaleForUsers($memberIds->push($request->user()->id));
+        }
 
         return response()->json($this->projectResource($project, $request->user()->id));
     }
@@ -208,6 +223,17 @@ class ProjectController extends Controller
             $data[] = ['date' => $date, 'count' => $count];
         }
         return $data;
+    }
+
+    private function projectStatusLabel(string $status): string
+    {
+        return [
+            'planning'  => 'Planejamento',
+            'active'    => 'Ativo',
+            'paused'    => 'Pausado',
+            'completed' => 'Concluído',
+            'cancelled' => 'Cancelado',
+        ][$status] ?? $status;
     }
 
     private function projectResource(Project $project, int $userId): array

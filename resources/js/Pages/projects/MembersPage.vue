@@ -2,12 +2,12 @@
   <div class="space-y-6 animate-fade-in">
 
     <!-- Header -->
-    <div class="flex items-center justify-between">
+    <div class="flex flex-wrap items-center justify-between gap-3">
       <div>
         <h1 class="text-xl font-bold text-white">Membros</h1>
         <p class="text-dark-400 text-sm">{{ stats.length }} membro{{ stats.length !== 1 ? 's' : '' }}</p>
       </div>
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-2 flex-wrap">
         <template v-if="canManage">
           <button v-if="currentProject?.is_owner" @click="showLinkModal = true"
             class="inline-flex items-center gap-2 px-4 py-2 bg-accent-600/15 hover:bg-accent-600/25 text-accent-400 text-sm font-medium rounded-lg border border-accent-600/25 transition-all duration-150">

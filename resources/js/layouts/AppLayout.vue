@@ -88,7 +88,6 @@
 
     <ProfileModal v-if="showProfile" @close="showProfile = false" />
     <Toast />
-    <NotificationPopup ref="notifPopupRef" />
 
     <!-- Overlay mobile -->
     <div v-if="sidebarOpen" @click="sidebarOpen = false"
@@ -97,7 +96,7 @@
     <!-- Main content -->
     <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
       <!-- Topbar -->
-      <header class="flex items-center gap-4 px-6 py-3.5 bg-dark-900/80 backdrop-blur border-b border-dark-700/60 flex-shrink-0">
+      <header class="flex items-center gap-3 sm:gap-4 px-4 sm:px-6 py-3.5 bg-dark-900/80 backdrop-blur border-b border-dark-700/60 flex-shrink-0">
         <button @click="sidebarOpen = !sidebarOpen" class="lg:hidden p-2 rounded-lg hover:bg-dark-700">
           <svg class="w-5 h-5 text-dark-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
@@ -116,7 +115,7 @@
       </header>
 
       <!-- Page content -->
-      <main class="flex-1 overflow-y-auto p-6">
+      <main class="flex-1 overflow-y-auto p-4 sm:p-6">
         <RouterView />
       </main>
     </div>
@@ -124,7 +123,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useProjectsStore } from '@/stores/projects'
@@ -137,7 +136,6 @@ import NavItem from '@/components/ui/NavItem.vue'
 import UserAvatar from '@/components/ui/UserAvatar.vue'
 import ProfileModal from '@/components/ui/ProfileModal.vue'
 import NotificationBell from '@/components/ui/NotificationBell.vue'
-import NotificationPopup from '@/components/ui/NotificationPopup.vue'
 import Toast from '@/components/ui/Toast.vue'
 
 const auth = useAuthStore()
@@ -150,7 +148,6 @@ const sidebarOpen = ref(false)
 const sidebarCollapsed = ref(false)
 const showProfile = ref(false)
 const myTasksCount = ref(0)
-const notifPopupRef = ref<InstanceType<typeof NotificationPopup> | null>(null)
 
 const currentProject = computed(() => projectsStore.currentProject)
 
@@ -164,12 +161,6 @@ const isLeaderOfCurrentProject = computed(() => {
 const currentDate = computed(() =>
   new Intl.DateTimeFormat('pt-BR', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date())
 )
-
-// Trigger popups for notifications that arrive via polling
-watch(() => notifStore.popupQueue.length, () => {
-  const queued = notifStore.drainPopupQueue()
-  queued.forEach(n => notifPopupRef.value?.push(n))
-})
 
 let echoChannel: ReturnType<typeof echo.private> | null = null
 
@@ -199,7 +190,6 @@ onMounted(async () => {
       echoChannel = echo.private(`App.Models.User.${auth.user.id}`)
         .listen('.notification.sent', (e: any) => {
           notifStore.addIncoming(e)
-          notifPopupRef.value?.push(e)
           browserNotify(e, () => navigateToNotification(e.data))
         })
         .listen('.dashboard.stale', () => {

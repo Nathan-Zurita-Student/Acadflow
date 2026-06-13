@@ -111,14 +111,14 @@
             ref="editorRef"
             v-model="selected.content"
             class="flex-1 resize-none bg-transparent text-dark-300 text-sm leading-relaxed p-5 outline-none placeholder-dark-700 font-mono min-w-0"
-            :class="viewMode === 'split' ? 'border-r border-dark-700 md:w-1/2' : ''"
             placeholder="Comece a escrever... (suporta Markdown: # título, **negrito**, - lista, - [ ] checklist, > citação, `código`, | tabela |)"
             @input="debounceSave"
             @keydown="onEditorKeydown"
           />
           <div
             v-if="viewMode !== 'edit'"
-            class="md-preview flex-1 overflow-y-auto p-5 text-sm text-dark-200 min-w-0"
+            class="md-preview overflow-y-auto p-5 text-sm text-dark-200 min-w-0"
+            :class="viewMode === 'split' ? 'hidden md:block md:flex-1 border-l border-dark-700' : 'flex-1'"
             v-html="renderedContent"
           />
         </div>

@@ -7,12 +7,16 @@ use App\Models\Project;
 use App\Models\ProjectInvitation;
 use App\Models\User;
 use App\Services\NotificationService;
+use App\Services\ProjectService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class ProjectInvitationController extends Controller
 {
-    public function __construct(private NotificationService $notifications) {}
+    public function __construct(
+        private NotificationService $notifications,
+        private ProjectService $projectService,
+    ) {}
 
     public function store(Request $request, Project $project): JsonResponse
     {
@@ -94,6 +98,10 @@ class ProjectInvitationController extends Controller
                 "{$request->user()->name} aceitou seu convite para o projeto \"{$invitation->project->name}\".",
                 ['project_id' => $invitation->project_id]
             );
+
+            // Atualiza a lista de participantes e os dashboards em tempo real
+            $this->projectService->broadcastMembersChanged($invitation->project);
+            $this->projectService->broadcastDashboardStale($invitation->project);
         } else {
             $invitation->update(['status' => ProjectInvitation::STATUS_DECLINED]);
 

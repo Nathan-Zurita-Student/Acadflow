@@ -21,8 +21,8 @@ if (isSupported && typeof navigator !== 'undefined' && navigator.permissions?.qu
 
 /**
  * Notificações nativas do navegador (Notification API).
- * Requer "contexto seguro" (HTTPS ou localhost). `notify()` só dispara o aviso
- * do SO quando a aba está oculta (quando visível, o popup in-app já cobre).
+ * Requer "contexto seguro" (HTTPS ou localhost). É o único mecanismo de
+ * notificação do app (não há mais popup in-app), então dispara sempre.
  */
 export function useBrowserNotifications() {
   async function requestPermission(): Promise<NotificationPermission> {
@@ -43,7 +43,6 @@ export function useBrowserNotifications() {
   function notify(n: AppNotification, onClick?: () => void) {
     // Lê o estado AO VIVO (não o cache) — funciona mesmo se a permissão foi dada nas configs do site
     if (!isSupported || Notification.permission !== 'granted') return
-    if (!document.hidden) return
 
     try {
       const notification = new Notification(n.title, {

@@ -15,10 +15,10 @@
         </div>
 
         <!-- Tabs -->
-        <div v-if="isEdit" class="flex items-center gap-1 px-6 pt-3 flex-shrink-0">
+        <div v-if="isEdit" class="flex items-center gap-1 px-4 sm:px-6 pt-3 flex-shrink-0 overflow-x-auto">
           <button v-for="tab in tabs" :key="tab.id"
             @click="activeTab = tab.id"
-            :class="['px-3 py-1.5 text-sm rounded-lg transition-colors flex items-center gap-1.5',
+            :class="['px-3 py-1.5 text-sm rounded-lg transition-colors flex items-center gap-1.5 flex-shrink-0 whitespace-nowrap',
               activeTab === tab.id ? 'bg-dark-700 text-white font-medium' : 'text-dark-400 hover:text-dark-200']">
             {{ tab.label }}
             <span v-if="tab.id === 'files' && attachments.length"
@@ -38,7 +38,7 @@
           <button v-if="isLeader && props.task"
             @click="duplicateTask"
             :disabled="duplicating"
-            class="ml-auto text-xs flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-dark-700 text-dark-400 hover:text-dark-200 hover:border-dark-600 transition-colors disabled:opacity-50"
+            class="ml-auto text-xs flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-dark-700 text-dark-400 hover:text-dark-200 hover:border-dark-600 transition-colors disabled:opacity-50 flex-shrink-0"
             title="Duplicar tarefa">
             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -245,7 +245,7 @@
           </div>
 
           <!-- ── Comments tab (WhatsApp-style) ───────────── -->
-          <div v-if="activeTab === 'comments'" class="flex flex-col" style="height: 460px;">
+          <div v-if="activeTab === 'comments'" class="flex flex-col h-[60vh] sm:h-[460px]">
 
             <!-- Presence / typing bar -->
             <div class="flex items-center justify-between px-3 py-1.5 border-b border-dark-700/50 bg-dark-800/40 text-[11px] min-h-[28px] flex-shrink-0">
@@ -616,7 +616,7 @@ const tabs = [
   { id: 'checklist', label: 'Checklist' },
   { id: 'comments',  label: 'Comentários' },
   { id: 'files',     label: 'Arquivos' },
-  { id: 'pomodoro',  label: 'Método de Pomodoro' },
+  { id: 'pomodoro',  label: 'Pomodoro' },
 ]
 
 // ── chat helpers ──────────────────────────────────────
