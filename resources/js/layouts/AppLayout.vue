@@ -129,6 +129,8 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useProjectsStore } from '@/stores/projects'
 import { useNotificationsStore } from '@/stores/notifications'
+import { useRealtimeStore } from '@/stores/realtime'
+import { useBrowserNotifications } from '@/composables/useBrowserNotifications'
 import { dashboardApi } from '@/api/projects'
 import echo from '@/echo'
 import NavItem from '@/components/ui/NavItem.vue'
@@ -141,6 +143,8 @@ import Toast from '@/components/ui/Toast.vue'
 const auth = useAuthStore()
 const projectsStore = useProjectsStore()
 const notifStore = useNotificationsStore()
+const realtimeStore = useRealtimeStore()
+const { requestPermission, notify: browserNotify } = useBrowserNotifications()
 const router = useRouter()
 const sidebarOpen = ref(false)
 const sidebarCollapsed = ref(false)
@@ -169,11 +173,25 @@ watch(() => notifStore.popupQueue.length, () => {
 
 let echoChannel: ReturnType<typeof echo.private> | null = null
 
-onMounted(async () => {
+function navigateToNotification(data: Record<string, any> | null | undefined) {
+  if (data?.project_id) {
+    const base = `/projects/${data.project_id}`
+    router.push(data.task_id ? `${base}/kanban` : base)
+  }
+}
+
+async function refreshMyTasksBadge() {
   try {
     const res = await dashboardApi.myTasks()
     myTasksCount.value = (res.data as any[]).filter((t: any) => t.status !== 'done').length
   } catch {}
+}
+
+onMounted(async () => {
+  refreshMyTasksBadge()
+
+  // Pede as permissões necessárias assim que o app carrega (notificações)
+  requestPermission()
 
   // Subscribe to personal real-time notification channel
   if (auth.user?.id) {
@@ -182,6 +200,11 @@ onMounted(async () => {
         .listen('.notification.sent', (e: any) => {
           notifStore.addIncoming(e)
           notifPopupRef.value?.push(e)
+          browserNotify(e, () => navigateToNotification(e.data))
+        })
+        .listen('.dashboard.stale', () => {
+          realtimeStore.markDashboardStale()
+          refreshMyTasksBadge()
         })
     } catch (err) {
       // Reverb may not be running in dev — gracefully degrade to polling

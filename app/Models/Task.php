@@ -85,4 +85,16 @@ class Task extends Model
     {
         return $this->due_date && $this->due_date->isPast() && $this->status !== 'done';
     }
+
+    /**
+     * Fonte única de verdade para "atribuída a este usuário":
+     * cobre tanto o assignee principal (assignee_id) quanto o pivot assignees.
+     */
+    public function scopeAssignedTo($query, int $userId)
+    {
+        return $query->where(function ($q) use ($userId) {
+            $q->where('assignee_id', $userId)
+              ->orWhereHas('assignees', fn($a) => $a->where('users.id', $userId));
+        });
+    }
 }

@@ -49,5 +49,27 @@ export const useTasksStore = defineStore('tasks', () => {
       .sort((a: Task, b: Task) => a.position - b.position)
   }
 
-  return { tasks, currentTask, loading, fetchTasks, fetchTask, createTask, updateTask, deleteTask, getByStatus }
+  // ── Aplicação de eventos em tempo real (sem chamadas à API) ──
+  function upsertTask(task: Task) {
+    const idx = tasks.value.findIndex((t: Task) => t.id === task.id)
+    if (idx !== -1) tasks.value[idx] = { ...tasks.value[idx], ...task }
+    else tasks.value.push(task)
+  }
+
+  function removeTask(taskId: number) {
+    tasks.value = tasks.value.filter((t: Task) => t.id !== taskId)
+  }
+
+  function applyReorder(updates: Array<{ id: number; status: TaskStatus; position: number }>) {
+    for (const u of updates) {
+      const t = tasks.value.find((x: Task) => x.id === u.id)
+      if (t) { t.status = u.status; t.position = u.position }
+    }
+  }
+
+  return {
+    tasks, currentTask, loading,
+    fetchTasks, fetchTask, createTask, updateTask, deleteTask, getByStatus,
+    upsertTask, removeTask, applyReorder,
+  }
 })

@@ -7,21 +7,31 @@
         <h1 class="text-xl font-bold text-white">Membros</h1>
         <p class="text-dark-400 text-sm">{{ stats.length }} membro{{ stats.length !== 1 ? 's' : '' }}</p>
       </div>
-      <div v-if="canManage" class="flex items-center gap-2">
-        <button v-if="currentProject?.is_owner" @click="showLinkModal = true"
-          class="inline-flex items-center gap-2 px-4 py-2 bg-accent-600/15 hover:bg-accent-600/25 text-accent-400 text-sm font-medium rounded-lg border border-accent-600/25 transition-all duration-150">
+      <div class="flex items-center gap-2">
+        <template v-if="canManage">
+          <button v-if="currentProject?.is_owner" @click="showLinkModal = true"
+            class="inline-flex items-center gap-2 px-4 py-2 bg-accent-600/15 hover:bg-accent-600/25 text-accent-400 text-sm font-medium rounded-lg border border-accent-600/25 transition-all duration-150">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+            </svg>
+            Gerar Link
+          </button>
+          <button @click="showInvite = true" class="btn-primary">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+            </svg>
+            Convidar
+          </button>
+        </template>
+        <button v-if="currentProject && !currentProject.is_owner" @click="leaving = true"
+          class="inline-flex items-center gap-2 px-4 py-2 bg-red-600/10 hover:bg-red-600/20 text-red-400 text-sm font-medium rounded-lg border border-red-600/20 transition-all duration-150">
           <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
           </svg>
-          Gerar Link
-        </button>
-        <button @click="showInvite = true" class="btn-primary">
-          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-          </svg>
-          Convidar
+          Sair do projeto
         </button>
       </div>
     </div>
@@ -167,15 +177,53 @@
       </div>
     </div>
   </Teleport>
+
+  <!-- Leave confirmation -->
+  <Teleport to="body">
+    <div
+      v-if="leaving"
+      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in"
+      @click.self="leaving = false"
+    >
+      <div class="w-full max-w-sm bg-dark-800 border border-dark-700 rounded-2xl shadow-2xl p-6 animate-slide-up">
+        <div class="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center mb-4">
+          <svg class="w-5 h-5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+          </svg>
+        </div>
+        <h3 class="font-semibold text-white mb-1">Sair do projeto</h3>
+        <p class="text-sm text-dark-400 mb-6">
+          Tem certeza que deseja sair de
+          <span class="text-white font-medium">{{ currentProject?.name }}</span>?
+          Você perderá o acesso até ser convidado novamente.
+        </p>
+        <div class="flex gap-3">
+          <button @click="leaving = false" class="btn-secondary flex-1 justify-center">
+            Cancelar
+          </button>
+          <button
+            @click="leaveProject"
+            :disabled="leaveLoading"
+            class="flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 disabled:opacity-50 text-white text-sm font-medium transition-colors"
+          >
+            <span v-if="leaveLoading" class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            <span v-else>Sair</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </Teleport>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useProjectsStore } from '@/stores/projects'
 import { useAuthStore } from '@/stores/auth'
 import { useToast } from '@/composables/useToast'
+import { useRealtime } from '@/composables/useRealtime'
 import { projectsApi } from '@/api/projects'
 import type { MemberStats } from '@/types'
 import InviteMemberModal from '@/components/ui/InviteMemberModal.vue'
@@ -183,11 +231,13 @@ import UserAvatar from '@/components/ui/UserAvatar.vue'
 import InviteLinkModal from '@/components/ui/InviteLinkModal.vue'
 
 const route = useRoute()
+const router = useRouter()
 const projectId = Number(route.params.id)
 
 const projectsStore = useProjectsStore()
 const authStore = useAuthStore()
 const toast = useToast()
+const realtime = useRealtime()
 const { currentProject } = storeToRefs(projectsStore)
 
 function chartAccent(): string {
@@ -201,6 +251,8 @@ const showInvite = ref(false)
 const showLinkModal = ref(false)
 const removing = ref<MemberStats | null>(null)
 const removeLoading = ref(false)
+const leaving = ref(false)
+const leaveLoading = ref(false)
 
 onMounted(async () => {
   try {
@@ -212,6 +264,10 @@ onMounted(async () => {
   } finally {
     loading.value = false
   }
+
+  // Tempo real: atualiza a lista de participantes ao add/remover/sair
+  realtime.privateChannel(`project.${projectId}`)
+    ?.listen('.members.changed', () => reloadStats())
 })
 
 const isLeader = computed(() => {
@@ -257,6 +313,20 @@ async function removeMember() {
     toast.error('Erro ao remover membro.')
   } finally {
     removeLoading.value = false
+  }
+}
+
+async function leaveProject() {
+  leaveLoading.value = true
+  try {
+    await projectsApi.leave(projectId)
+    toast.success('Você saiu do projeto.')
+    router.push('/projects')
+  } catch (e: any) {
+    toast.error(e?.response?.data?.message ?? 'Erro ao sair do projeto.')
+  } finally {
+    leaveLoading.value = false
+    leaving.value = false
   }
 }
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Events\TaskChanged;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Task\StoreTaskRequest;
 use App\Http\Requests\Task\UpdateTaskRequest;
@@ -83,15 +84,19 @@ class TaskController extends Controller
             }
         }
 
-        $task->load(['assignee', 'assignees', 'tags', 'checklists']);
+        $task->load(['assignee', 'assignees', 'tags', 'checklists', 'timeLogs']);
 
-        return response()->json(new TaskResource($task), 201);
+        $resource = (new TaskResource($task))->resolve();
+        $this->emitChange($project->id, 'created', $resource);
+        $this->projectService->broadcastDashboardStale($project);
+
+        return response()->json($resource, 201);
     }
 
     public function show(Request $request, Project $project, Task $task): JsonResponse
     {
         $this->authorize('view', $project);
-        $task->load(['assignee', 'creator', 'tags', 'checklists', 'comments.user', 'attachments.uploader']);
+        $task->load(['assignee', 'assignees', 'creator', 'tags', 'checklists', 'comments.user', 'comments.reads', 'attachments.uploader']);
 
         return response()->json(new TaskResource($task));
     }
@@ -101,6 +106,10 @@ class TaskController extends Controller
         $this->authorize('view', $project);
 
         $data = $request->validated();
+
+        $oldStatus   = $task->status;
+        $oldPriority = $task->priority;
+        $oldAssigneeIds = $task->assignees()->pluck('users.id')->all();
 
         $fields = [];
         foreach (['title', 'description', 'status', 'priority'] as $f) {
@@ -124,16 +133,29 @@ class TaskController extends Controller
         $project->recalculateProgress();
         $this->projectService->logActivity($project, $request->user(), 'updated_task', 'Task', $task->id, ['title' => $task->title]);
 
-        $task->load(['assignee', 'assignees', 'tags', 'checklists']);
+        $this->notifyTaskUpdate($request, $project, $task, $oldStatus, $oldPriority, $oldAssigneeIds);
 
-        return response()->json(new TaskResource($task));
+        $task->load(['assignee', 'assignees', 'tags', 'checklists', 'timeLogs']);
+
+        $resource = (new TaskResource($task))->resolve();
+        $this->emitChange($project->id, 'updated', $resource);
+        $this->projectService->broadcastDashboardStale($project);
+
+        return response()->json($resource);
     }
 
     public function destroy(Request $request, Project $project, Task $task): JsonResponse
     {
         $this->authorize('view', $project);
+
+        $taskId = $task->id;
+        $status = $task->status;
+
         $task->delete();
         $project->recalculateProgress();
+
+        $this->emitChange($project->id, 'deleted', ['id' => $taskId, 'status' => $status]);
+        $this->projectService->broadcastDashboardStale($project);
 
         return response()->json(null, 204);
     }
@@ -158,6 +180,9 @@ class TaskController extends Controller
 
         $project->recalculateProgress();
 
+        $this->emitChange($project->id, 'reordered', ['tasks' => $data['tasks']]);
+        $this->projectService->broadcastDashboardStale($project);
+
         return response()->json(['message' => 'Tarefas reordenadas.']);
     }
 
@@ -168,6 +193,8 @@ class TaskController extends Controller
         $task->update(['approval_status' => 'pending', 'rejection_note' => null]);
 
         $this->projectService->logActivity($project, $request->user(), 'submitted_approval', 'Task', $task->id, ['title' => $task->title]);
+
+        $this->broadcastTaskUpdated($project, $task);
 
         return response()->json(['approval_status' => 'pending']);
     }
@@ -196,6 +223,8 @@ class TaskController extends Controller
                 "Sua tarefa \"{$task->title}\" foi aprovada pelo líder.",
                 ['project_id' => $project->id, 'task_id' => $task->id]);
         }
+
+        $this->broadcastTaskUpdated($project, $task);
 
         return response()->json(['approval_status' => 'approved']);
     }
@@ -227,7 +256,74 @@ class TaskController extends Controller
                 ['project_id' => $project->id, 'task_id' => $task->id]);
         }
 
+        $this->broadcastTaskUpdated($project, $task);
+
         return response()->json(['approval_status' => 'rejected', 'rejection_note' => $task->rejection_note]);
     }
 
+    private function broadcastTaskUpdated(Project $project, Task $task): void
+    {
+        $task->load(['assignee', 'assignees', 'tags', 'checklists', 'timeLogs']);
+        $this->emitChange($project->id, 'updated', (new TaskResource($task))->resolve());
+        $this->projectService->broadcastDashboardStale($project);
+    }
+
+    /** Broadcast à prova de falhas — uma queda do Reverb nunca quebra a ação principal. */
+    private function emitChange(int $projectId, string $action, array $payload): void
+    {
+        try {
+            broadcast(new TaskChanged($projectId, $action, $payload));
+        } catch (\Throwable $e) {
+            \Log::warning('TaskChanged broadcast failed: ' . $e->getMessage());
+        }
+    }
+
+    private function notifyTaskUpdate(Request $request, Project $project, Task $task, ?string $oldStatus, ?string $oldPriority, array $oldAssigneeIds): void
+    {
+        $task->loadMissing('assignees');
+        $actorId   = $request->user()->id;
+        $actorName = $request->user()->name;
+        $assigneeIds = $task->assignees->pluck('id')->all();
+
+        // Novos responsáveis alocados nesta atualização
+        $newAssigneeIds = array_values(array_diff($assigneeIds, $oldAssigneeIds));
+        foreach ($newAssigneeIds as $uid) {
+            if ($uid === $actorId) continue;
+            $this->notifications->notify($uid, 'task_assigned', 'Você foi alocado em uma tarefa',
+                "{$actorName} alocou você na tarefa \"{$task->title}\" — {$project->name}",
+                ['project_id' => $project->id, 'task_id' => $task->id]);
+        }
+
+        // Demais destinatários (criador + responsáveis já existentes), exceto o autor da ação
+        $recipientIds = collect([$task->created_by])
+            ->merge($assigneeIds)
+            ->reject(fn($id) => in_array($id, $newAssigneeIds, true))
+            ->unique()->filter(fn($id) => $id && $id !== $actorId);
+
+        if ($oldStatus !== $task->status) {
+            foreach ($recipientIds as $uid) {
+                $this->notifications->notify($uid, 'task_status', 'Status de tarefa alterado',
+                    "{$actorName} moveu \"{$task->title}\" para {$this->statusLabel($task->status)}",
+                    ['project_id' => $project->id, 'task_id' => $task->id]);
+            }
+        }
+
+        if ($oldPriority !== $task->priority) {
+            foreach ($recipientIds as $uid) {
+                $this->notifications->notify($uid, 'task_priority', 'Prioridade de tarefa alterada',
+                    "{$actorName} alterou a prioridade de \"{$task->title}\" para {$this->priorityLabel($task->priority)}",
+                    ['project_id' => $project->id, 'task_id' => $task->id]);
+            }
+        }
+    }
+
+    private function statusLabel(string $s): string
+    {
+        return ['backlog' => 'Backlog', 'pending' => 'Pendente', 'in_progress' => 'Em andamento', 'review' => 'Revisão', 'done' => 'Concluída'][$s] ?? $s;
+    }
+
+    private function priorityLabel(string $p): string
+    {
+        return ['low' => 'Baixa', 'medium' => 'Média', 'high' => 'Alta', 'urgent' => 'Urgente'][$p] ?? $p;
+    }
 }

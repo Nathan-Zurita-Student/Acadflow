@@ -79,10 +79,7 @@ class DashboardController extends Controller
 
         // Próximas entregas do usuário (tarefas com prazo nos próx. 7 dias)
         $upcoming = \App\Models\Task::with('project:id,name')
-            ->where(function ($q) use ($user) {
-                $q->where('assignee_id', $user->id)
-                  ->orWhereHas('assignees', fn($q2) => $q2->where('users.id', $user->id));
-            })
+            ->assignedTo($user->id)
             ->whereNotIn('status', ['done'])
             ->whereNotNull('due_date')
             ->where('due_date', '<=', now()->addDays(7))
@@ -129,10 +126,7 @@ class DashboardController extends Controller
         $user = $request->user();
 
         $tasks = \App\Models\Task::with(['project:id,name', 'tags:id,name,color'])
-            ->where(function ($q) use ($user) {
-                $q->where('assignee_id', $user->id)
-                  ->orWhereHas('assignees', fn($q2) => $q2->where('users.id', $user->id));
-            })
+            ->assignedTo($user->id)
             ->orderByRaw("CASE WHEN due_date IS NULL THEN 2 WHEN due_date < NOW() THEN 0 ELSE 1 END")
             ->orderBy('due_date', 'asc')
             ->orderByRaw("CASE priority WHEN 'urgent' THEN 0 WHEN 'high' THEN 1 WHEN 'medium' THEN 2 ELSE 3 END")

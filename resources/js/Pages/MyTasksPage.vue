@@ -130,16 +130,27 @@
           </span>
         </div>
 
-        <!-- Ação rápida: ir ao projeto -->
-        <button
-          @click.stop="goToKanban(task)"
-          class="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-lg hover:bg-dark-700 text-dark-400 hover:text-accent-400"
-          title="Abrir no Kanban">
-          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-          </svg>
-        </button>
+        <!-- Ações rápidas -->
+        <div class="flex-shrink-0 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <button
+            @click.stop="goToKanban(task)"
+            class="p-1.5 rounded-lg hover:bg-dark-700 text-dark-400 hover:text-accent-400"
+            title="Abrir no Kanban">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+            </svg>
+          </button>
+          <button
+            @click.stop="deleteTask(task)"
+            class="p-1.5 rounded-lg hover:bg-red-500/15 text-dark-400 hover:text-red-400"
+            title="Excluir tarefa">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+          </button>
+        </div>
       </div>
     </div>
 
@@ -169,12 +180,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { dashboardApi } from '@/api/projects'
+import { dashboardApi, tasksApi } from '@/api/projects'
+import { useRealtimeStore } from '@/stores/realtime'
+import { useToast } from '@/composables/useToast'
 import TaskModal from '@/components/tasks/TaskModal.vue'
 
 const router = useRouter()
+const realtimeStore = useRealtimeStore()
+const toast = useToast()
 const loading = ref(true)
 const allTasks = ref<any[]>([])
 const selectedTask = ref<any>(null)
@@ -184,20 +199,31 @@ const filterProject = ref('')
 const filterUrgency = ref('')
 const searchQuery   = ref('')
 
-const statusFilters = [
+const statusFilters: { value: 'active' | 'done' | 'all'; label: string }[] = [
   { value: 'active', label: 'Pendentes' },
   { value: 'done',   label: 'Concluídas' },
   { value: 'all',    label: 'Todas' },
 ]
 
-onMounted(async () => {
+async function load(silent = false) {
+  if (!silent) loading.value = true
   try {
     const res = await dashboardApi.myTasks()
     allTasks.value = res.data
   } finally {
     loading.value = false
   }
+}
+
+onMounted(() => load())
+
+// Tempo real: recarrega silenciosamente em criar/editar/excluir/status/responsável
+let staleTimer: ReturnType<typeof setTimeout> | null = null
+watch(() => realtimeStore.dashboardStaleTick, () => {
+  if (staleTimer) clearTimeout(staleTimer)
+  staleTimer = setTimeout(() => load(true), 400)
 })
+onUnmounted(() => { if (staleTimer) clearTimeout(staleTimer) })
 
 const nonDoneTasks = computed(() => allTasks.value.filter(t => t.status !== 'done'))
 const doneTasks    = computed(() => allTasks.value.filter(t => t.status === 'done'))
@@ -310,8 +336,23 @@ function goToKanban(task: any) {
   router.push(`/projects/${task.project.id}/kanban`)
 }
 
+async function deleteTask(task: any) {
+  if (!confirm(`Excluir a tarefa "${task.title}"? Esta ação não pode ser desfeita.`)) return
+  // Remoção otimista — o broadcast confirma para os demais usuários
+  const before = allTasks.value
+  allTasks.value = allTasks.value.filter(t => t.id !== task.id)
+  if (selectedTask.value?.id === task.id) selectedTask.value = null
+  try {
+    await tasksApi.delete(task.project.id, task.id)
+    toast.success('Tarefa excluída.')
+  } catch {
+    allTasks.value = before
+    toast.error('Erro ao excluir a tarefa.')
+  }
+}
+
 function onTaskSaved() {
   selectedTask.value = null
-  dashboardApi.myTasks().then(res => { allTasks.value = res.data })
+  load(true)
 }
 </script>

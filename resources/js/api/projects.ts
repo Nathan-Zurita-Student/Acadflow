@@ -11,6 +11,7 @@ export const projectsApi = {
   members: (id: number) => api.get<MemberStats[]>(`/projects/${id}/members`),
   addMember: (id: number, userId: number, role?: string) => api.post(`/projects/${id}/members`, { user_id: userId, role }),
   removeMember: (id: number, userId: number) => api.delete(`/projects/${id}/members/${userId}`),
+  leave: (id: number) => api.delete(`/projects/${id}/leave`),
 }
 
 export const tasksApi = {
@@ -23,6 +24,10 @@ export const tasksApi = {
     api.post(`/projects/${projectId}/tasks/reorder`, { tasks }),
   addComment: (projectId: number, taskId: number, content: string) =>
     api.post(`/projects/${projectId}/tasks/${taskId}/comments`, { content }),
+  markCommentsDelivered: (projectId: number, taskId: number) =>
+    api.post(`/projects/${projectId}/tasks/${taskId}/comments/delivered`),
+  markCommentsRead: (projectId: number, taskId: number) =>
+    api.post(`/projects/${projectId}/tasks/${taskId}/comments/read`),
   submitApproval: (projectId: number, taskId: number) =>
     api.post<{ approval_status: string }>(`/projects/${projectId}/tasks/${taskId}/submit-approval`),
   approveTask: (projectId: number, taskId: number) =>

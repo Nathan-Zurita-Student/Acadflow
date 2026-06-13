@@ -103,13 +103,60 @@ class ProjectController extends Controller
             );
         }
 
+        $this->projectService->broadcastMembersChanged($project);
+        $this->projectService->broadcastDashboardStale($project);
+
         return response()->json(['message' => 'Membro adicionado com sucesso.']);
     }
 
     public function removeMember(Request $request, Project $project, int $userId): JsonResponse
     {
         $this->authorize('update', $project);
+
+        if ($userId === $project->owner_id) {
+            return response()->json(['message' => 'O dono do projeto não pode ser removido.'], 422);
+        }
+
+        // Captura os afetados ANTES de desvincular (inclui o membro removido)
+        $affected = $this->projectService->affectedUserIds($project);
+
         $this->projectService->removeMember($project, $userId);
+
+        $removed = User::find($userId);
+        if ($removed) {
+            $this->notifications->notify(
+                $removed,
+                'project_removed',
+                'Você foi removido de um projeto',
+                "{$request->user()->name} removeu você do projeto \"{$project->name}\".",
+                ['project_id' => $project->id],
+            );
+        }
+
+        $this->projectService->broadcastMembersChanged($project);
+        $this->projectService->broadcastDashboardStaleForUsers($affected);
+
+        return response()->json(null, 204);
+    }
+
+    public function leave(Request $request, Project $project): JsonResponse
+    {
+        $this->authorize('view', $project);
+
+        $user = $request->user();
+
+        if ($user->id === $project->owner_id) {
+            return response()->json([
+                'message' => 'O dono não pode sair do projeto. Transfira a propriedade ou exclua o projeto.',
+            ], 422);
+        }
+
+        $affected = $this->projectService->affectedUserIds($project);
+
+        $this->projectService->removeMember($project, $user->id);
+
+        $this->projectService->broadcastMembersChanged($project);
+        $this->projectService->broadcastDashboardStaleForUsers($affected);
 
         return response()->json(null, 204);
     }

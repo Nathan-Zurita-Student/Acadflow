@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="flex-shrink-0 w-72 flex flex-col">
     <!-- Column header -->
     <div class="flex items-center justify-between mb-3 px-1">
@@ -20,37 +20,42 @@
       </button>
     </div>
 
-    <!-- Drop zone -->
-    <div
-      class="flex-1 bg-dark-900/50 border border-dark-700/60 rounded-xl p-2 space-y-2 transition-colors"
-      :class="{ 'border-accent-500/50 bg-accent-500/5': isDraggingOver }"
-      @dragover.prevent="isDraggingOver = true"
-      @dragleave.self="isDraggingOver = false"
-      @drop.prevent="onDrop"
+    <!-- Drop zone (vuedraggable) — reordena dentro da coluna e move entre colunas -->
+    <draggable
+      :list="tasks"
+      group="kanban"
+      item-key="id"
+      :animation="160"
+      ghost-class="kanban-ghost"
+      filter=".kanban-no-drag, select, button, textarea, input, a, option"
+      :prevent-on-filter="false"
+      class="flex-1 bg-dark-900/50 border border-dark-700/60 rounded-xl p-2 space-y-2 transition-colors min-h-[80px]"
+      @change="$emit('reorder')"
     >
-      <KanbanCard
-        v-for="(task, index) in tasks"
-        :key="task.id"
-        :task="task"
-        :index="index"
-        :project-id="projectId"
-        :is-leader="isLeader"
-        @click="$emit('task-click', task)"
-        @dragstart="onDragStart($event, task)"
-        @dragend="isDraggingOver = false"
-        @status-change="(status) => $emit('status-change', task, status)"
-        @approval-change="(taskId, status, note) => $emit('approval-change', taskId, status, note)"
-      />
-      <div v-if="!tasks.length" class="h-16 flex items-center justify-center">
-        <p class="text-xs text-dark-600">Arraste tarefas aqui</p>
-      </div>
-    </div>
+      <template #item="{ element: task, index }">
+        <KanbanCard
+          :task="task"
+          :index="index"
+          :project-id="projectId"
+          :is-leader="isLeader"
+          @click="$emit('task-click', task)"
+          @delete="$emit('task-delete', task)"
+          @status-change="(status) => $emit('status-change', task, status)"
+          @approval-change="(taskId, status, note) => $emit('approval-change', taskId, status, note)"
+        />
+      </template>
+      <template #footer>
+        <div v-if="!tasks.length" class="h-16 flex items-center justify-center">
+          <p class="text-xs text-dark-600">Arraste tarefas aqui</p>
+        </div>
+      </template>
+    </draggable>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { useTasksStore } from '@/stores/tasks'
+import { computed } from 'vue'
+import draggable from 'vuedraggable'
 import type { Task, TaskStatus } from '@/types'
 import KanbanCard from './KanbanCard.vue'
 
@@ -61,16 +66,14 @@ const props = defineProps<{
   isLeader: boolean
 }>()
 
-const emit = defineEmits<{
-  (e: 'task-moved', updates: Array<{ id: number; status: TaskStatus; position: number }>): void
+defineEmits<{
   (e: 'task-click', task: Task): void
   (e: 'quick-add'): void
   (e: 'status-change', task: Task, status: TaskStatus): void
   (e: 'approval-change', taskId: number, status: string, note?: string): void
+  (e: 'task-delete', task: Task): void
+  (e: 'reorder'): void
 }>()
-
-const tasksStore = useTasksStore()
-const isDraggingOver = ref(false)
 
 const pendingCount = computed(() => props.tasks.filter(t => t.approval_status === 'pending').length)
 
@@ -82,20 +85,10 @@ const dotColors: Record<string, string> = {
   done:        'bg-emerald-500',
 }
 const dotColor = computed(() => dotColors[props.column.status])
-
-function onDragStart(e: DragEvent, task: Task) {
-  if (e.dataTransfer) {
-    e.dataTransfer.setData('text/plain', String(task.id))
-    e.dataTransfer.effectAllowed = 'move'
-  }
-}
-
-function onDrop(e: DragEvent) {
-  isDraggingOver.value = false
-  const taskId = Number(e.dataTransfer?.getData('text/plain'))
-  if (!taskId) return
-  const task = tasksStore.tasks.find(t => t.id === taskId)
-  if (!task || task.status === props.column.status) return
-  emit('task-moved', [{ id: taskId, status: props.column.status, position: props.tasks.length }])
-}
 </script>
+
+<style scoped>
+.kanban-ghost {
+  opacity: 0.45;
+}
+</style>

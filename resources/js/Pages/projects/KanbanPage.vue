@@ -79,14 +79,15 @@
       <KanbanColumn
         v-for="col in columns" :key="col.status"
         :column="col"
-        :tasks="filteredByStatus[col.status] ?? []"
+        :tasks="board[col.status] ?? []"
         :project-id="projectId"
         :is-leader="isLeader"
-        @task-moved="handleTaskMoved"
         @task-click="openTask"
+        @task-delete="deleteTask"
         @quick-add="handleQuickAdd(col.status)"
         @status-change="handleStatusChange"
         @approval-change="handleApprovalChange"
+        @reorder="scheduleBoardPersist"
       />
     </div>
 
@@ -103,13 +104,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
+import { ref, reactive, computed, watch, onMounted, onUnmounted } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useRoute } from 'vue-router'
 import { useTasksStore } from '@/stores/tasks'
 import { useProjectsStore } from '@/stores/projects'
 import { useAuthStore } from '@/stores/auth'
 import { useToast } from '@/composables/useToast'
+import { useRealtime } from '@/composables/useRealtime'
 import { tasksApi } from '@/api/projects'
 import type { Task, TaskStatus } from '@/types'
 import KanbanColumn from '@/components/kanban/KanbanColumn.vue'
@@ -120,6 +122,7 @@ const store         = useTasksStore()
 const projectsStore = useProjectsStore()
 const authStore     = useAuthStore()
 const toast         = useToast()
+const realtime      = useRealtime()
 const projectId     = Number(route.params.id)
 
 const { currentProject } = storeToRefs(projectsStore)
@@ -207,7 +210,19 @@ const filteredByStatus = computed(() => {
   return map
 })
 
-// ── polling AJAX a cada 15s ────────────────────────────
+// Espelho mutável do board para o vuedraggable. É reconstruído a partir do
+// estado canônico (store.tasks) sempre que ele muda — inclusive via WebSocket.
+const board = reactive<Record<TaskStatus, Task[]>>({
+  backlog: [], pending: [], in_progress: [], review: [], done: [],
+})
+
+watch(filteredByStatus, (val) => {
+  for (const col of columns) {
+    board[col.status] = (val[col.status] ?? []).slice()
+  }
+}, { immediate: true })
+
+// ── Tempo real do board (com fallback de polling se o Reverb estiver off) ──
 let pollInterval: ReturnType<typeof setInterval> | null = null
 
 function startPolling() {
@@ -228,6 +243,12 @@ function onVisibilityChange() {
   else { store.fetchTasks(projectId); startPolling() }
 }
 
+function onTaskChanged(e: { action: string; payload: any }) {
+  if (e.action === 'created' || e.action === 'updated') store.upsertTask(e.payload as Task)
+  else if (e.action === 'deleted') store.removeTask(e.payload.id)
+  else if (e.action === 'reordered') store.applyReorder(e.payload.tasks)
+}
+
 function onKeyDown(e: KeyboardEvent) {
   if (
     e.key === 'n' && !e.ctrlKey && !e.metaKey && !e.shiftKey &&
@@ -244,27 +265,56 @@ onMounted(async () => {
   if (!currentProject.value || currentProject.value.id !== projectId) {
     await projectsStore.fetchProject(projectId)
   }
-  startPolling()
-  document.addEventListener('visibilitychange', onVisibilityChange)
   document.addEventListener('keydown', onKeyDown)
+
+  if (realtime.enabled) {
+    realtime.privateChannel(`project.${projectId}`)?.listen('.task.changed', onTaskChanged)
+  } else {
+    startPolling()
+    document.addEventListener('visibilitychange', onVisibilityChange)
+  }
 })
 
 onUnmounted(() => {
   stopPolling()
   document.removeEventListener('visibilitychange', onVisibilityChange)
   document.removeEventListener('keydown', onKeyDown)
+  // useRealtime sai dos canais automaticamente no onUnmounted
 })
 
-async function handleTaskMoved(updates: Array<{ id: number; status: TaskStatus; position: number }>) {
-  for (const u of updates) {
-    const task = store.tasks.find(t => t.id === u.id)
-    if (task) { task.status = u.status; task.position = u.position }
+// ── Persistência da ordenação manual (drag) ──
+let persistTimer: ReturnType<typeof setTimeout> | null = null
+
+function scheduleBoardPersist() {
+  if (persistTimer) clearTimeout(persistTimer)
+  persistTimer = setTimeout(persistBoard, 60)
+}
+
+function persistBoard() {
+  const updates: Array<{ id: number; status: TaskStatus; position: number }> = []
+  for (const col of columns) {
+    board[col.status].forEach((task, index) => {
+      task.status = col.status
+      task.position = index
+      updates.push({ id: task.id, status: col.status, position: index })
+    })
   }
-  await tasksApi.reorder(projectId, updates)
+  if (updates.length) {
+    tasksApi.reorder(projectId, updates).catch(() => toast.error('Erro ao salvar a ordem.'))
+  }
 }
 
 async function handleStatusChange(task: Task, status: TaskStatus) {
-  await handleTaskMoved([{ id: task.id, status, position: task.position }])
+  const st = store.tasks.find(t => t.id === task.id)
+  if (!st) return
+  const newPos = store.tasks.filter(t => t.status === status && t.id !== task.id).length
+  st.status = status
+  st.position = newPos
+  try {
+    await tasksApi.reorder(projectId, [{ id: task.id, status, position: newPos }])
+  } catch {
+    toast.error('Erro ao mover tarefa.')
+  }
 }
 
 function handleApprovalChange(taskId: number, status: string, note?: string) {
@@ -272,6 +322,20 @@ function handleApprovalChange(taskId: number, status: string, note?: string) {
   if (!task) return
   task.approval_status = status as Task['approval_status']
   task.rejection_note  = note ?? null
+}
+
+async function deleteTask(task: Task) {
+  if (!confirm(`Excluir a tarefa "${task.title}"? Esta ação não pode ser desfeita.`)) return
+  const before = [...store.tasks]
+  store.removeTask(task.id)
+  if (selectedTask.value?.id === task.id) closeModal()
+  try {
+    await tasksApi.delete(projectId, task.id)
+    toast.success('Tarefa excluída.')
+  } catch {
+    store.tasks = before
+    toast.error('Erro ao excluir a tarefa.')
+  }
 }
 
 function openTask(task: Task) { selectedTask.value = task }
@@ -288,6 +352,6 @@ function closeModal() {
 
 async function onTaskSaved() {
   closeModal()
-  await store.fetchTasks(projectId)
+  if (!realtime.enabled) await store.fetchTasks(projectId)
 }
 </script>

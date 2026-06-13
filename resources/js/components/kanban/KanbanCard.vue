@@ -1,10 +1,7 @@
 ﻿<template>
   <div
-    class="bg-dark-800 border rounded-lg p-3 cursor-pointer transition-all duration-150 group select-none"
-    :class="[cardBorderClass, { 'opacity-50': dragging }]"
-    draggable="true"
-    @dragstart="onDragStart"
-    @dragend="dragging = false; $emit('dragend')"
+    class="bg-dark-800 border rounded-lg p-3 cursor-grab active:cursor-grabbing transition-all duration-150 group select-none"
+    :class="cardBorderClass"
     @click.self="$emit('click')"
   >
     <!-- Approval banner (pending) -->
@@ -49,11 +46,23 @@
     </div>
 
     <!-- Title row -->
-    <div class="flex items-start justify-between gap-2 mb-2" @click="$emit('click')">
-      <h4 class="text-sm font-medium text-dark-100 group-hover:text-white transition-colors leading-tight flex-1">
+    <div class="flex items-start justify-between gap-2 mb-2">
+      <h4 @click="$emit('click')" class="text-sm font-medium text-dark-100 group-hover:text-white transition-colors leading-tight flex-1 cursor-pointer">
         {{ task.title }}
       </h4>
-      <PriorityDot :priority="task.priority" class="flex-shrink-0 mt-0.5" />
+      <div class="flex items-center gap-1 flex-shrink-0">
+        <button
+          @click.stop="$emit('delete')"
+          class="kanban-no-drag opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-red-500/15 text-dark-500 hover:text-red-400 transition-all"
+          title="Excluir tarefa"
+        >
+          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+          </svg>
+        </button>
+        <PriorityDot :priority="task.priority" class="mt-0.5" />
+      </div>
     </div>
 
     <!-- Tags -->
@@ -223,22 +232,10 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   click: []
-  dragstart: [e: DragEvent]
-  dragend: []
+  delete: []
   'status-change': [status: TaskStatus]
   'approval-change': [taskId: number, status: string, note?: string]
 }>()
-
-// ── drag ────────────────────────────────────────────
-const dragging = ref(false)
-function onDragStart(e: DragEvent) {
-  dragging.value = true
-  if (e.dataTransfer) {
-    e.dataTransfer.setData('text/plain', String(props.task.id))
-    e.dataTransfer.effectAllowed = 'move'
-  }
-  emit('dragstart', e)
-}
 
 // ── status ───────────────────────────────────────────
 const statuses: { value: TaskStatus; label: string }[] = [

@@ -39,6 +39,34 @@
           >Marcar todas como lidas</button>
         </div>
 
+        <!-- Pedido de permissão para notificações do navegador -->
+        <div v-if="supported && permission !== 'granted'" class="px-4 py-3 border-b border-dark-700 bg-accent-500/5">
+          <div class="flex items-start gap-2.5">
+            <span class="text-base leading-none mt-0.5">🔔</span>
+            <div class="flex-1 min-w-0">
+              <template v-if="permission === 'default'">
+                <p class="text-xs text-dark-100 font-medium">Ativar notificações do navegador</p>
+                <p class="text-[11px] text-dark-500 mt-0.5 leading-relaxed">Seja avisado de novas tarefas, comentários e menções mesmo com a aba minimizada.</p>
+                <button
+                  @click="enableBrowserNotifications"
+                  :disabled="requesting"
+                  class="mt-2 inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg bg-accent-600 hover:bg-accent-500 disabled:opacity-50 text-white transition-colors"
+                >
+                  <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                  </svg>
+                  Ativar notificações
+                </button>
+              </template>
+              <template v-else>
+                <p class="text-xs text-dark-100 font-medium">Notificações bloqueadas</p>
+                <p class="text-[11px] text-dark-500 mt-0.5 leading-relaxed">Para reativar, clique no ícone 🔒 na barra de endereço do navegador e permita notificações para este site.</p>
+              </template>
+            </div>
+          </div>
+        </div>
+
         <!-- Lista -->
         <div class="max-h-80 overflow-y-auto">
           <div v-if="!store.items.length" class="px-4 py-8 text-center">
@@ -110,15 +138,31 @@ import { useRouter } from 'vue-router'
 import { onClickOutside } from '@vueuse/core'
 import { useNotificationsStore } from '@/stores/notifications'
 import { usePolling } from '@/composables/usePolling'
+import { useBrowserNotifications } from '@/composables/useBrowserNotifications'
+import { useToast } from '@/composables/useToast'
 import type { AppNotification } from '@/api/notifications'
 import { useTimeAgo } from '@/composables/useTimeAgo'
 import { projectInvitationsApi } from '@/api/projects'
 
 const store  = useNotificationsStore()
 const router = useRouter()
+const toast  = useToast()
+const { supported, permission, requestPermission } = useBrowserNotifications()
 const open   = ref(false)
 const containerRef = ref<HTMLElement | null>(null)
 const respondingId = ref<number | null>(null)
+const requesting = ref(false)
+
+async function enableBrowserNotifications() {
+  requesting.value = true
+  try {
+    const result = await requestPermission()
+    if (result === 'granted') toast.success('Notificações ativadas! 🔔')
+    else if (result === 'denied') toast.error('Permissão negada. Habilite nas configurações do navegador.')
+  } finally {
+    requesting.value = false
+  }
+}
 
 // Fallback polling every 60s — real-time handled by Reverb WebSocket
 usePolling(() => store.fetch(), 60_000)
@@ -159,6 +203,7 @@ function typeEmoji(type: string) {
     task_rejected: '❌', file_uploaded: '📎', project_member_added: '🎓',
     meeting_scheduled: '📅', project_invitation: '✉️',
     project_invitation_accepted: '🎉', project_invitation_declined: '😔',
+    task_mention: '📣', task_status: '🔄', task_priority: '⚡', project_removed: '🚪',
   }
   return map[type] ?? '🔔'
 }
@@ -166,7 +211,10 @@ function typeEmoji(type: string) {
 function iconBg(type: string) {
   if (type === 'task_approved' || type === 'project_invitation_accepted') return 'bg-emerald-500/15'
   if (type === 'task_rejected' || type === 'project_invitation_declined') return 'bg-red-500/15'
-  if (type === 'task_comment') return 'bg-blue-500/15'
+  if (type === 'task_comment' || type === 'task_status') return 'bg-blue-500/15'
+  if (type === 'task_mention') return 'bg-accent-500/15'
+  if (type === 'task_priority') return 'bg-orange-500/15'
+  if (type === 'project_removed') return 'bg-red-500/15'
   if (type === 'file_uploaded') return 'bg-purple-500/15'
   if (type === 'meeting_scheduled') return 'bg-teal-500/15'
   if (type === 'project_invitation') return 'bg-amber-500/15'

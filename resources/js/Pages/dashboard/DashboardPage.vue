@@ -135,10 +135,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch, onUnmounted } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { dashboardApi } from '@/api/projects'
 import { useAuthStore } from '@/stores/auth'
+import { useRealtimeStore } from '@/stores/realtime'
 import StatCard from '@/components/ui/StatCard.vue'
 import StatusBadge from '@/components/ui/StatusBadge.vue'
 import UserAvatar from '@/components/ui/UserAvatar.vue'
@@ -146,6 +147,7 @@ import { useTimeAgo } from '@/composables/useTimeAgo'
 
 const auth = useAuthStore()
 const router = useRouter()
+const realtimeStore = useRealtimeStore()
 const loading = ref(true)
 const data = ref<any>(null)
 
@@ -154,14 +156,25 @@ function chartAccent(): string {
   return raw ? `rgb(${raw.split(/\s+/).join(',')})` : '#6366f1'
 }
 
-onMounted(async () => {
+async function load(silent = false) {
+  if (!silent) loading.value = true
   try {
     const res = await dashboardApi.global()
     data.value = res.data
   } finally {
     loading.value = false
   }
+}
+
+onMounted(() => load())
+
+// Tempo real: recarrega silenciosamente quando uma tarefa/membro do usuário muda
+let staleTimer: ReturnType<typeof setTimeout> | null = null
+watch(() => realtimeStore.dashboardStaleTick, () => {
+  if (staleTimer) clearTimeout(staleTimer)
+  staleTimer = setTimeout(() => load(true), 400)
 })
+onUnmounted(() => { if (staleTimer) clearTimeout(staleTimer) })
 
 const weeklySeries = computed(() => [{
   name: 'Concluídas',

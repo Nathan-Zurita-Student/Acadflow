@@ -56,6 +56,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('{project}/members', [ProjectController::class, 'members'])->name('members.index');
         Route::post('{project}/members', [ProjectController::class, 'addMember'])->name('members.store');
         Route::delete('{project}/members/{userId}', [ProjectController::class, 'removeMember'])->name('members.destroy');
+        Route::delete('{project}/leave', [ProjectController::class, 'leave'])->name('leave');
 
         Route::get('{project}/tasks', [TaskController::class, 'index'])->name('tasks.index');
         Route::post('{project}/tasks', [TaskController::class, 'store'])->name('tasks.store');
@@ -64,6 +65,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('{project}/tasks/{task}', [TaskController::class, 'destroy'])->name('tasks.destroy');
         Route::post('{project}/tasks/reorder', [TaskController::class, 'reorder'])->name('tasks.reorder');
         Route::post('{project}/tasks/{task}/comments', [TaskCommentController::class, 'store'])->name('tasks.comments.store');
+        Route::post('{project}/tasks/{task}/comments/delivered', [TaskCommentController::class, 'markDelivered'])->name('tasks.comments.delivered');
+        Route::post('{project}/tasks/{task}/comments/read', [TaskCommentController::class, 'markRead'])->name('tasks.comments.read');
         Route::post('{project}/tasks/{task}/time', [TaskTimeLogController::class, 'store'])->name('tasks.time.store');
         Route::post('{project}/tasks/{task}/submit-approval', [TaskController::class, 'submitApproval'])->name('tasks.approval.submit');
         Route::post('{project}/tasks/{task}/approve', [TaskController::class, 'approveTask'])->name('tasks.approval.approve');

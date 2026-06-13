@@ -57,47 +57,58 @@
 
     <div v-else-if="filtered.length" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
       <div v-for="a in filtered" :key="a.id"
-        class="card hover:border-dark-600 transition-colors flex items-center gap-4 group">
-        <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
-          :class="fileIconBg(a.mime_type)">
-          <span class="text-xs font-bold" :class="fileIconColor(a.mime_type)">
-            {{ fileExt(a.name) }}
-          </span>
+        class="card !p-0 overflow-hidden hover:border-dark-600 transition-colors group flex flex-col">
+
+        <!-- Preview -->
+        <div class="relative h-40 bg-dark-900/60 flex items-center justify-center overflow-hidden">
+          <img v-if="isImage(a)" :src="a.url" :alt="a.name" loading="lazy"
+            class="w-full h-full object-cover" />
+          <video v-else-if="isVideo(a)" :src="a.url" controls preload="metadata"
+            class="w-full h-full object-contain bg-black" />
+          <iframe v-else-if="isPdf(a)" :src="`${a.url}#toolbar=0&navpanes=0&view=FitH`"
+            class="w-full h-full bg-white" :title="`Pré-visualização de ${a.name}`" loading="lazy" />
+          <div v-else class="w-14 h-14 rounded-xl flex items-center justify-center" :class="fileIconBg(a.mime_type)">
+            <span class="text-sm font-bold" :class="fileIconColor(a.mime_type)">{{ fileExt(a.name) }}</span>
+          </div>
+
+          <!-- Hover actions overlay -->
+          <div class="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <a :href="a.url" target="_blank" rel="noopener"
+              class="p-1.5 rounded-lg bg-dark-900/80 backdrop-blur hover:bg-dark-700 text-dark-200 transition-colors"
+              title="Abrir em nova aba" @click.stop>
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+            </a>
+            <a :href="a.url" :download="a.name"
+              class="p-1.5 rounded-lg bg-dark-900/80 backdrop-blur hover:bg-dark-700 text-dark-200 transition-colors"
+              title="Baixar arquivo" @click.stop>
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+            </a>
+            <button @click.stop="deleteFile(a.id)"
+              class="p-1.5 rounded-lg bg-dark-900/80 backdrop-blur hover:bg-red-600/30 text-dark-200 hover:text-red-400 transition-colors"
+              title="Excluir arquivo">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </button>
+          </div>
         </div>
-        <div class="flex-1 min-w-0">
-          <p class="text-sm font-medium text-dark-100 truncate">{{ a.name }}</p>
-          <p class="text-xs text-dark-500 mt-0.5">
-            {{ formatSize(a.size) }} • {{ a.uploader?.name }}
-          </p>
-        </div>
-        <div class="flex items-center gap-1 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-          <!-- Abrir no navegador -->
-          <a :href="a.url" target="_blank" rel="noopener"
-            class="p-1.5 rounded hover:bg-dark-700 text-dark-400 hover:text-dark-200 transition-colors"
-            title="Abrir no navegador">
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-            </svg>
-          </a>
-          <!-- Download -->
-          <a :href="a.url" :download="a.name"
-            class="p-1.5 rounded hover:bg-dark-700 text-dark-400 hover:text-dark-200 transition-colors"
-            title="Baixar arquivo">
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-            </svg>
-          </a>
-          <!-- Deletar -->
-          <button @click="deleteFile(a.id)"
-            class="p-1.5 rounded hover:bg-red-600/20 text-dark-400 hover:text-red-400 transition-colors"
-            title="Excluir arquivo">
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-            </svg>
-          </button>
+
+        <!-- Info -->
+        <div class="p-3 flex items-center gap-3">
+          <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" :class="fileIconBg(a.mime_type)">
+            <span class="text-[10px] font-bold" :class="fileIconColor(a.mime_type)">{{ fileExt(a.name) }}</span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-medium text-dark-100 truncate" :title="a.name">{{ a.name }}</p>
+            <p class="text-xs text-dark-500 mt-0.5 truncate">{{ formatSize(a.size) }} • {{ a.uploader?.name }}</p>
+          </div>
         </div>
       </div>
     </div>
@@ -290,6 +301,10 @@ async function deleteFile(id: number) {
   attachments.value = attachments.value.filter(a => a.id !== id)
   toast.success('Arquivo excluído.')
 }
+
+function isImage(a: Attachment) { return a.mime_type.startsWith('image/') }
+function isVideo(a: Attachment) { return a.mime_type.startsWith('video/') }
+function isPdf(a: Attachment)   { return a.mime_type === 'application/pdf' }
 
 function fileExt(name: string) {
   return name.split('.').pop()?.toUpperCase().slice(0, 4) ?? 'FILE'

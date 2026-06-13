@@ -45,6 +45,7 @@ export interface Comment {
   content: string
   user: Pick<User, 'id' | 'name' | 'avatar'>
   created_at: string
+  status?: 'sent' | 'delivered' | 'read'
 }
 
 export interface Attachment {

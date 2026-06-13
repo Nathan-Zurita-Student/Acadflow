@@ -2,11 +2,14 @@
 
 namespace App\Services;
 
+use App\Events\DashboardStale;
+use App\Events\ProjectMembersChanged;
 use App\Models\ActivityLog;
 use App\Models\Project;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 
 class ProjectService
 {
@@ -154,5 +157,67 @@ class ProjectService
             'subject_id' => $subjectId,
             'data' => $data,
         ]);
+    }
+
+    /** IDs de todos os usuários afetados pelo projeto (membros + owner). */
+    public function affectedUserIds(Project $project): Collection
+    {
+        $project->loadMissing('members');
+
+        return $project->members->pluck('id')
+            ->push($project->owner_id)
+            ->filter()
+            ->unique()
+            ->values();
+    }
+
+    /** Invalida o cache de dashboard de todos os usuários do projeto. */
+    public function clearDashboardCaches(Project $project): void
+    {
+        foreach ($this->affectedUserIds($project) as $userId) {
+            Cache::forget("dashboard:{$userId}");
+        }
+    }
+
+    /**
+     * Invalida o cache e avisa (via WebSocket) todos os usuários do projeto
+     * para refazerem o fetch do dashboard / minhas tarefas.
+     */
+    public function broadcastDashboardStale(Project $project): void
+    {
+        $this->broadcastDashboardStaleForUsers($this->affectedUserIds($project));
+    }
+
+    /** Igual ao acima, mas para um conjunto explícito de usuários (ex.: membro removido). */
+    public function broadcastDashboardStaleForUsers($userIds): void
+    {
+        foreach (collect($userIds)->filter()->unique() as $userId) {
+            Cache::forget("dashboard:{$userId}");
+            try {
+                broadcast(new DashboardStale((int) $userId));
+            } catch (\Throwable $e) {
+                \Log::warning('DashboardStale broadcast failed: ' . $e->getMessage());
+            }
+        }
+    }
+
+    /** Emite a lista de membros atualizada no canal do projeto. */
+    public function broadcastMembersChanged(Project $project): void
+    {
+        $project->load('members', 'owner');
+
+        $members = $project->members->map(fn(User $m) => [
+            'id'     => $m->id,
+            'name'   => $m->name,
+            'email'  => $m->email,
+            'avatar' => $m->avatar,
+            'role'   => $m->pivot->role,
+        ])->values()->all();
+
+        try {
+            broadcast(new ProjectMembersChanged($project->id, $members));
+        } catch (\Throwable $e) {
+            \Log::warning('ProjectMembersChanged broadcast failed: ' . $e->getMessage());
+        }
     }
 }

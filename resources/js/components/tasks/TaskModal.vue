@@ -247,6 +247,21 @@
           <!-- ── Comments tab (WhatsApp-style) ───────────── -->
           <div v-if="activeTab === 'comments'" class="flex flex-col" style="height: 460px;">
 
+            <!-- Presence / typing bar -->
+            <div class="flex items-center justify-between px-3 py-1.5 border-b border-dark-700/50 bg-dark-800/40 text-[11px] min-h-[28px] flex-shrink-0">
+              <span class="text-dark-500 flex items-center gap-1.5 min-w-0 truncate">
+                <template v-if="onlineOthers.length">
+                  <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0" />
+                  <span class="truncate">{{ onlineOthers.map(u => u.name.split(' ')[0]).join(', ') }} {{ onlineOthers.length === 1 ? 'está vendo' : 'estão vendo' }}</span>
+                </template>
+                <template v-else>
+                  <span class="inline-block w-1.5 h-1.5 rounded-full bg-dark-600 flex-shrink-0" />
+                  Ninguém mais vendo agora
+                </template>
+              </span>
+              <span v-if="typingText" class="text-accent-400 italic flex-shrink-0 ml-2">{{ typingText }}</span>
+            </div>
+
             <!-- Messages -->
             <div ref="commentsContainer" class="flex-1 overflow-y-auto min-h-0 px-3 py-3 space-y-0.5 bg-dark-900/30">
 
@@ -282,10 +297,16 @@
                       <p class="text-sm leading-relaxed break-words" v-html="renderMd(item.comment.content)" />
                       <div class="flex items-center justify-end gap-1 mt-0.5">
                         <time class="text-[10px] text-white/55">{{ msgTime(item.comment.created_at) }}</time>
-                        <svg v-if="item.pending" class="w-3 h-3 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                        <!-- Enviando -->
+                        <svg v-if="item.pending" class="w-3 h-3 text-white/35" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                          <circle cx="12" cy="12" r="9" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 7v5l3 2" />
                         </svg>
-                        <svg v-else class="w-3.5 h-3.5 text-white/60" viewBox="0 0 16 11" fill="currentColor">
+                        <!-- Enviada: 1 check -->
+                        <svg v-else-if="statusOf(item.comment) === 'sent'" class="w-3.5 h-3.5 text-white/55" viewBox="0 0 12 11" fill="currentColor">
+                          <path d="M11.071.653a.75.75 0 0 1 .025 1.06l-6.5 7a.75.75 0 0 1-1.085.008l-3-3.2a.75.75 0 0 1 1.078-1.042l2.445 2.608 5.977-6.409a.75.75 0 0 1 1.06-.025z"/>
+                        </svg>
+                        <!-- Entregue (cinza) / Lida por todos (azul): 2 checks -->
+                        <svg v-else class="w-3.5 h-3.5" :class="statusOf(item.comment) === 'read' ? 'text-sky-300' : 'text-white/55'" viewBox="0 0 16 11" fill="currentColor">
                           <path d="M11.071.653a.75.75 0 0 1 .025 1.06l-6.5 7a.75.75 0 0 1-1.085.008l-3-3.2a.75.75 0 0 1 1.078-1.042l2.445 2.608 5.977-6.409a.75.75 0 0 1 1.06-.025zM14.621.653a.75.75 0 0 1 .025 1.06l-6.5 7a.75.75 0 0 1-1.083.01L5.96 7.19a.75.75 0 1 1 1.08-1.04l.606.628 5.915-6.1a.75.75 0 0 1 1.06-.025z"/>
                         </svg>
                       </div>
@@ -404,7 +425,12 @@
             <div v-if="attachments.length" class="space-y-2">
               <div v-for="file in attachments" :key="file.id"
                 class="flex items-center gap-3 p-3 rounded-xl bg-dark-700/40 border border-dark-700 hover:border-dark-600 group transition-colors">
-                <div class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" :class="fileIconBg(file.mime_type)">
+                <!-- Miniatura para imagens, ícone para o resto -->
+                <a v-if="file.mime_type.startsWith('image/')" :href="file.url" target="_blank" rel="noopener"
+                  class="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-dark-900 block" @click.stop>
+                  <img :src="file.url" :alt="file.name" loading="lazy" class="w-full h-full object-cover" />
+                </a>
+                <div v-else class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" :class="fileIconBg(file.mime_type)">
                   <svg class="w-4 h-4" :class="fileIconColor(file.mime_type)" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="fileIconPath(file.mime_type)" />
                   </svg>
@@ -418,6 +444,12 @@
                     class="p-1.5 rounded-lg hover:bg-dark-600 text-dark-400 hover:text-white transition-colors" title="Abrir" @click.stop>
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                  </a>
+                  <a :href="file.url" :download="file.name"
+                    class="p-1.5 rounded-lg hover:bg-dark-600 text-dark-400 hover:text-white transition-colors" title="Baixar" @click.stop>
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                     </svg>
                   </a>
                   <button @click="deleteAttachment(file.id)"
@@ -457,6 +489,7 @@ import { useTasksStore } from '@/stores/tasks'
 import { useProjectsStore } from '@/stores/projects'
 import { useAuthStore } from '@/stores/auth'
 import { useToast } from '@/composables/useToast'
+import { useRealtime } from '@/composables/useRealtime'
 import { tasksApi, attachmentsApi } from '@/api/projects'
 import PomodoroTimer from '@/components/tasks/PomodoroTimer.vue'
 import type { Task, TaskStatus, Attachment, Comment, ChecklistItem } from '@/types'
@@ -478,6 +511,24 @@ const toast         = useToast()
 const { currentProject } = storeToRefs(projectsStore)
 
 const currentUserId = computed(() => authStore.user?.id)
+
+// ── tempo real (chat instantâneo, presença, digitação, recibos) ──
+const realtime = useRealtime()
+let presenceCh: any = null
+const onlineUsers  = ref<Array<{ id: number; name: string; avatar?: string | null }>>([])
+const typingUsers  = ref<Record<number, string>>({})
+const typingTimers: Record<number, ReturnType<typeof setTimeout>> = {}
+let lastTypingSent = 0
+
+const onlineOthers = computed(() => onlineUsers.value.filter(u => u.id !== currentUserId.value))
+const typingText = computed(() => {
+  const names = Object.values(typingUsers.value).map(n => n.split(' ')[0])
+  if (!names.length) return ''
+  if (names.length === 1) return `${names[0]} está digitando...`
+  if (names.length === 2) return `${names[0]} e ${names[1]} estão digitando...`
+  return 'Várias pessoas estão digitando...'
+})
+function statusOf(c: any): string { return c.status ?? 'sent' }
 
 // Per-user chat bubble colors (hashed by user id)
 const CHAT_COLORS = [
@@ -547,7 +598,9 @@ function onOutsideClick(e: MouseEvent) {
 onMounted(() => document.addEventListener('mousedown', onOutsideClick))
 onUnmounted(() => {
   document.removeEventListener('mousedown', onOutsideClick)
+  window.removeEventListener('focus', markReadIfViewing)
   stopCommentsPolling()
+  Object.values(typingTimers).forEach(t => clearTimeout(t))
 })
 
 // ── files ─────────────────────────────────────────────
@@ -623,6 +676,7 @@ const filteredMentions = computed(() => {
 
 function onCommentInput() {
   adjustCommentRows()
+  sendTyping()
   const match = newComment.value.match(/@([\wÀ-ſ]*)$/)
   if (match) {
     mentionQuery.value = match[1].toLowerCase()
@@ -671,10 +725,69 @@ function stopCommentsPolling() {
   if (commentsPollInterval) { clearInterval(commentsPollInterval); commentsPollInterval = null }
 }
 
+// ── handlers de tempo real ──
+function onCommentPosted(e: any) {
+  if (!detail.value) return
+  const list = (detail.value.comments ??= []) as LocalComment[]
+  if (list.some(c => c.id === e.id)) return
+  list.push({ ...e })
+  nextTick(scrollCommentsToBottom)
+  if (e.user?.id !== currentUserId.value && props.task) {
+    tasksApi.markCommentsDelivered(props.projectId, props.task.id).catch(() => {})
+    markReadIfViewing()
+  }
+}
+
+function onCommentStatus(e: { comment_id: number; status: string }) {
+  const list = detail.value?.comments as LocalComment[] | undefined
+  const c = list?.find(x => x.id === e.comment_id)
+  if (c) (c as any).status = e.status
+}
+
+function onTyping(e: { id: number; name: string }) {
+  if (e.id === currentUserId.value) return
+  typingUsers.value = { ...typingUsers.value, [e.id]: e.name }
+  if (typingTimers[e.id]) clearTimeout(typingTimers[e.id])
+  typingTimers[e.id] = setTimeout(() => {
+    const copy = { ...typingUsers.value }; delete copy[e.id]; typingUsers.value = copy
+  }, 3000)
+}
+
+function sendTyping() {
+  if (!realtime.enabled || !presenceCh || !props.task) return
+  const now = Date.now()
+  if (now - lastTypingSent < 1500) return
+  lastTypingSent = now
+  presenceCh.whisper('typing', { id: currentUserId.value, name: authStore.user?.name ?? '' })
+}
+
+function markReadIfViewing() {
+  if (!props.task) return
+  if (activeTab.value === 'comments' && !document.hidden) {
+    tasksApi.markCommentsRead(props.projectId, props.task.id).catch(() => {})
+  }
+}
+
+function setupRealtime() {
+  if (!realtime.enabled || !props.task) return
+  const taskId = props.task.id
+
+  realtime.privateChannel(`task.${taskId}`)
+    ?.listen('.comment.posted', onCommentPosted)
+    ?.listen('.comment.status', onCommentStatus)
+
+  presenceCh = realtime.presence(`task-presence.${taskId}`)
+  presenceCh?.here((users: any[]) => { onlineUsers.value = users })
+  presenceCh?.joining((u: any) => { if (!onlineUsers.value.some(x => x.id === u.id)) onlineUsers.value.push(u) })
+  presenceCh?.leaving((u: any) => { onlineUsers.value = onlineUsers.value.filter(x => x.id !== u.id) })
+  presenceCh?.listenForWhisper('typing', onTyping)
+}
+
 watch(activeTab, (tab) => {
   if (tab === 'comments') {
-    startCommentsPolling()
+    if (!realtime.enabled) startCommentsPolling()
     nextTick(() => scrollCommentsToBottom())
+    markReadIfViewing()
   } else {
     stopCommentsPolling()
   }
@@ -691,10 +804,12 @@ onMounted(async () => {
     const res = await tasksApi.get(props.projectId, props.task.id)
     detail.value = res.data
     attachments.value = res.data.attachments ?? []
+    setupRealtime()
   }
   if (!currentProject.value || currentProject.value.id !== props.projectId) {
     await projectsStore.fetchProject(props.projectId)
   }
+  window.addEventListener('focus', markReadIfViewing)
 })
 
 async function submit() {
@@ -789,8 +904,15 @@ async function addComment() {
 
   try {
     const res = await tasksApi.addComment(props.projectId, props.task.id, text)
+    const real = res.data as LocalComment
     const idx = localComments.findIndex(c => c.id === tempId)
-    if (idx !== -1) localComments.splice(idx, 1, res.data as LocalComment)
+    const alreadyReal = localComments.some(c => c.id === real.id) // broadcast pode ter chegado antes
+    if (idx !== -1) {
+      if (alreadyReal) localComments.splice(idx, 1)
+      else localComments.splice(idx, 1, real)
+    } else if (!alreadyReal) {
+      localComments.push(real)
+    }
   } catch {
     detail.value!.comments = localComments.filter(c => c.id !== tempId) as Comment[]
   } finally {
