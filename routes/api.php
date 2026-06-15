@@ -25,6 +25,10 @@ Route::prefix('auth')->name('auth.')->group(function () {
     Route::post('register', [AuthController::class, 'register'])->name('register');
     Route::post('login', [AuthController::class, 'login'])->name('login');
 
+    // Login com Google (OAuth) — navegações de página inteira, sem auth
+    Route::get('google/redirect', [AuthController::class, 'redirectToGoogle'])->name('google.redirect');
+    Route::get('google/callback', [AuthController::class, 'handleGoogleCallback'])->name('google.callback');
+
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('logout', [AuthController::class, 'logout'])->name('logout');
         Route::get('me', [AuthController::class, 'me'])->name('me');

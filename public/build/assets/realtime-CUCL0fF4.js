@@ -1,0 +1,1 @@
+import{G as e,Z as t}from"./vue.runtime.esm-bundler-w55EvkJz.js";import{o as n}from"./app-DpWiYyDu.js";e();var r=n(`realtime`,()=>{let e=t(0);function n(){e.value++}return{dashboardStaleTick:e,markDashboardStale:n}});export{r as t};

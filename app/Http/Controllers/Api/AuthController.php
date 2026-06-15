@@ -7,10 +7,12 @@ use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
+use Laravel\Socialite\Facades\Socialite;
 
 class AuthController extends Controller
 {
@@ -99,6 +101,47 @@ class AuthController extends Controller
     public function me(Request $request): JsonResponse
     {
         return response()->json($this->userResource($request->user()));
+    }
+
+    /** Redireciona o navegador para o consentimento do Google. */
+    public function redirectToGoogle(): RedirectResponse
+    {
+        return Socialite::driver('google')->stateless()->redirect();
+    }
+
+    /** Callback do Google: cria/encontra o usuário, gera token e devolve pro SPA. */
+    public function handleGoogleCallback(): RedirectResponse
+    {
+        try {
+            $googleUser = Socialite::driver('google')->stateless()->user();
+        } catch (\Throwable $e) {
+            return redirect('/login?error=google');
+        }
+
+        $user = User::where('google_id', $googleUser->getId())->first()
+            ?? User::where('email', $googleUser->getEmail())->first();
+
+        if (! $user) {
+            $user = User::create([
+                'name'              => $googleUser->getName() ?: ($googleUser->getNickname() ?: 'Usuário'),
+                'email'             => $googleUser->getEmail(),
+                'google_id'         => $googleUser->getId(),
+                'avatar'            => $googleUser->getAvatar(),
+                'password'          => null,
+                'role'              => 'member',
+                'email_verified_at' => now(),
+            ]);
+        } else {
+            // Vincula a conta Google a um usuário já existente (mesmo e-mail)
+            $updates = [];
+            if (! $user->google_id) $updates['google_id'] = $googleUser->getId();
+            if (! $user->avatar && $googleUser->getAvatar()) $updates['avatar'] = $googleUser->getAvatar();
+            if ($updates) $user->update($updates);
+        }
+
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return redirect('/auth/callback?token=' . urlencode($token));
     }
 
     private function userResource(User $user): array

@@ -1,10 +1,10 @@
 {
-  "_ProjectModal-CUshQJXj.js": {
-    "file": "assets/ProjectModal-CUshQJXj.js",
+  "_ProjectModal-CxWelezX.js": {
+    "file": "assets/ProjectModal-CxWelezX.js",
     "name": "ProjectModal",
     "imports": [
       "_vue.runtime.esm-bundler-w55EvkJz.js",
-      "_projects-rbBwdkg7.js"
+      "_projects-lvfYW_Su.js"
     ]
   },
   "_StatCard-CgScFrWV.js": {
@@ -21,18 +21,18 @@
       "_vue.runtime.esm-bundler-w55EvkJz.js"
     ]
   },
-  "_TaskModal-BPhNQaR7.js": {
-    "file": "assets/TaskModal-BPhNQaR7.js",
+  "_TaskModal-DFkAqaS7.js": {
+    "file": "assets/TaskModal-DFkAqaS7.js",
     "name": "TaskModal",
     "imports": [
       "_vue.runtime.esm-bundler-w55EvkJz.js",
       "resources/js/app.ts",
-      "_projects-ZMjLP5lx.js",
+      "_projects-DpqQzSEt.js",
       "_UserAvatar-TZkzKwbB.js",
       "_useRealtime-B3I9Apen.js",
       "_useTimeAgo-BRxpdCvD.js",
       "_useToast-CQxLI-Ix.js",
-      "_projects-rbBwdkg7.js"
+      "_projects-lvfYW_Su.js"
     ]
   },
   "_UserAvatar-TZkzKwbB.js": {
@@ -53,24 +53,24 @@
       "_vue.runtime.esm-bundler-w55EvkJz.js"
     ]
   },
-  "_projects-ZMjLP5lx.js": {
-    "file": "assets/projects-ZMjLP5lx.js",
+  "_projects-DpqQzSEt.js": {
+    "file": "assets/projects-DpqQzSEt.js",
     "name": "projects",
     "imports": [
       "resources/js/app.ts"
     ]
   },
-  "_projects-rbBwdkg7.js": {
-    "file": "assets/projects-rbBwdkg7.js",
+  "_projects-lvfYW_Su.js": {
+    "file": "assets/projects-lvfYW_Su.js",
     "name": "projects",
     "imports": [
       "_vue.runtime.esm-bundler-w55EvkJz.js",
       "resources/js/app.ts",
-      "_projects-ZMjLP5lx.js"
+      "_projects-DpqQzSEt.js"
     ]
   },
-  "_realtime-CtJCBZ22.js": {
-    "file": "assets/realtime-CtJCBZ22.js",
+  "_realtime-CUCL0fF4.js": {
+    "file": "assets/realtime-CUCL0fF4.js",
     "name": "realtime",
     "imports": [
       "_vue.runtime.esm-bundler-w55EvkJz.js",
@@ -107,7 +107,7 @@
     "isDynamicEntry": true
   },
   "resources/css/app.css": {
-    "file": "assets/app-C21WyVqr.css",
+    "file": "assets/app--sNKgKE0.css",
     "name": "app",
     "names": [
       "app.css"
@@ -116,14 +116,14 @@
     "isEntry": true
   },
   "resources/js/Pages/AcceptInvitePage.vue": {
-    "file": "assets/AcceptInvitePage-DcqExXa1.js",
+    "file": "assets/AcceptInvitePage-BwU5V22Q.js",
     "name": "AcceptInvitePage",
     "src": "resources/js/Pages/AcceptInvitePage.vue",
     "isDynamicEntry": true,
     "imports": [
       "_vue.runtime.esm-bundler-w55EvkJz.js",
       "resources/js/app.ts",
-      "_projects-ZMjLP5lx.js"
+      "_projects-DpqQzSEt.js"
     ]
   },
   "resources/js/Pages/App.vue": {
@@ -137,21 +137,31 @@
     ]
   },
   "resources/js/Pages/MyTasksPage.vue": {
-    "file": "assets/MyTasksPage-COXY7e4G.js",
+    "file": "assets/MyTasksPage-BEAWnGdy.js",
     "name": "MyTasksPage",
     "src": "resources/js/Pages/MyTasksPage.vue",
     "isDynamicEntry": true,
     "imports": [
       "_vue.runtime.esm-bundler-w55EvkJz.js",
       "resources/js/app.ts",
-      "_projects-ZMjLP5lx.js",
-      "_TaskModal-BPhNQaR7.js",
+      "_projects-DpqQzSEt.js",
+      "_TaskModal-DFkAqaS7.js",
       "_useToast-CQxLI-Ix.js",
-      "_realtime-CtJCBZ22.js"
+      "_realtime-CUCL0fF4.js"
+    ]
+  },
+  "resources/js/Pages/auth/AuthCallbackPage.vue": {
+    "file": "assets/AuthCallbackPage-CWDDRRE1.js",
+    "name": "AuthCallbackPage",
+    "src": "resources/js/Pages/auth/AuthCallbackPage.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vue.runtime.esm-bundler-w55EvkJz.js",
+      "resources/js/app.ts"
     ]
   },
   "resources/js/Pages/auth/LoginPage.vue": {
-    "file": "assets/LoginPage-BECG-Zjf.js",
+    "file": "assets/LoginPage-C0Ag581s.js",
     "name": "LoginPage",
     "src": "resources/js/Pages/auth/LoginPage.vue",
     "isDynamicEntry": true,
@@ -161,7 +171,7 @@
     ]
   },
   "resources/js/Pages/auth/RegisterPage.vue": {
-    "file": "assets/RegisterPage-DsfcaEYG.js",
+    "file": "assets/RegisterPage-DQz775EB.js",
     "name": "RegisterPage",
     "src": "resources/js/Pages/auth/RegisterPage.vue",
     "isDynamicEntry": true,
@@ -171,35 +181,35 @@
     ]
   },
   "resources/js/Pages/dashboard/DashboardPage.vue": {
-    "file": "assets/DashboardPage-BeCLoyys.js",
+    "file": "assets/DashboardPage-C5G-jNgf.js",
     "name": "DashboardPage",
     "src": "resources/js/Pages/dashboard/DashboardPage.vue",
     "isDynamicEntry": true,
     "imports": [
       "_vue.runtime.esm-bundler-w55EvkJz.js",
       "resources/js/app.ts",
-      "_projects-ZMjLP5lx.js",
+      "_projects-DpqQzSEt.js",
       "_StatCard-CgScFrWV.js",
       "_StatusBadge-Btcpaf6g.js",
       "_UserAvatar-TZkzKwbB.js",
       "_useTimeAgo-BRxpdCvD.js",
-      "_realtime-CtJCBZ22.js"
+      "_realtime-CUCL0fF4.js"
     ]
   },
   "resources/js/Pages/projects/FilesPage.vue": {
-    "file": "assets/FilesPage-Bn6dlVTb.js",
+    "file": "assets/FilesPage-DzGCHNBs.js",
     "name": "FilesPage",
     "src": "resources/js/Pages/projects/FilesPage.vue",
     "isDynamicEntry": true,
     "imports": [
       "_vue.runtime.esm-bundler-w55EvkJz.js",
       "resources/js/app.ts",
-      "_projects-ZMjLP5lx.js",
+      "_projects-DpqQzSEt.js",
       "_useToast-CQxLI-Ix.js"
     ]
   },
   "resources/js/Pages/projects/KanbanPage.vue": {
-    "file": "assets/KanbanPage-DgmzbU_d.js",
+    "file": "assets/KanbanPage-BcZjJY5B.js",
     "name": "KanbanPage",
     "src": "resources/js/Pages/projects/KanbanPage.vue",
     "isDynamicEntry": true,
@@ -207,48 +217,48 @@
       "__plugin-vue_export-helper-BDNMzG2s.js",
       "_vue.runtime.esm-bundler-w55EvkJz.js",
       "resources/js/app.ts",
-      "_projects-ZMjLP5lx.js",
-      "_TaskModal-BPhNQaR7.js",
+      "_projects-DpqQzSEt.js",
+      "_TaskModal-DFkAqaS7.js",
       "_UserAvatar-TZkzKwbB.js",
       "_useRealtime-B3I9Apen.js",
       "_useToast-CQxLI-Ix.js",
-      "_projects-rbBwdkg7.js"
+      "_projects-lvfYW_Su.js"
     ],
     "css": [
       "assets/KanbanPage-BnKOK-hN.css"
     ]
   },
   "resources/js/Pages/projects/MeetingsPage.vue": {
-    "file": "assets/MeetingsPage-5kkZTty2.js",
+    "file": "assets/MeetingsPage-hFWhwLFG.js",
     "name": "MeetingsPage",
     "src": "resources/js/Pages/projects/MeetingsPage.vue",
     "isDynamicEntry": true,
     "imports": [
       "_vue.runtime.esm-bundler-w55EvkJz.js",
       "resources/js/app.ts",
-      "_projects-ZMjLP5lx.js",
+      "_projects-DpqQzSEt.js",
       "_UserAvatar-TZkzKwbB.js",
       "_useToast-CQxLI-Ix.js",
-      "_projects-rbBwdkg7.js"
+      "_projects-lvfYW_Su.js"
     ]
   },
   "resources/js/Pages/projects/MembersPage.vue": {
-    "file": "assets/MembersPage-C_quxg5Q.js",
+    "file": "assets/MembersPage-BgCVSGhV.js",
     "name": "MembersPage",
     "src": "resources/js/Pages/projects/MembersPage.vue",
     "isDynamicEntry": true,
     "imports": [
       "_vue.runtime.esm-bundler-w55EvkJz.js",
       "resources/js/app.ts",
-      "_projects-ZMjLP5lx.js",
+      "_projects-DpqQzSEt.js",
       "_UserAvatar-TZkzKwbB.js",
       "_useRealtime-B3I9Apen.js",
       "_useToast-CQxLI-Ix.js",
-      "_projects-rbBwdkg7.js"
+      "_projects-lvfYW_Su.js"
     ]
   },
   "resources/js/Pages/projects/NotesPage.vue": {
-    "file": "assets/NotesPage-DaKXaVTe.js",
+    "file": "assets/NotesPage-1rldobkN.js",
     "name": "NotesPage",
     "src": "resources/js/Pages/projects/NotesPage.vue",
     "isDynamicEntry": true,
@@ -256,47 +266,47 @@
       "__plugin-vue_export-helper-BDNMzG2s.js",
       "_vue.runtime.esm-bundler-w55EvkJz.js",
       "resources/js/app.ts",
-      "_projects-ZMjLP5lx.js",
+      "_projects-DpqQzSEt.js",
       "_useTimeAgo-BRxpdCvD.js",
       "_useToast-CQxLI-Ix.js",
-      "_projects-rbBwdkg7.js"
+      "_projects-lvfYW_Su.js"
     ],
     "css": [
       "assets/NotesPage-DUo29nyT.css"
     ]
   },
   "resources/js/Pages/projects/ProjectDetailPage.vue": {
-    "file": "assets/ProjectDetailPage-Dr0dzUfY.js",
+    "file": "assets/ProjectDetailPage-BE8kDABd.js",
     "name": "ProjectDetailPage",
     "src": "resources/js/Pages/projects/ProjectDetailPage.vue",
     "isDynamicEntry": true,
     "imports": [
       "_vue.runtime.esm-bundler-w55EvkJz.js",
       "resources/js/app.ts",
-      "_ProjectModal-CUshQJXj.js",
+      "_ProjectModal-CxWelezX.js",
       "_StatCard-CgScFrWV.js",
       "_UserAvatar-TZkzKwbB.js",
       "_useTimeAgo-BRxpdCvD.js",
-      "_projects-rbBwdkg7.js"
+      "_projects-lvfYW_Su.js"
     ]
   },
   "resources/js/Pages/projects/ProjectsPage.vue": {
-    "file": "assets/ProjectsPage-DmETRg8C.js",
+    "file": "assets/ProjectsPage-Oy9wRGkJ.js",
     "name": "ProjectsPage",
     "src": "resources/js/Pages/projects/ProjectsPage.vue",
     "isDynamicEntry": true,
     "imports": [
       "_vue.runtime.esm-bundler-w55EvkJz.js",
       "resources/js/app.ts",
-      "_ProjectModal-CUshQJXj.js",
+      "_ProjectModal-CxWelezX.js",
       "_StatusBadge-Btcpaf6g.js",
       "_UserAvatar-TZkzKwbB.js",
       "_useToast-CQxLI-Ix.js",
-      "_projects-rbBwdkg7.js"
+      "_projects-lvfYW_Su.js"
     ]
   },
   "resources/js/Pages/projects/SettingsPage.vue": {
-    "file": "assets/SettingsPage-B59zHBQv.js",
+    "file": "assets/SettingsPage-C-vTmrpQ.js",
     "name": "SettingsPage",
     "src": "resources/js/Pages/projects/SettingsPage.vue",
     "isDynamicEntry": true,
@@ -304,11 +314,11 @@
       "_vue.runtime.esm-bundler-w55EvkJz.js",
       "resources/js/app.ts",
       "_useToast-CQxLI-Ix.js",
-      "_projects-rbBwdkg7.js"
+      "_projects-lvfYW_Su.js"
     ]
   },
   "resources/js/app.ts": {
-    "file": "assets/app-BozS9hY8.js",
+    "file": "assets/app-DpWiYyDu.js",
     "name": "app",
     "src": "resources/js/app.ts",
     "isEntry": true,
@@ -320,6 +330,7 @@
       "resources/js/Pages/AcceptInvitePage.vue",
       "resources/js/Pages/auth/LoginPage.vue",
       "resources/js/Pages/auth/RegisterPage.vue",
+      "resources/js/Pages/auth/AuthCallbackPage.vue",
       "resources/js/layouts/AppLayout.vue",
       "resources/js/Pages/dashboard/DashboardPage.vue",
       "resources/js/Pages/MyTasksPage.vue",
@@ -335,7 +346,7 @@
     ]
   },
   "resources/js/layouts/AppLayout.vue": {
-    "file": "assets/AppLayout-BUj_aqta.js",
+    "file": "assets/AppLayout-TCD4vyoD.js",
     "name": "AppLayout",
     "src": "resources/js/layouts/AppLayout.vue",
     "isDynamicEntry": true,
@@ -343,12 +354,12 @@
       "_vue.runtime.esm-bundler-w55EvkJz.js",
       "resources/js/app.ts",
       "_echo-BOohR6Cg.js",
-      "_projects-ZMjLP5lx.js",
+      "_projects-DpqQzSEt.js",
       "_UserAvatar-TZkzKwbB.js",
       "_useTimeAgo-BRxpdCvD.js",
       "_useToast-CQxLI-Ix.js",
-      "_projects-rbBwdkg7.js",
-      "_realtime-CtJCBZ22.js"
+      "_projects-lvfYW_Su.js",
+      "_realtime-CUCL0fF4.js"
     ]
   }
 }
