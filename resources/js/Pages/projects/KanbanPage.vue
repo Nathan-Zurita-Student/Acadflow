@@ -22,6 +22,10 @@
           ao vivo
         </div>
 
+        <button @click="showAi = true"
+          class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-accent-600/15 hover:bg-accent-600/25 text-accent-300 border border-accent-500/30 transition-colors">
+          Gerar com IA
+        </button>
         <button @click="showCreate = true" class="btn-primary">
           <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -100,6 +104,13 @@
       @close="closeModal"
       @saved="onTaskSaved"
     />
+
+    <AiPlanModal
+      v-if="showAi"
+      :project-id="projectId"
+      @close="showAi = false"
+      @created="onAiCreated"
+    />
   </div>
 </template>
 
@@ -116,6 +127,7 @@ import { tasksApi } from '@/api/projects'
 import type { Task, TaskStatus } from '@/types'
 import KanbanColumn from '@/components/kanban/KanbanColumn.vue'
 import TaskModal from '@/components/tasks/TaskModal.vue'
+import AiPlanModal from '@/components/tasks/AiPlanModal.vue'
 
 const route         = useRoute()
 const store         = useTasksStore()
@@ -128,6 +140,7 @@ const projectId     = Number(route.params.id)
 const { currentProject } = storeToRefs(projectsStore)
 
 const showCreate   = ref(false)
+const showAi       = ref(false)
 const createStatus = ref<TaskStatus>('backlog')
 const selectedTask = ref<Task | null>(null)
 
@@ -353,5 +366,9 @@ function closeModal() {
 async function onTaskSaved() {
   closeModal()
   if (!realtime.enabled) await store.fetchTasks(projectId)
+}
+
+async function onAiCreated() {
+  await store.fetchTasks(projectId)
 }
 </script>

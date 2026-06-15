@@ -64,6 +64,28 @@ export const dashboardApi = {
   users:    (q: string) => api.get('/users/search', { params: { q } }),
 }
 
+export interface AiPlanTask {
+  title: string
+  description: string
+  status: string
+  priority: string
+  due_date: string | null
+  suggested_assignee_id: number | null
+  subtasks: string[]
+}
+
+export const aiApi = {
+  generatePlan: (projectId: number, payload: { content?: string; file?: File | null; due_date?: string }) => {
+    const form = new FormData()
+    if (payload.content) form.append('content', payload.content)
+    if (payload.file)    form.append('file', payload.file)
+    if (payload.due_date) form.append('due_date', payload.due_date)
+    return api.post<{ tasks: AiPlanTask[] }>(`/projects/${projectId}/ai/generate-plan`, form)
+  },
+  applyPlan: (projectId: number, tasks: Array<Record<string, unknown>>) =>
+    api.post<{ tasks: Task[] }>(`/projects/${projectId}/ai/apply-plan`, { tasks }),
+}
+
 export const projectInvitationsApi = {
   send:    (projectId: number, userId: number, role?: string) =>
     api.post(`/projects/${projectId}/invitations`, { user_id: userId, role }),

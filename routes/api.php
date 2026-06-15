@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AiPlanController;
 use App\Http\Controllers\Api\AttachmentController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DashboardController;
@@ -68,6 +69,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('{project}/tasks/{task}', [TaskController::class, 'update'])->name('tasks.update');
         Route::delete('{project}/tasks/{task}', [TaskController::class, 'destroy'])->name('tasks.destroy');
         Route::post('{project}/tasks/reorder', [TaskController::class, 'reorder'])->name('tasks.reorder');
+
+        // IA — gerar plano de trabalho a partir do enunciado
+        Route::post('{project}/ai/generate-plan', [AiPlanController::class, 'generate'])->name('ai.generate');
+        Route::post('{project}/ai/apply-plan', [AiPlanController::class, 'apply'])->name('ai.apply');
         Route::post('{project}/tasks/{task}/comments', [TaskCommentController::class, 'store'])->name('tasks.comments.store');
         Route::post('{project}/tasks/{task}/comments/delivered', [TaskCommentController::class, 'markDelivered'])->name('tasks.comments.delivered');
         Route::post('{project}/tasks/{task}/comments/read', [TaskCommentController::class, 'markRead'])->name('tasks.comments.read');
