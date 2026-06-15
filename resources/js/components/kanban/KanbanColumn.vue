@@ -9,9 +9,9 @@
         <!-- pending approval badge -->
         <span
           v-if="pendingCount > 0"
-          class="text-xs bg-yellow-500/15 text-yellow-400 px-1.5 py-0.5 rounded-full"
+          class="inline-flex items-center gap-1 text-xs bg-yellow-500/15 text-yellow-400 px-1.5 py-0.5 rounded-full"
           title="Tarefas aguardando aprovação"
-        >{{ pendingCount }} ⏳</span>
+        >{{ pendingCount }} <Icon name="hourglass_top" :size="12" /></span>
       </div>
       <button @click="$emit('quick-add')" class="p-1 rounded hover:bg-dark-700 text-dark-500 hover:text-dark-300 transition-colors">
         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -58,6 +58,7 @@ import { computed } from 'vue'
 import draggable from 'vuedraggable'
 import type { Task, TaskStatus } from '@/types'
 import KanbanCard from './KanbanCard.vue'
+import Icon from '@/components/ui/Icon.vue'
 
 const props = defineProps<{
   column: { status: TaskStatus; label: string; color: string }

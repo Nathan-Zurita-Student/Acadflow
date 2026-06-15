@@ -15,7 +15,7 @@
           class="flex items-center gap-3 pl-4 pr-3 py-3 rounded-xl shadow-2xl text-sm font-medium pointer-events-auto w-80"
           :class="classes(t.type)"
         >
-          <span class="text-lg flex-shrink-0 leading-none">{{ icon(t.type) }}</span>
+          <Icon :name="icon(t.type)" :size="20" class="flex-shrink-0" />
           <span class="flex-1 leading-snug">{{ t.message }}</span>
           <button @click="dismiss(t.id)"
             class="opacity-50 hover:opacity-100 transition-opacity flex-shrink-0 p-0.5 rounded">
@@ -31,10 +31,11 @@
 
 <script setup lang="ts">
 import { useToast } from '@/composables/useToast'
+import Icon from '@/components/ui/Icon.vue'
 const { toasts, dismiss } = useToast()
 
 function icon(type: string) {
-  return { success: '✅', error: '❌', info: 'ℹ️', warning: '⚠️' }[type] ?? '🔔'
+  return { success: 'check_circle', error: 'cancel', info: 'info', warning: 'warning' }[type] ?? 'notifications'
 }
 function classes(type: string) {
   return {

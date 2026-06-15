@@ -97,7 +97,7 @@ class InviteController extends Controller
         $notifyIds = collect([$project->owner_id, $invite->created_by])
             ->unique()->filter(fn($id) => $id && $id !== $user->id);
         foreach ($notifyIds as $uid) {
-            $this->notifications->notify($uid, 'project_member_joined', 'Novo membro no projeto 🎓',
+            $this->notifications->notify($uid, 'project_member_joined', 'Novo membro no projeto',
                 "{$user->name} entrou no projeto \"{$project->name}\".",
                 ['project_id' => $project->id]);
         }

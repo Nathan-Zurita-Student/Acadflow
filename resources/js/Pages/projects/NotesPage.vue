@@ -100,7 +100,7 @@
         <div v-if="viewMode !== 'preview'" class="flex items-center gap-0.5 px-3 py-1.5 border-b border-dark-700 flex-shrink-0 overflow-x-auto">
           <button v-for="t in toolbar" :key="t.label" @click="t.action" :title="t.label"
             class="px-2 py-1 rounded-md text-dark-400 hover:text-dark-100 hover:bg-dark-700 transition-colors flex-shrink-0 text-sm">
-            <span v-html="t.icon" />
+            <Icon :name="t.icon" :size="18" />
           </button>
         </div>
 
@@ -149,6 +149,7 @@ import { useProjectsStore } from '@/stores/projects'
 import { useToast } from '@/composables/useToast'
 import { useMarkdown } from '@/composables/useMarkdown'
 import { notesApi } from '@/api/projects'
+import Icon from '@/components/ui/Icon.vue'
 import type { ProjectNote } from '@/types'
 import { useTimeAgo } from '@/composables/useTimeAgo'
 
@@ -190,15 +191,15 @@ function stripMd(src: string | null | undefined): string {
 
 // ── Markdown toolbar ──
 const toolbar = [
-  { label: 'Negrito (Ctrl+B)',  icon: '<b>B</b>',                action: () => surround('**', '**', 'negrito') },
-  { label: 'Itálico (Ctrl+I)',  icon: '<i>I</i>',               action: () => surround('*', '*', 'itálico') },
-  { label: 'Título',            icon: 'H',                       action: () => prefixLines('## ') },
-  { label: 'Lista',             icon: '•',                       action: () => prefixLines('- ') },
-  { label: 'Checklist',         icon: '☑',                       action: () => prefixLines('- [ ] ') },
-  { label: 'Citação',           icon: '&ldquo;',                 action: () => prefixLines('> ') },
-  { label: 'Código',            icon: '&lt;/&gt;',               action: () => surround('`', '`', 'código') },
-  { label: 'Link',              icon: '🔗',                      action: () => surround('[', '](https://)', 'texto') },
-  { label: 'Tabela',            icon: '▦',                       action: insertTable },
+  { label: 'Negrito (Ctrl+B)', icon: 'format_bold',          action: () => surround('**', '**', 'negrito') },
+  { label: 'Itálico (Ctrl+I)', icon: 'format_italic',        action: () => surround('*', '*', 'itálico') },
+  { label: 'Título',           icon: 'title',                action: () => prefixLines('## ') },
+  { label: 'Lista',            icon: 'format_list_bulleted', action: () => prefixLines('- ') },
+  { label: 'Checklist',        icon: 'checklist',            action: () => prefixLines('- [ ] ') },
+  { label: 'Citação',          icon: 'format_quote',         action: () => prefixLines('> ') },
+  { label: 'Código',           icon: 'code',                 action: () => surround('`', '`', 'código') },
+  { label: 'Link',             icon: 'link',                 action: () => surround('[', '](https://)', 'texto') },
+  { label: 'Tabela',           icon: 'table_chart',          action: insertTable },
 ]
 
 function surround(before: string, after = before, placeholder = '') {

@@ -184,7 +184,7 @@
           </svg>
           {{ task.checklists_done }}/{{ task.checklists_total }}
         </span>
-        <span v-if="task.is_overdue" class="text-xs text-red-400">⚠</span>
+        <Icon v-if="task.is_overdue" name="warning" :size="14" class="text-red-400" />
       </div>
 
       <!-- Right: due date + assignees -->
@@ -222,6 +222,7 @@ import { tasksApi } from '@/api/projects'
 import type { Task, TaskStatus } from '@/types'
 import PriorityDot from '@/components/ui/PriorityDot.vue'
 import UserAvatar from '@/components/ui/UserAvatar.vue'
+import Icon from '@/components/ui/Icon.vue'
 
 const props = defineProps<{
   task: Task

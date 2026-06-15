@@ -37,7 +37,7 @@
                     : 'border-dark-700 text-dark-400 hover:border-dark-600 hover:text-dark-300'
                 ]"
               >
-                <span class="text-base">{{ opt.icon }}</span>
+                <Icon :name="opt.icon" :size="18" />
                 <div class="text-left">
                   <p>{{ opt.label }}</p>
                   <p class="text-xs font-normal opacity-70">{{ opt.desc }}</p>
@@ -121,6 +121,7 @@ import { ref, watch } from 'vue'
 import { dashboardApi, projectInvitationsApi } from '@/api/projects'
 import type { MemberStats } from '@/types'
 import UserAvatar from './UserAvatar.vue'
+import Icon from '@/components/ui/Icon.vue'
 
 const props = defineProps<{
   projectId: number
@@ -135,8 +136,8 @@ const emit = defineEmits<{
 type SearchUser = { id: number; name: string; email: string; avatar: string | null }
 
 const roleOptions = [
-  { value: 'member' as const, label: 'Membro', icon: '👤', desc: 'Acesso padrão' },
-  { value: 'leader' as const, label: 'Líder', icon: '⭐', desc: 'Pode gerenciar' },
+  { value: 'member' as const, label: 'Membro', icon: 'person', desc: 'Acesso padrão' },
+  { value: 'leader' as const, label: 'Líder', icon: 'star', desc: 'Pode gerenciar' },
 ]
 
 const query = ref('')

@@ -50,7 +50,7 @@ class MeetingController extends Controller
             $this->notifications->notifyMany(
                 $members,
                 'meeting_scheduled',
-                'Nova reunião agendada 📅',
+                'Nova reunião agendada',
                 "{$request->user()->name} agendou \"{$meeting->title}\" para " .
                     $meeting->scheduled_at->format('d/m/Y H:i') . '.',
                 ['project_id' => $project->id, 'meeting_id' => $meeting->id],

@@ -68,7 +68,7 @@ class AuthController extends Controller
             'display_name' => ['nullable', 'string', 'max:255'],
             'email'        => ['sometimes', 'email', 'max:255', 'unique:users,email,' . $user->id],
             'password'     => ['nullable', 'string', 'min:8', 'confirmed'],
-            'avatar'       => ['nullable', 'image', 'max:2048'],
+            'avatar'       => ['nullable', 'image', 'max:20480'],
         ]);
 
         $data = $request->only(['name', 'display_name', 'email']);

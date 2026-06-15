@@ -69,7 +69,7 @@ class AttachmentController extends Controller
         $this->notifications->notifyMany(
             $members,
             'file_uploaded',
-            'Novo arquivo enviado 📎',
+            'Novo arquivo enviado',
             "{$uploaderName} enviou \"{$displayName}\" em {$project->name}",
             ['project_id' => $project->id, 'attachment_id' => $attachment->id],
         );

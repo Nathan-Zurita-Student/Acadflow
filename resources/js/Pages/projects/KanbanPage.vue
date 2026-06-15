@@ -19,12 +19,12 @@
         <!-- Indicador de sincronização -->
         <div class="flex items-center gap-1.5 text-xs text-dark-600">
           <div class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-          ao vivo
+            Sincronizado
         </div>
 
         <button @click="showAi = true"
           class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-accent-600/15 hover:bg-accent-600/25 text-accent-300 border border-accent-500/30 transition-colors">
-          Gerar com IA
+          Gerar tarefas com IA
         </button>
         <button @click="showCreate = true" class="btn-primary">
           <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

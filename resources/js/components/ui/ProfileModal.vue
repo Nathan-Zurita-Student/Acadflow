@@ -35,7 +35,7 @@
             </div>
             <div>
               <p class="text-sm font-medium text-dark-200">Foto de perfil</p>
-              <p class="text-xs text-dark-500">JPG, PNG ou GIF — máx. 2MB</p>
+              <p class="text-xs text-dark-500">JPG, PNG ou GIF — máx. 20MB (suporta 4K)</p>
             </div>
           </div>
 

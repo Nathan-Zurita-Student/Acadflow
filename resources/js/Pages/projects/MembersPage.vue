@@ -72,7 +72,7 @@
                     v-if="isProjectOwner(s.user.id)"
                     class="text-xs text-amber-400 bg-amber-400/10 border border-amber-400/20 px-1.5 py-0.5 rounded-md"
                   >
-                    Dono
+                    Lider do projeto
                   </span>
                 </div>
                 <p class="text-xs text-dark-500 truncate">{{ s.user.email }}</p>

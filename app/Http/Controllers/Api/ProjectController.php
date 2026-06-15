@@ -69,7 +69,7 @@ class ProjectController extends Controller
                 ->unique()->filter(fn($id) => $id && $id !== $request->user()->id);
             $label = $this->projectStatusLabel($project->status);
             foreach ($memberIds as $uid) {
-                $this->notifications->notify($uid, 'project_status', 'Status do projeto alterado 🚦',
+                $this->notifications->notify($uid, 'project_status', 'Status do projeto alterado',
                     "O projeto \"{$project->name}\" mudou para {$label}.",
                     ['project_id' => $project->id]);
             }
@@ -112,7 +112,7 @@ class ProjectController extends Controller
             $this->notifications->notify(
                 $newMember,
                 'project_member_added',
-                'Você foi adicionado a um projeto 🎓',
+                'Você foi adicionado a um projeto',
                 "{$request->user()->name} adicionou você como {$roleLabel} no projeto \"{$project->name}\".",
                 ['project_id' => $project->id],
             );

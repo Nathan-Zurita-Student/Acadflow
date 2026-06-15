@@ -1,0 +1,1 @@
+import{Et as e,P as t,T as n,_ as r,ft as i,kt as a,x as o}from"./vue.runtime.esm-bundler-w55EvkJz.js";n(),i();var s=o({__name:`Icon`,props:{name:{},size:{default:20}},setup(n){return(i,o)=>(t(),r(`span`,{class:`material-symbols-outlined`,style:e({fontSize:`${n.size}px`}),"aria-hidden":`true`},a(n.name),5))}});export{s as t};

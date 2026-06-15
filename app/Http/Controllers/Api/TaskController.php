@@ -199,7 +199,7 @@ class TaskController extends Controller
             ->merge($project->members()->wherePivot('role', 'leader')->pluck('users.id'))
             ->unique()->filter(fn($id) => $id && $id !== $request->user()->id);
         foreach ($leaderIds as $uid) {
-            $this->notifications->notify($uid, 'task_approval_requested', 'Tarefa aguardando aprovação ⏳',
+            $this->notifications->notify($uid, 'task_approval_requested', 'Tarefa aguardando aprovação',
                 "{$request->user()->name} enviou \"{$task->title}\" para sua aprovação.",
                 ['project_id' => $project->id, 'task_id' => $task->id]);
         }
@@ -229,7 +229,7 @@ class TaskController extends Controller
             ->merge($task->assignees->pluck('id'))
             ->unique()->filter(fn($id) => $id && $id !== $request->user()->id);
         foreach ($notifyIds as $uid) {
-            $this->notifications->notify($uid, 'task_approved', 'Tarefa aprovada! ✅',
+            $this->notifications->notify($uid, 'task_approved', 'Tarefa aprovada!',
                 "Sua tarefa \"{$task->title}\" foi aprovada pelo líder.",
                 ['project_id' => $project->id, 'task_id' => $task->id]);
         }
@@ -261,7 +261,7 @@ class TaskController extends Controller
             ->unique()->filter(fn($id) => $id && $id !== $request->user()->id);
         $noteMsg = $data['note'] ? " Motivo: {$data['note']}" : '';
         foreach ($notifyIds as $uid) {
-            $this->notifications->notify($uid, 'task_rejected', 'Tarefa reprovada ❌',
+            $this->notifications->notify($uid, 'task_rejected', 'Tarefa reprovada',
                 "Sua tarefa \"{$task->title}\" foi reprovada.{$noteMsg}",
                 ['project_id' => $project->id, 'task_id' => $task->id]);
         }

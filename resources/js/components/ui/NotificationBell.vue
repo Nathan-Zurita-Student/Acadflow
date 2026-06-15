@@ -42,7 +42,7 @@
         <!-- Pedido de permissão para notificações do navegador -->
         <div v-if="supported && permission !== 'granted'" class="px-4 py-3 border-b border-dark-700 bg-accent-500/5">
           <div class="flex items-start gap-2.5">
-            <span class="text-base leading-none mt-0.5">🔔</span>
+            <Icon name="notifications" :size="18" class="text-accent-400 mt-0.5" />
             <div class="flex-1 min-w-0">
               <template v-if="permission === 'default'">
                 <p class="text-xs text-dark-100 font-medium">Ativar notificações do navegador</p>
@@ -61,7 +61,7 @@
               </template>
               <template v-else>
                 <p class="text-xs text-dark-100 font-medium">Notificações bloqueadas</p>
-                <p class="text-[11px] text-dark-500 mt-0.5 leading-relaxed">Para reativar, clique no ícone 🔒 na barra de endereço do navegador e permita notificações para este site.</p>
+                <p class="text-[11px] text-dark-500 mt-0.5 leading-relaxed">Para reativar, clique no ícone de cadeado na barra de endereço do navegador e permita notificações para este site.</p>
               </template>
             </div>
           </div>
@@ -87,9 +87,9 @@
             @click="n.type !== 'project_invitation' && handleClick(n)"
           >
             <!-- Ícone por tipo -->
-            <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-base mt-0.5"
+            <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
               :class="iconBg(n.type)">
-              {{ typeEmoji(n.type) }}
+              <Icon :name="typeIcon(n.type)" :size="18" :class="iconColor(n.type)" />
             </div>
             <div class="flex-1 min-w-0">
               <p class="text-xs font-semibold text-dark-100 leading-tight">{{ n.title }}</p>
@@ -143,6 +143,7 @@ import { useToast } from '@/composables/useToast'
 import type { AppNotification } from '@/api/notifications'
 import { useTimeAgo } from '@/composables/useTimeAgo'
 import { projectInvitationsApi } from '@/api/projects'
+import Icon from '@/components/ui/Icon.vue'
 
 const store  = useNotificationsStore()
 const router = useRouter()
@@ -157,7 +158,7 @@ async function enableBrowserNotifications() {
   requesting.value = true
   try {
     const result = await requestPermission()
-    if (result === 'granted') toast.success('Notificações ativadas! 🔔')
+    if (result === 'granted') toast.success('Notificações ativadas!')
     else if (result === 'denied') toast.error('Permissão negada. Habilite nas configurações do navegador.')
   } finally {
     requesting.value = false
@@ -197,16 +198,28 @@ async function respondToInvite(n: AppNotification, action: 'accept' | 'decline')
   }
 }
 
-function typeEmoji(type: string) {
+function typeIcon(type: string) {
   const map: Record<string, string> = {
-    task_comment: '💬', task_assigned: '📌', task_approved: '✅',
-    task_rejected: '❌', file_uploaded: '📎', project_member_added: '🎓',
-    meeting_scheduled: '📅', project_invitation: '✉️',
-    project_invitation_accepted: '🎉', project_invitation_declined: '😔',
-    task_mention: '📣', task_status: '🔄', task_priority: '⚡', project_removed: '🚪',
-    task_approval_requested: '⏳', project_status: '🚦', project_member_joined: '👋',
+    task_comment: 'chat', task_assigned: 'push_pin', task_approved: 'check_circle',
+    task_rejected: 'cancel', file_uploaded: 'attach_file', project_member_added: 'school',
+    meeting_scheduled: 'event', project_invitation: 'mail',
+    project_invitation_accepted: 'celebration', project_invitation_declined: 'sentiment_dissatisfied',
+    task_mention: 'campaign', task_status: 'sync', task_priority: 'bolt', project_removed: 'logout',
+    task_approval_requested: 'hourglass_top', project_status: 'traffic', project_member_joined: 'waving_hand',
   }
-  return map[type] ?? '🔔'
+  return map[type] ?? 'notifications'
+}
+
+function iconColor(type: string) {
+  if (type === 'task_approved' || type === 'project_invitation_accepted') return 'text-emerald-400'
+  if (type === 'task_rejected' || type === 'project_invitation_declined' || type === 'project_removed') return 'text-red-400'
+  if (type === 'task_comment' || type === 'task_status') return 'text-blue-400'
+  if (type === 'task_priority') return 'text-orange-400'
+  if (type === 'task_approval_requested') return 'text-yellow-400'
+  if (type === 'project_status' || type === 'meeting_scheduled') return 'text-teal-400'
+  if (type === 'file_uploaded') return 'text-purple-400'
+  if (type === 'project_invitation' || type === 'project_member_joined' || type === 'project_member_added') return 'text-amber-400'
+  return 'text-accent-400'
 }
 
 function iconBg(type: string) {

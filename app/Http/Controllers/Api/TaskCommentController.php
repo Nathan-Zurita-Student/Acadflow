@@ -42,7 +42,7 @@ class TaskCommentController extends Controller
             ->merge($task->assignees->pluck('id'))
             ->unique()->filter(fn($id) => $id && $id !== $request->user()->id);
         foreach ($notifyIds as $uid) {
-            $this->notifications->notify($uid, 'task_comment', 'Novo comentário na tarefa 💬',
+            $this->notifications->notify($uid, 'task_comment', 'Novo comentário na tarefa',
                 "{$request->user()->name} comentou em \"{$task->title}\"",
                 ['project_id' => $project->id, 'task_id' => $task->id]);
         }
@@ -171,7 +171,7 @@ class TaskCommentController extends Controller
             if ($member->id === $request->user()->id) continue;
             if ($alreadyNotified->contains($member->id)) continue;
 
-            $this->notifications->notify($member->id, 'task_mention', 'Você foi mencionado 💬',
+            $this->notifications->notify($member->id, 'task_mention', 'Você foi mencionado',
                 "{$request->user()->name} mencionou você em \"{$task->title}\"",
                 ['project_id' => $project->id, 'task_id' => $task->id]);
         }
