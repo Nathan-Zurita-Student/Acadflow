@@ -46,6 +46,7 @@
           </template>
         </NavItem>
         <NavItem to="/projects" icon="folder" :label="sidebarCollapsed ? '' : 'Projetos'" :collapsed="sidebarCollapsed" />
+        <NavItem to="/plans" icon="crown" :label="sidebarCollapsed ? '' : 'Planos'" :collapsed="sidebarCollapsed" />
 
         <!-- Current project sub-nav -->
         <template v-if="currentProject && !sidebarCollapsed">

@@ -34,9 +34,20 @@ class ProjectController extends Controller
 
     public function store(StoreProjectRequest $request): JsonResponse
     {
+        $user = $request->user();
+
+        // Limite de projetos por plano (config/plans.php). null = ilimitado.
+        $ownedCount = $user->ownedProjects()->count();
+        if (! $user->withinLimit('projects', $ownedCount)) {
+            return response()->json([
+                'message' => 'Você atingiu o limite de projetos do seu plano. Faça upgrade para criar mais.',
+                'limit_reached' => 'projects',
+            ], 403);
+        }
+
         $data = $request->validated();
 
-        $project = $this->projectService->createProject($request->user(), $data);
+        $project = $this->projectService->createProject($user, $data);
         $project->load(['owner', 'members']);
 
         return response()->json($this->projectResource($project, $request->user()->id), 201);

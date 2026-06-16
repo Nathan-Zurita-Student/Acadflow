@@ -1,3 +1,5 @@
+export type PlanKey = 'free' | 'pro' | 'ultra'
+
 export interface User {
   id: number
   name: string
@@ -5,7 +7,22 @@ export interface User {
   email: string
   role: 'admin' | 'leader' | 'member'
   avatar: string | null
+  plan?: PlanKey
+  plan_status?: string | null
+  plan_expires_at?: string | null
   created_at: string
+}
+
+export interface Plan {
+  key: PlanKey
+  name: string
+  price: number
+  description: string
+  limits: {
+    projects: number | null
+    members: number | null
+    ai_per_month: number | null
+  }
 }
 
 export interface Project {

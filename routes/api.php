@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\NoteController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\ProjectController;
 use App\Http\Controllers\Api\ProjectInvitationController;
+use App\Http\Controllers\Api\SubscriptionController;
 use App\Http\Controllers\Api\TaskChecklistController;
 use App\Http\Controllers\Api\TaskCommentController;
 use App\Http\Controllers\Api\TaskController;
@@ -21,6 +22,9 @@ use Illuminate\Support\Facades\Route;
 
 // Public — no auth required
 Route::get('invite/{token}', [InviteController::class, 'info'])->name('invite.info');
+
+// Webhook do ASAAS — público (autenticado pelo token no header), chamado pelo gateway
+Route::post('webhooks/asaas', [SubscriptionController::class, 'webhook'])->name('webhooks.asaas');
 
 Route::prefix('auth')->name('auth.')->group(function () {
     Route::post('register', [AuthController::class, 'register'])->name('register');
@@ -46,6 +50,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::post('notifications/{notification}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
     Route::post('notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');
+
+    // Planos & assinaturas (ASAAS)
+    Route::get('plans', [SubscriptionController::class, 'index'])->name('plans.index');
+    Route::post('subscriptions', [SubscriptionController::class, 'subscribe'])->name('subscriptions.store');
+    Route::post('subscriptions/cancel', [SubscriptionController::class, 'cancel'])->name('subscriptions.cancel');
 
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
     Route::get('my-tasks', [DashboardController::class, 'myTasks'])->name('dashboard.my-tasks');

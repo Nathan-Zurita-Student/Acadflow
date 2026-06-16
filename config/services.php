@@ -46,4 +46,16 @@ return [
         'model'   => env('ANTHROPIC_MODEL', 'claude-haiku-4-5'),
     ],
 
+    'asaas' => [
+        // Chave de API gerada no painel do ASAAS (Configurações > Integrações > API).
+        'key' => env('ASAAS_API_KEY'),
+        // URL base da API. Sandbox (testes) por padrão; troque por produção quando for ao ar.
+        // Sandbox:  https://sandbox.asaas.com/api/v3
+        // Produção: https://api.asaas.com/v3
+        'base_url' => env('ASAAS_BASE_URL', 'https://sandbox.asaas.com/api/v3'),
+        // Token secreto que VOCÊ inventa e cadastra no webhook do ASAAS, para
+        // garantir que a notificação veio mesmo deles.
+        'webhook_token' => env('ASAAS_WEBHOOK_TOKEN'),
+    ],
+
 ];

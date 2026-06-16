@@ -21,6 +21,14 @@ class User extends Authenticatable
         'avatar',
         'role',
         'google_id',
+        'plan',
+        'plan_status',
+        'plan_expires_at',
+        'asaas_customer_id',
+        'asaas_subscription_id',
+        'cpf_cnpj',
+        'ai_usage_count',
+        'ai_usage_period',
     ];
 
     protected $hidden = [
@@ -32,8 +40,68 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'plan_expires_at'   => 'datetime',
+            'password'          => 'hashed',
         ];
+    }
+
+    /**
+     * Plano efetivo do usuário. Se a assinatura paga venceu (sem renovar
+     * dentro da tolerância), cai automaticamente para "free".
+     */
+    public function effectivePlan(): string
+    {
+        $plan = $this->plan ?: 'free';
+
+        if ($plan === 'free') {
+            return 'free';
+        }
+
+        // Assinatura cancelada/inativa ou expirada → volta para o gratuito.
+        if ($this->plan_status === 'canceled' || $this->plan_status === 'inactive') {
+            return 'free';
+        }
+
+        if ($this->plan_expires_at && $this->plan_expires_at->isPast()) {
+            return 'free';
+        }
+
+        return $plan;
+    }
+
+    public function isPro(): bool
+    {
+        return in_array($this->effectivePlan(), ['pro', 'ultra'], true);
+    }
+
+    public function isUltra(): bool
+    {
+        return $this->effectivePlan() === 'ultra';
+    }
+
+    /** Limites configurados (config/plans.php) para o plano efetivo. */
+    public function planLimits(): array
+    {
+        $plan = $this->effectivePlan();
+
+        return config("plans.plans.{$plan}.limits", config('plans.plans.free.limits'));
+    }
+
+    /**
+     * Retorna o limite de um recurso para o plano atual.
+     * `null` significa ilimitado.
+     */
+    public function limitFor(string $key): ?int
+    {
+        return $this->planLimits()[$key] ?? null;
+    }
+
+    /** Verifica se ainda está dentro do limite de um recurso. */
+    public function withinLimit(string $key, int $current): bool
+    {
+        $limit = $this->limitFor($key);
+
+        return $limit === null || $current < $limit;
     }
 
     public function ownedProjects(): HasMany
