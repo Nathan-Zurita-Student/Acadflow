@@ -56,6 +56,10 @@ return [
         // Token secreto que VOCÊ inventa e cadastra no webhook do ASAAS, para
         // garantir que a notificação veio mesmo deles.
         'webhook_token' => env('ASAAS_WEBHOOK_TOKEN'),
+        // Enviar callback de redirect pós-pagamento. Requer um site cadastrado
+        // na conta ASAAS (Minha Conta > Informações). Deixe false até cadastrar,
+        // senão a criação de assinatura falha com 400 ("Não há domínio configurado").
+        'enable_callback' => env('ASAAS_ENABLE_CALLBACK', false),
     ],
 
 ];

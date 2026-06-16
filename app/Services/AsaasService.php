@@ -76,20 +76,29 @@ class AsaasService
      */
     public function createSubscription(string $customerId, float $value, string $description): array
     {
-        $response = $this->http()->post('/subscriptions', [
+        $payload = [
             'customer'    => $customerId,
             'billingType' => 'UNDEFINED', // cliente escolhe Pix/cartão/boleto
             'value'       => $value,
             'nextDueDate' => now()->format('Y-m-d'),
             'cycle'       => 'MONTHLY',
             'description' => $description,
-            // Após concluir o pagamento, o ASAAS redireciona o cliente de volta
-            // para o AcadFlow (tela de planos com aviso de sucesso).
-            'callback'    => [
+        ];
+
+        // Redirect automático pós-pagamento: ao concluir, o ASAAS manda o cliente
+        // de volta para o AcadFlow (tela de planos com aviso de sucesso).
+        // O ASAAS só aceita 'callback' se a conta tiver um site cadastrado
+        // (Minha Conta > Informações); sem isso a criação falha com HTTP 400.
+        // Por isso fica desligado por padrão — ative ASAAS_ENABLE_CALLBACK=true
+        // depois de cadastrar o domínio na conta.
+        if (config('services.asaas.enable_callback')) {
+            $payload['callback'] = [
                 'successUrl'   => rtrim(config('app.url'), '/') . '/settings/plans?pagamento=sucesso',
                 'autoRedirect' => true,
-            ],
-        ]);
+            ];
+        }
+
+        $response = $this->http()->post('/subscriptions', $payload);
 
         if ($response->failed()) {
             throw new RuntimeException('Falha ao criar assinatura no ASAAS: ' . $response->body());
