@@ -18,14 +18,14 @@
       </div>
 
       <div class="card">
-        <form @submit.prevent="handleLogin" class="space-y-4">
+        <form @submit.prevent="handleLogin" class="space-y-4" novalidate>
           <div>
             <label class="label">Email</label>
-            <input v-model="form.email" type="email" class="input" placeholder="seu@email.com" required />
+            <input v-model="form.email" type="email" class="input" placeholder="seu@email.com" />
           </div>
           <div>
             <label class="label">Senha</label>
-            <input v-model="form.password" type="password" class="input" placeholder="••••••••" required />
+            <input v-model="form.password" type="password" class="input" placeholder="••••••••" />
           </div>
 
           <p v-if="error" class="text-sm text-red-400 bg-red-400/10 border border-red-400/20 rounded-lg px-3 py-2">
@@ -70,6 +70,7 @@
 import { ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { validateFields } from '@/composables/useFormValidation'
 
 const auth = useAuthStore()
 const router = useRouter()
@@ -85,6 +86,13 @@ if (route.query.error === 'google') {
 
 async function handleLogin() {
   error.value = ''
+
+  const msg = validateFields([
+    { value: form.value.email,    label: 'Email', rules: ['required', 'email'] },
+    { value: form.value.password, label: 'Senha', rules: ['required'] },
+  ])
+  if (msg) { error.value = msg; return }
+
   loading.value = true
   try {
     await auth.login(form.value.email, form.value.password)

@@ -1,7 +1,7 @@
 <template>
-  <div class="space-y-6 animate-fade-in max-w-5xl mx-auto">
-    <!-- Header -->
-    <div>
+  <div class="space-y-6 animate-fade-in" :class="embedded ? '' : 'max-w-5xl mx-auto'">
+    <!-- Header (oculto quando embutido nas Configurações) -->
+    <div v-if="!embedded">
       <h1 class="text-xl font-bold text-white">Planos & Assinatura</h1>
       <p class="text-dark-400 text-sm mt-0.5">
         Escolha o plano ideal para o seu grupo. Pague com Pix, cartão ou boleto.
@@ -119,12 +119,16 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import { billingApi, type PlansResponse } from '@/api/billing'
 import { useToast } from '@/composables/useToast'
 import { useAuthStore } from '@/stores/auth'
 import Icon from '@/components/ui/Icon.vue'
 import type { Plan } from '@/types'
 
+defineProps<{ embedded?: boolean }>()
+
+const route = useRoute()
 const toast = useToast()
 const auth = useAuthStore()
 
@@ -202,5 +206,12 @@ async function onCancel() {
   }
 }
 
-onMounted(load)
+onMounted(async () => {
+  await load()
+  // Voltou do pagamento no ASAAS (callback successUrl).
+  if (route.query.pagamento === 'sucesso') {
+    toast.success('Pagamento recebido! Seu plano será ativado em instantes.')
+    await auth.fetchMe()
+  }
+})
 </script>

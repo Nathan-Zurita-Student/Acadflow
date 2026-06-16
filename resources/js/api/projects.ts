@@ -1,5 +1,5 @@
 import api from './client'
-import type { Project, ProjectDashboard, MemberStats, Task, Attachment, Meeting, ProjectNote, ProjectWebhook } from '@/types'
+import type { Project, ProjectDashboard, MemberStats, Task, Attachment, Meeting, ProjectNote, ProjectWebhook, ProjectColumn } from '@/types'
 
 export const projectsApi = {
   list: () => api.get<Project[]>('/projects'),
@@ -40,6 +40,18 @@ export const tasksApi = {
     api.put(`/projects/${projectId}/tasks/${taskId}/checklists/${checklistId}`, { completed }),
   deleteChecklist: (projectId: number, taskId: number, checklistId: number) =>
     api.delete(`/projects/${projectId}/tasks/${taskId}/checklists/${checklistId}`),
+}
+
+export const columnsApi = {
+  list:    (projectId: number) => api.get<ProjectColumn[]>(`/projects/${projectId}/columns`),
+  create:  (projectId: number, data: { label: string; color?: string }) =>
+    api.post<ProjectColumn>(`/projects/${projectId}/columns`, data),
+  update:  (projectId: number, columnId: number, data: { label?: string; color?: string }) =>
+    api.put<ProjectColumn>(`/projects/${projectId}/columns/${columnId}`, data),
+  delete:  (projectId: number, columnId: number) =>
+    api.delete(`/projects/${projectId}/columns/${columnId}`),
+  reorder: (projectId: number, ids: number[]) =>
+    api.post<ProjectColumn[]>(`/projects/${projectId}/columns/reorder`, { ids }),
 }
 
 export const attachmentsApi = {

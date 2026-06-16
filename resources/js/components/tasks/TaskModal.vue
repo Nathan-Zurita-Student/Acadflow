@@ -55,7 +55,7 @@
           <div v-if="activeTab === 'form'" class="p-6 space-y-4">
             <div>
               <label class="label">Título *</label>
-              <input v-model="form.title" class="input" placeholder="Título da tarefa" required />
+              <input v-model="form.title" class="input" placeholder="Título da tarefa" />
             </div>
             <div>
               <label class="label">Descrição</label>
@@ -65,11 +65,7 @@
               <div>
                 <label class="label">Status</label>
                 <select v-model="form.status" class="input">
-                  <option value="backlog">Backlog</option>
-                  <option value="pending">Pendente</option>
-                  <option value="in_progress">Em andamento</option>
-                  <option value="review">Revisão</option>
-                  <option value="done">Concluída</option>
+                  <option v-for="c in statusOptions" :key="c.status" :value="c.status">{{ c.label }}</option>
                 </select>
               </div>
               <div>
@@ -492,7 +488,8 @@ import { useToast } from '@/composables/useToast'
 import { useRealtime } from '@/composables/useRealtime'
 import { tasksApi, attachmentsApi } from '@/api/projects'
 import PomodoroTimer from '@/components/tasks/PomodoroTimer.vue'
-import type { Task, TaskStatus, Attachment, Comment, ChecklistItem } from '@/types'
+import { validateFields } from '@/composables/useFormValidation'
+import type { Task, TaskStatus, Attachment, Comment, ChecklistItem, KanbanColumnDef } from '@/types'
 import UserAvatar from '@/components/ui/UserAvatar.vue'
 import { useTimeAgo } from '@/composables/useTimeAgo'
 
@@ -501,7 +498,17 @@ const props = defineProps<{
   task?: Task
   defaultStatus?: TaskStatus
   isLeader?: boolean
+  columns?: KanbanColumnDef[]
 }>()
+
+const defaultColumns: KanbanColumnDef[] = [
+  { status: 'backlog',     label: 'Backlog',      color: 'text-slate-400' },
+  { status: 'pending',     label: 'Pendente',     color: 'text-yellow-400' },
+  { status: 'in_progress', label: 'Em andamento', color: 'text-blue-400' },
+  { status: 'review',      label: 'Revisão',      color: 'text-purple-400' },
+  { status: 'done',        label: 'Concluída',    color: 'text-emerald-400' },
+]
+const statusOptions = computed<KanbanColumnDef[]>(() => props.columns?.length ? props.columns : defaultColumns)
 const emit = defineEmits(['close', 'saved'])
 
 const store         = useTasksStore()
@@ -813,7 +820,11 @@ onMounted(async () => {
 })
 
 async function submit() {
-  if (!form.value.title.trim()) return
+  const msg = validateFields([
+    { value: form.value.title, label: 'Título da tarefa', rules: ['required'] },
+  ])
+  if (msg) { toast.error(msg); return }
+
   error.value = ''
   saving.value = true
   try {

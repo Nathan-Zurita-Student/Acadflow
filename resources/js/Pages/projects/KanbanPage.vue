@@ -83,6 +83,7 @@
       <KanbanColumn
         v-for="col in columns" :key="col.status"
         :column="col"
+        :columns="columns"
         :tasks="board[col.status] ?? []"
         :project-id="projectId"
         :is-leader="isLeader"
@@ -101,6 +102,7 @@
       :task="selectedTask ?? undefined"
       :default-status="createStatus"
       :is-leader="isLeader"
+      :columns="columns"
       @close="closeModal"
       @saved="onTaskSaved"
     />
@@ -123,8 +125,8 @@ import { useProjectsStore } from '@/stores/projects'
 import { useAuthStore } from '@/stores/auth'
 import { useToast } from '@/composables/useToast'
 import { useRealtime } from '@/composables/useRealtime'
-import { tasksApi } from '@/api/projects'
-import type { Task, TaskStatus } from '@/types'
+import { tasksApi, columnsApi } from '@/api/projects'
+import type { Task, TaskStatus, KanbanColumnDef } from '@/types'
 import KanbanColumn from '@/components/kanban/KanbanColumn.vue'
 import TaskModal from '@/components/tasks/TaskModal.vue'
 import AiPlanModal from '@/components/tasks/AiPlanModal.vue'
@@ -174,13 +176,28 @@ const pendingApprovals = computed(() =>
   store.tasks.filter(t => t.approval_status === 'pending').length
 )
 
-const columns = [
-  { status: 'backlog'     as TaskStatus, label: 'Backlog',       color: 'text-slate-400' },
-  { status: 'pending'     as TaskStatus, label: 'Pendente',      color: 'text-yellow-400' },
-  { status: 'in_progress' as TaskStatus, label: 'Em andamento',  color: 'text-blue-400' },
-  { status: 'review'      as TaskStatus, label: 'Revisão',       color: 'text-purple-400' },
-  { status: 'done'        as TaskStatus, label: 'Concluída',     color: 'text-emerald-400' },
-]
+// Colunas do Kanban — carregadas da API (configuráveis por projeto).
+// Fallback com as 5 padrão enquanto a requisição não retorna.
+const columns = ref<KanbanColumnDef[]>([
+  { status: 'backlog',     label: 'Backlog',      color: 'text-slate-400' },
+  { status: 'pending',     label: 'Pendente',     color: 'text-yellow-400' },
+  { status: 'in_progress', label: 'Em andamento', color: 'text-blue-400' },
+  { status: 'review',      label: 'Revisão',      color: 'text-purple-400' },
+  { status: 'done',        label: 'Concluída',    color: 'text-emerald-400' },
+])
+
+async function loadColumns() {
+  try {
+    const { data } = await columnsApi.list(projectId)
+    if (data.length) {
+      columns.value = data.map(c => ({ status: c.key, label: c.label, color: c.color }))
+      // Garante uma chave no board para cada coluna.
+      for (const col of columns.value) {
+        if (!board[col.status]) board[col.status] = []
+      }
+    }
+  } catch { /* mantém o fallback padrão */ }
+}
 
 const filteredTasks = computed(() => {
   let tasks = store.tasks
@@ -215,7 +232,7 @@ const filteredTasks = computed(() => {
 
 const filteredByStatus = computed(() => {
   const map: Partial<Record<TaskStatus, Task[]>> = {}
-  for (const col of columns) {
+  for (const col of columns.value) {
     map[col.status] = filteredTasks.value
       .filter(t => t.status === col.status)
       .sort((a, b) => a.position - b.position)
@@ -230,7 +247,7 @@ const board = reactive<Record<TaskStatus, Task[]>>({
 })
 
 watch(filteredByStatus, (val) => {
-  for (const col of columns) {
+  for (const col of columns.value) {
     board[col.status] = (val[col.status] ?? []).slice()
   }
 }, { immediate: true })
@@ -275,6 +292,7 @@ function onKeyDown(e: KeyboardEvent) {
 
 onMounted(async () => {
   store.fetchTasks(projectId)
+  loadColumns()
   if (!currentProject.value || currentProject.value.id !== projectId) {
     await projectsStore.fetchProject(projectId)
   }
@@ -305,7 +323,7 @@ function scheduleBoardPersist() {
 
 function persistBoard() {
   const updates: Array<{ id: number; status: TaskStatus; position: number }> = []
-  for (const col of columns) {
+  for (const col of columns.value) {
     board[col.status].forEach((task, index) => {
       task.status = col.status
       task.position = index

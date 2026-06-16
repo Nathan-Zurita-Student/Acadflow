@@ -12,10 +12,10 @@
           </button>
         </div>
 
-        <form @submit.prevent="submit" class="p-6 space-y-4">
+        <form @submit.prevent="submit" class="p-6 space-y-4" novalidate>
           <div>
             <label class="label">Nome do projeto *</label>
-            <input v-model="form.name" class="input" placeholder="Ex: Monografia de TCC" required />
+            <input v-model="form.name" class="input" placeholder="Ex: Monografia de TCC" />
           </div>
           <div>
             <label class="label">Descrição</label>
@@ -60,6 +60,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useProjectsStore } from '@/stores/projects'
+import { validateFields } from '@/composables/useFormValidation'
 import type { Project } from '@/types'
 
 const props = defineProps<{ project?: Project }>()
@@ -80,6 +81,12 @@ const form = ref({
 
 async function submit() {
   error.value = ''
+
+  const msg = validateFields([
+    { value: form.value.name, label: 'Nome do projeto', rules: ['required'] },
+  ])
+  if (msg) { error.value = msg; return }
+
   saving.value = true
   try {
     if (isEdit && props.project) {

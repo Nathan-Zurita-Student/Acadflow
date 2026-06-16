@@ -32,11 +32,18 @@
         <!-- Header -->
         <div class="flex items-center justify-between px-4 py-3 border-b border-dark-700">
           <h3 class="text-sm font-semibold text-white">Notificações</h3>
-          <button
-            v-if="store.hasUnread"
-            @click="store.markAllRead()"
-            class="text-xs text-accent-400 hover:text-accent-300 transition-colors"
-          >Marcar todas como lidas</button>
+          <div class="flex items-center gap-3">
+            <button
+              v-if="store.hasUnread"
+              @click="store.markAllRead()"
+              class="text-xs text-accent-400 hover:text-accent-300 transition-colors"
+            >Marcar como lidas</button>
+            <button
+              v-if="store.items.length"
+              @click="clearAll"
+              class="text-xs text-dark-500 hover:text-red-400 transition-colors"
+            >Limpar</button>
+          </div>
         </div>
 
         <!-- Pedido de permissão para notificações do navegador -->
@@ -171,6 +178,16 @@ usePolling(() => store.fetch(), 60_000)
 onClickOutside(containerRef, () => { open.value = false })
 
 function toggle() { open.value = !open.value }
+
+async function clearAll() {
+  if (!confirm('Limpar todas as notificações? Esta ação não pode ser desfeita.')) return
+  try {
+    await store.clearAll()
+    toast.success('Notificações limpas.')
+  } catch {
+    toast.error('Erro ao limpar notificações.')
+  }
+}
 
 function handleClick(n: AppNotification) {
   if (!n.read_at) store.markRead(n.id)

@@ -83,6 +83,12 @@ class AsaasService
             'nextDueDate' => now()->format('Y-m-d'),
             'cycle'       => 'MONTHLY',
             'description' => $description,
+            // Após concluir o pagamento, o ASAAS redireciona o cliente de volta
+            // para o AcadFlow (tela de planos com aviso de sucesso).
+            'callback'    => [
+                'successUrl'   => rtrim(config('app.url'), '/') . '/settings/plans?pagamento=sucesso',
+                'autoRedirect' => true,
+            ],
         ]);
 
         if ($response->failed()) {

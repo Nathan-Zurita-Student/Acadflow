@@ -47,6 +47,11 @@ class Project extends Model
         return $this->hasMany(Task::class);
     }
 
+    public function columns(): HasMany
+    {
+        return $this->hasMany(ProjectColumn::class)->orderBy('position');
+    }
+
     public function tags(): HasMany
     {
         return $this->hasMany(Tag::class);

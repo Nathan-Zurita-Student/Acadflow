@@ -38,6 +38,7 @@
           :index="index"
           :project-id="projectId"
           :is-leader="isLeader"
+          :columns="columns"
           @click="$emit('task-click', task)"
           @delete="$emit('task-delete', task)"
           @status-change="(status) => $emit('status-change', task, status)"
@@ -56,12 +57,13 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import draggable from 'vuedraggable'
-import type { Task, TaskStatus } from '@/types'
+import type { Task, TaskStatus, KanbanColumnDef } from '@/types'
 import KanbanCard from './KanbanCard.vue'
 import Icon from '@/components/ui/Icon.vue'
 
 const props = defineProps<{
-  column: { status: TaskStatus; label: string; color: string }
+  column: KanbanColumnDef
+  columns: KanbanColumnDef[]
   tasks: Task[]
   projectId: number
   isLeader: boolean
@@ -85,7 +87,13 @@ const dotColors: Record<string, string> = {
   review:      'bg-purple-500',
   done:        'bg-emerald-500',
 }
-const dotColor = computed(() => dotColors[props.column.status])
+// Colunas padrão usam o mapa acima; colunas personalizadas derivam o ponto
+// a partir da sua cor (text-cor-400 → bg-cor-500).
+const dotColor = computed(() =>
+  dotColors[props.column.status]
+    ?? props.column.color?.replace('text-', 'bg-').replace(/-\d+$/, '-500')
+    ?? 'bg-slate-500'
+)
 </script>
 
 <style scoped>

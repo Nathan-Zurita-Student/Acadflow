@@ -14,4 +14,5 @@ export const notificationsApi = {
   list: () => api.get<{ items: AppNotification[]; unread: number }>('/notifications'),
   markRead: (id: number) => api.post<AppNotification>(`/notifications/${id}/read`),
   markAllRead: () => api.post('/notifications/read-all'),
+  clearAll: () => api.delete('/notifications'),
 }

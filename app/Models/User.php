@@ -57,12 +57,16 @@ class User extends Authenticatable
             return 'free';
         }
 
-        // Assinatura cancelada/inativa ou expirada → volta para o gratuito.
-        if ($this->plan_status === 'canceled' || $this->plan_status === 'inactive') {
+        // Ainda não pagou (assinatura criada mas sem confirmação) ou foi
+        // estornada/removida → sem acesso ao plano pago.
+        if ($this->plan_status === 'pending' || $this->plan_status === 'inactive') {
             return 'free';
         }
 
-        if ($this->plan_expires_at && $this->plan_expires_at->isPast()) {
+        // Para 'active', 'overdue' e 'canceled' o acesso vale até a data que já
+        // foi paga (plan_expires_at). Ao cancelar, o usuário NÃO perde o plano na
+        // hora: continua usando até o fim do período que pagou.
+        if (! $this->plan_expires_at || $this->plan_expires_at->isPast()) {
             return 'free';
         }
 

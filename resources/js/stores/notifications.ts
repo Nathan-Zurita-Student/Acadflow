@@ -34,5 +34,11 @@ export const useNotificationsStore = defineStore('notifications', () => {
     unread.value = 0
   }
 
-  return { items, unread, hasUnread, fetch, addIncoming, markRead, markAllRead }
+  async function clearAll() {
+    await notificationsApi.clearAll()
+    items.value = []
+    unread.value = 0
+  }
+
+  return { items, unread, hasUnread, fetch, addIncoming, markRead, markAllRead, clearAll }
 })

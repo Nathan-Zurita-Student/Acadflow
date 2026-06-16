@@ -164,10 +164,12 @@ class TaskController extends Controller
     {
         $this->authorize('view', $project);
 
+        $columnKeys = $project->columns()->pluck('key')->all();
+
         $data = $request->validate([
             'tasks' => ['required', 'array'],
             'tasks.*.id' => ['required', 'exists:tasks,id'],
-            'tasks.*.status' => ['required', 'in:backlog,pending,in_progress,review,done'],
+            'tasks.*.status' => ['required', \Illuminate\Validation\Rule::in($columnKeys)],
             'tasks.*.position' => ['required', 'integer'],
         ]);
 

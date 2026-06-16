@@ -59,11 +59,13 @@ class AiPlanController extends Controller
     {
         $this->authorize('view', $project);
 
+        $columnKeys = $project->columns()->pluck('key')->all();
+
         $data = $request->validate([
             'tasks'                 => ['required', 'array', 'min:1', 'max:50'],
             'tasks.*.title'         => ['required', 'string', 'max:255'],
             'tasks.*.description'   => ['nullable', 'string'],
-            'tasks.*.status'        => ['required', 'in:backlog,pending,in_progress,review,done'],
+            'tasks.*.status'        => ['required', \Illuminate\Validation\Rule::in($columnKeys)],
             'tasks.*.priority'      => ['required', 'in:low,medium,high,urgent'],
             'tasks.*.due_date'      => ['nullable', 'date'],
             'tasks.*.assignee_id'   => ['nullable', 'integer', 'exists:users,id'],

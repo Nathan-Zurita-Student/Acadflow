@@ -41,7 +41,23 @@ export interface Project {
   risk_level?: 'low' | 'medium' | 'high'
 }
 
-export type TaskStatus = 'backlog' | 'pending' | 'in_progress' | 'review' | 'done'
+export type TaskStatus = string
+
+export interface ProjectColumn {
+  id: number
+  key: string
+  label: string
+  color: string
+  position: number
+  is_default: boolean
+}
+
+/** Formato usado pelo board do Kanban (status = key da coluna). */
+export interface KanbanColumnDef {
+  status: string
+  label: string
+  color: string
+}
 export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent'
 
 export interface Tag {

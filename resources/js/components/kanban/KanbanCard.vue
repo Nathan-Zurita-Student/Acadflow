@@ -219,7 +219,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { tasksApi } from '@/api/projects'
-import type { Task, TaskStatus } from '@/types'
+import type { Task, TaskStatus, KanbanColumnDef } from '@/types'
 import PriorityDot from '@/components/ui/PriorityDot.vue'
 import UserAvatar from '@/components/ui/UserAvatar.vue'
 import Icon from '@/components/ui/Icon.vue'
@@ -229,6 +229,7 @@ const props = defineProps<{
   index: number
   projectId?: number
   isLeader?: boolean
+  columns?: KanbanColumnDef[]
 }>()
 
 const emit = defineEmits<{
@@ -239,21 +240,21 @@ const emit = defineEmits<{
 }>()
 
 // ── status ───────────────────────────────────────────
-const statuses: { value: TaskStatus; label: string }[] = [
-  { value: 'backlog',     label: 'Backlog' },
-  { value: 'pending',     label: 'Pendente' },
-  { value: 'in_progress', label: 'Em andamento' },
-  { value: 'review',      label: 'Revisão' },
-  { value: 'done',        label: 'Concluída' },
+const defaultColumns: KanbanColumnDef[] = [
+  { status: 'backlog',     label: 'Backlog',      color: 'text-slate-400' },
+  { status: 'pending',     label: 'Pendente',     color: 'text-yellow-400' },
+  { status: 'in_progress', label: 'Em andamento', color: 'text-blue-400' },
+  { status: 'review',      label: 'Revisão',      color: 'text-purple-400' },
+  { status: 'done',        label: 'Concluída',    color: 'text-emerald-400' },
 ]
-const statusColorMap: Record<string, string> = {
-  backlog:     'text-slate-400',
-  pending:     'text-yellow-400',
-  in_progress: 'text-blue-400',
-  review:      'text-purple-400',
-  done:        'text-emerald-400',
-}
-const statusClass = computed(() => statusColorMap[props.task.status] ?? 'text-dark-400')
+// Usa as colunas do projeto (quando fornecidas) ou as 5 padrão como fallback.
+const effectiveColumns = computed<KanbanColumnDef[]>(() =>
+  props.columns?.length ? props.columns : defaultColumns
+)
+const statuses = computed(() => effectiveColumns.value.map(c => ({ value: c.status, label: c.label })))
+const statusClass = computed(() =>
+  effectiveColumns.value.find(c => c.status === props.task.status)?.color ?? 'text-dark-400'
+)
 
 function onStatusChange(e: Event) {
   emit('status-change', (e.target as HTMLSelectElement).value as TaskStatus)

@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\InviteController;
 use App\Http\Controllers\Api\MeetingController;
 use App\Http\Controllers\Api\NoteController;
 use App\Http\Controllers\Api\NotificationController;
+use App\Http\Controllers\Api\ProjectColumnController;
 use App\Http\Controllers\Api\ProjectController;
 use App\Http\Controllers\Api\ProjectInvitationController;
 use App\Http\Controllers\Api\SubscriptionController;
@@ -50,6 +51,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::post('notifications/{notification}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
     Route::post('notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');
+    Route::delete('notifications', [NotificationController::class, 'clearAll'])->name('notifications.clear');
 
     // Planos & assinaturas (ASAAS)
     Route::get('plans', [SubscriptionController::class, 'index'])->name('plans.index');
@@ -71,6 +73,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('{project}/members', [ProjectController::class, 'addMember'])->name('members.store');
         Route::delete('{project}/members/{userId}', [ProjectController::class, 'removeMember'])->name('members.destroy');
         Route::delete('{project}/leave', [ProjectController::class, 'leave'])->name('leave');
+
+        // Colunas do Kanban (configuráveis por projeto)
+        Route::get('{project}/columns', [ProjectColumnController::class, 'index'])->name('columns.index');
+        Route::post('{project}/columns', [ProjectColumnController::class, 'store'])->name('columns.store');
+        Route::post('{project}/columns/reorder', [ProjectColumnController::class, 'reorder'])->name('columns.reorder');
+        Route::put('{project}/columns/{column}', [ProjectColumnController::class, 'update'])->name('columns.update');
+        Route::delete('{project}/columns/{column}', [ProjectColumnController::class, 'destroy'])->name('columns.destroy');
 
         Route::get('{project}/tasks', [TaskController::class, 'index'])->name('tasks.index');
         Route::post('{project}/tasks', [TaskController::class, 'store'])->name('tasks.store');

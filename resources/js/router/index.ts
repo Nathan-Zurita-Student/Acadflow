@@ -47,9 +47,18 @@ const router = createRouter({
           component: () => import('@/Pages/projects/ProjectsPage.vue'),
         },
         {
+          path: 'settings',
+          redirect: '/settings/profile',
+        },
+        {
+          path: 'settings/:tab',
+          name: 'settings',
+          component: () => import('@/Pages/settings/SettingsPage.vue'),
+        },
+        // Compatibilidade: /plans antigo agora vive dentro de Configurações.
+        {
           path: 'plans',
-          name: 'plans',
-          component: () => import('@/Pages/billing/PlansPage.vue'),
+          redirect: '/settings/plans',
         },
         {
           path: 'projects/:id',

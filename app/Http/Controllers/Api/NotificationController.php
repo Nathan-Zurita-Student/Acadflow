@@ -47,6 +47,14 @@ class NotificationController extends Controller
         return response()->json(['message' => 'Todas marcadas como lidas.']);
     }
 
+    /** Apaga todas as notificações do usuário. */
+    public function clearAll(Request $request): JsonResponse
+    {
+        $request->user()->notifications()->delete();
+
+        return response()->json(['message' => 'Notificações limpas.']);
+    }
+
     private function resource(Notification $n): array
     {
         return [

@@ -46,12 +46,12 @@
           </template>
         </NavItem>
         <NavItem to="/projects" icon="folder" :label="sidebarCollapsed ? '' : 'Projetos'" :collapsed="sidebarCollapsed" />
-        <NavItem to="/plans" icon="crown" :label="sidebarCollapsed ? '' : 'Planos'" :collapsed="sidebarCollapsed" />
 
         <!-- Current project sub-nav -->
         <template v-if="currentProject && !sidebarCollapsed">
-          <div class="mt-4 mb-2 px-2">
-            <p class="text-[10px] font-semibold text-dark-500 uppercase tracking-wider truncate">{{ currentProject.name }}</p>
+          <div class="mt-4 mb-2 mx-1 px-3 py-2 rounded-lg bg-accent-600/10 border border-accent-500/25">
+            <p class="text-[10px] font-semibold text-accent-400/80 uppercase tracking-wider">Projeto</p>
+            <p class="text-sm font-bold text-white truncate leading-tight">{{ currentProject.name }}</p>
           </div>
           <div class="ml-2 pl-3 border-l border-dark-700">
             <NavItem v-if="isLeaderOfCurrentProject" :to="`/projects/${currentProject.id}`" icon="chart" label="Visão Geral" :exact="true" />
@@ -65,29 +65,21 @@
         </template>
       </nav>
 
-      <!-- User section -->
+      <!-- Configurações -->
       <div class="px-2 py-3 border-t border-dark-700/60 flex-shrink-0">
-        <div class="flex items-center gap-2.5 px-2 py-2 rounded-lg hover:bg-dark-800 cursor-pointer group"
-          :class="sidebarCollapsed ? 'justify-center' : ''"
-          @click="showProfile = true">
-          <UserAvatar :user="auth.user" class="w-8 h-8 rounded-full bg-accent-600/30 text-accent-400 text-sm font-semibold flex-shrink-0" />
-          <template v-if="!sidebarCollapsed">
-            <div class="flex-1 min-w-0">
-              <p class="text-sm font-medium text-dark-100 truncate">{{ auth.user?.display_name || auth.user?.name }}</p>
-              <p class="text-xs text-dark-500 truncate">{{ auth.user?.email }}</p>
-            </div>
-            <button @click.stop="handleLogout" class="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-dark-700 transition-opacity flex-shrink-0">
-              <svg class="w-4 h-4 text-dark-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-              </svg>
-            </button>
-          </template>
+        <div class="flex items-center gap-2.5 px-2 py-2 rounded-lg hover:bg-dark-800 cursor-pointer transition-colors"
+          :class="[sidebarCollapsed ? 'justify-center' : '', isSettingsActive ? 'bg-accent-600/20 text-accent-400' : 'text-dark-300']"
+          title="Configurações"
+          @click="router.push('/settings')">
+          <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+          <span v-if="!sidebarCollapsed" class="text-sm font-medium">Configurações</span>
         </div>
       </div>
     </aside>
-
-    <ProfileModal v-if="showProfile" @close="showProfile = false" />
     <Toast />
 
     <!-- Overlay mobile -->
@@ -107,11 +99,28 @@
         <div class="flex-1 min-w-0">
           <slot name="title" />
         </div>
-        <div class="flex items-center gap-2">
-          <span class="text-xs text-dark-500 bg-dark-800 border border-dark-700 px-2 py-1 rounded-md hidden sm:block">
+        <div class="flex items-center gap-2 sm:gap-3">
+          <span class="text-xs text-dark-500 bg-dark-800 border border-dark-700 px-2 py-1 rounded-md hidden lg:block">
             {{ currentDate }}
           </span>
           <NotificationBell />
+
+          <!-- Perfil do usuário -->
+          <div class="flex items-center gap-2 pl-2 sm:pl-3 border-l border-dark-700">
+            <RouterLink to="/settings" class="flex items-center gap-2 group" title="Configurações">
+              <UserAvatar :user="auth.user" class="w-8 h-8 rounded-full bg-accent-600/30 text-accent-400 text-sm font-semibold flex-shrink-0" />
+              <span class="text-sm font-medium text-dark-100 group-hover:text-white truncate max-w-[120px] hidden sm:block">
+                {{ auth.user?.display_name || auth.user?.name }}
+              </span>
+            </RouterLink>
+            <button @click="handleLogout" title="Sair"
+              class="p-1.5 rounded-lg hover:bg-dark-700 text-dark-400 hover:text-red-400 transition-colors">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+            </button>
+          </div>
         </div>
       </header>
 
@@ -125,7 +134,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useProjectsStore } from '@/stores/projects'
 import { useNotificationsStore } from '@/stores/notifications'
@@ -135,7 +144,6 @@ import { dashboardApi } from '@/api/projects'
 import echo from '@/echo'
 import NavItem from '@/components/ui/NavItem.vue'
 import UserAvatar from '@/components/ui/UserAvatar.vue'
-import ProfileModal from '@/components/ui/ProfileModal.vue'
 import NotificationBell from '@/components/ui/NotificationBell.vue'
 import Toast from '@/components/ui/Toast.vue'
 
@@ -145,12 +153,13 @@ const notifStore = useNotificationsStore()
 const realtimeStore = useRealtimeStore()
 const { requestPermission, notify: browserNotify } = useBrowserNotifications()
 const router = useRouter()
+const route = useRoute()
 const sidebarOpen = ref(false)
 const sidebarCollapsed = ref(false)
-const showProfile = ref(false)
 const myTasksCount = ref(0)
 
 const currentProject = computed(() => projectsStore.currentProject)
+const isSettingsActive = computed(() => route.path.startsWith('/settings'))
 
 const isLeaderOfCurrentProject = computed(() => {
   if (!currentProject.value) return false

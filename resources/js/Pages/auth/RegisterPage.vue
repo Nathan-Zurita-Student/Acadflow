@@ -15,7 +15,7 @@
       </div>
 
       <div class="card">
-        <form @submit.prevent="handleRegister" class="space-y-4">
+        <form @submit.prevent="handleRegister" class="space-y-4" novalidate>
 
           <!-- Avatar picker -->
           <div class="flex flex-col items-center gap-3 pb-2">
@@ -41,15 +41,15 @@
 
           <div>
             <label class="label">Nome completo</label>
-            <input v-model="form.name" type="text" class="input" placeholder="Seu nome" required />
+            <input v-model="form.name" type="text" class="input" placeholder="Seu nome" />
           </div>
           <div>
             <label class="label">Email</label>
-            <input v-model="form.email" type="email" class="input" placeholder="seu@email.com" required />
+            <input v-model="form.email" type="email" class="input" placeholder="seu@email.com" />
           </div>
           <div>
             <label class="label">Senha</label>
-            <input v-model="form.password" type="password" class="input" placeholder="Mínimo 8 caracteres" required />
+            <input v-model="form.password" type="password" class="input" placeholder="Mínimo 8 caracteres" />
           </div>
 
           <p v-if="error" class="text-sm text-red-400 bg-red-400/10 border border-red-400/20 rounded-lg px-3 py-2">
@@ -94,6 +94,7 @@
 import { ref, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { validateFields } from '@/composables/useFormValidation'
 
 const auth = useAuthStore()
 const router = useRouter()
@@ -129,6 +130,14 @@ function onAvatarChange(e: Event) {
 
 async function handleRegister() {
   error.value = ''
+
+  const msg = validateFields([
+    { value: form.value.name,     label: 'Nome completo', rules: ['required'] },
+    { value: form.value.email,    label: 'Email',         rules: ['required', 'email'] },
+    { value: form.value.password, label: 'Senha',         rules: ['required', 'min:8'] },
+  ])
+  if (msg) { error.value = msg; return }
+
   loading.value = true
   try {
     await auth.register(form.value.name, form.value.email, form.value.password, avatarFile.value)

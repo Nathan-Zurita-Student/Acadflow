@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Task;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreTaskRequest extends FormRequest
 {
@@ -13,7 +14,9 @@ class StoreTaskRequest extends FormRequest
         return [
             'title'        => ['required', 'string', 'max:255'],
             'description'  => ['nullable', 'string'],
-            'status'       => ['nullable', 'in:backlog,pending,in_progress,review,done'],
+            // Aceita qualquer coluna que exista no Kanban deste projeto.
+            'status'       => ['nullable', Rule::exists('project_columns', 'key')
+                                ->where('project_id', $this->route('project')->id)],
             'priority'     => ['nullable', 'in:low,medium,high,urgent'],
             'due_date'     => ['nullable', 'date'],
             'assignee_ids' => ['nullable', 'array'],

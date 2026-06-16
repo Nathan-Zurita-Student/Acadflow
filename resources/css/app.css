@@ -39,9 +39,20 @@
    ===================================================================== */
 @layer base {
   * { @apply border-dark-700; }
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
   body {
     @apply bg-dark-950 text-dark-100 font-sans antialiased;
     font-feature-settings: "cv11", "ss01";
+  }
+
+  /* MOBILE: remove o atraso de ~300ms ("precisar tocar duas vezes") que os
+     navegadores aplicam em toques por causa do duplo-toque-para-zoom. */
+  a, button, [role="button"], input, select, textarea, label, summary,
+  .cursor-pointer, [class*="hover:"] {
+    touch-action: manipulation;
   }
   ::-webkit-scrollbar { width: 6px; height: 6px; }
   ::-webkit-scrollbar-track  { background: rgb(var(--scrollbar-track)); }
@@ -110,5 +121,33 @@
   }
   .kanban-board > * {
     scroll-snap-align: start;
+  }
+}
+
+/* =====================================================================
+   MOBILE
+   ===================================================================== */
+
+/* No celular, campos com fonte < 16px fazem o navegador dar ZOOM automático
+   ao focar. Forçando 16px nos campos em telas pequenas isso é eliminado.
+   Fica fora das @layer + !important para vencer utilitários (text-sm/text-xs). */
+@media (max-width: 767px) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+
+  /* Alvos de toque mais confortáveis para botões/ícones pequenos no mobile */
+  button, [role="button"], a {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* Em dispositivos SEM hover (toque), revela as ações que no desktop só
+   aparecem ao passar o mouse — senão ficariam inacessíveis no celular. */
+@media (hover: none) {
+  [class*="group-hover:opacity-100"] {
+    opacity: 1 !important;
   }
 }
