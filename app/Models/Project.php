@@ -52,6 +52,25 @@ class Project extends Model
         return $this->hasMany(ProjectColumn::class)->orderBy('position');
     }
 
+    /**
+     * Cria as colunas padrão do Kanban para este projeto.
+     * Fonte única usada na criação de projeto (ProjectService), no seeder e nas
+     * factories — todo projeto SEMPRE nasce com as colunas, e o status de tarefa
+     * é validado contra elas.
+     */
+    public function seedDefaultColumns(): void
+    {
+        foreach (ProjectColumn::DEFAULTS as $pos => $col) {
+            $this->columns()->create([
+                'key'        => $col['key'],
+                'label'      => $col['label'],
+                'color'      => $col['color'],
+                'position'   => $pos,
+                'is_default' => true,
+            ]);
+        }
+    }
+
     public function tags(): HasMany
     {
         return $this->hasMany(Tag::class);

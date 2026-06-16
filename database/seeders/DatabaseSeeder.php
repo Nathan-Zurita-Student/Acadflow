@@ -49,6 +49,8 @@ class DatabaseSeeder extends Seeder
             'deadline' => now()->addMonths(3)->toDateString(),
         ]);
 
+        $project->seedDefaultColumns();
+
         $project->members()->attach($leader->id, ['role' => 'leader']);
         foreach ($members as $member) {
             $project->members()->attach($member->id, ['role' => 'member']);

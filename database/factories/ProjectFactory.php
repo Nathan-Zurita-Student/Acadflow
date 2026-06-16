@@ -23,4 +23,13 @@ class ProjectFactory extends Factory
             'progress'    => fake()->numberBetween(0, 100),
         ];
     }
+
+    /**
+     * Todo projeto nasce com as colunas padrão do Kanban — espelha o que acontece
+     * em produção (ProjectService) e mantém válido o status das tarefas nos testes.
+     */
+    public function configure(): static
+    {
+        return $this->afterCreating(fn (Project $project) => $project->seedDefaultColumns());
+    }
 }

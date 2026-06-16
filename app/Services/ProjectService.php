@@ -27,15 +27,7 @@ class ProjectService
         $project->members()->attach($owner->id, ['role' => 'leader']);
 
         // Cria as colunas padrão do Kanban para o projeto.
-        foreach (\App\Models\ProjectColumn::DEFAULTS as $pos => $col) {
-            $project->columns()->create([
-                'key'        => $col['key'],
-                'label'      => $col['label'],
-                'color'      => $col['color'],
-                'position'   => $pos,
-                'is_default' => true,
-            ]);
-        }
+        $project->seedDefaultColumns();
 
         return $project;
     }
