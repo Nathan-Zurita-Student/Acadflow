@@ -16,12 +16,16 @@ return [
     // Quantos dias de tolerância manter o plano ativo após um pagamento vencer.
     'grace_days' => (int) env('PLAN_GRACE_DAYS', 3),
 
+    // Preços por ciclo. O anual dá "2 meses grátis" (paga 10 meses, usa 12).
     'plans' => [
 
         'free' => [
             'name'        => 'Gratuito',
-            'price'       => 0.0,
             'description' => 'Para começar a organizar seu primeiro grupo.',
+            'prices' => [
+                'monthly' => 0.0,
+                'annual'  => 0.0,
+            ],
             'limits' => [
                 'projects'      => 2,   // projetos que o usuário pode CRIAR (ser dono)
                 'members'       => 4,   // membros por grupo
@@ -31,8 +35,11 @@ return [
 
         'pro' => [
             'name'        => 'Pro',
-            'price'       => 19.90,
             'description' => 'Para grupos que levam os trabalhos a sério.',
+            'prices' => [
+                'monthly' => 19.90,
+                'annual'  => 199.00, // 19,90 × 10 (2 meses grátis)
+            ],
             'limits' => [
                 'projects'      => 10,
                 'members'       => 15,
@@ -42,8 +49,11 @@ return [
 
         'ultra' => [
             'name'        => 'Ultra Pro',
-            'price'       => 39.90,
             'description' => 'Sem limites. Para quem vive de projetos.',
+            'prices' => [
+                'monthly' => 39.90,
+                'annual'  => 399.00, // 39,90 × 10 (2 meses grátis)
+            ],
             'limits' => [
                 'projects'      => null,
                 'members'       => null,

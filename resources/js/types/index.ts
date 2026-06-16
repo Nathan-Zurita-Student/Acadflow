@@ -1,4 +1,5 @@
 export type PlanKey = 'free' | 'pro' | 'ultra'
+export type BillingCycle = 'monthly' | 'annual'
 
 export interface User {
   id: number
@@ -16,7 +17,10 @@ export interface User {
 export interface Plan {
   key: PlanKey
   name: string
-  price: number
+  prices: {
+    monthly: number
+    annual: number
+  }
   description: string
   limits: {
     projects: number | null

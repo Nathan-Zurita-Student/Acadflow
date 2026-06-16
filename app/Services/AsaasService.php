@@ -72,16 +72,17 @@ class AsaasService
      * billingType = UNDEFINED deixa o cliente escolher Pix, cartão OU boleto
      * na própria página de pagamento do ASAAS.
      *
+     * @param  string  $cycle  Ciclo do ASAAS: 'MONTHLY' ou 'YEARLY'.
      * @return array{id:string, ...} dados da assinatura
      */
-    public function createSubscription(string $customerId, float $value, string $description): array
+    public function createSubscription(string $customerId, float $value, string $description, string $cycle = 'MONTHLY'): array
     {
         $payload = [
             'customer'    => $customerId,
             'billingType' => 'UNDEFINED', // cliente escolhe Pix/cartão/boleto
             'value'       => $value,
             'nextDueDate' => now()->format('Y-m-d'),
-            'cycle'       => 'MONTHLY',
+            'cycle'       => $cycle,
             'description' => $description,
         ];
 

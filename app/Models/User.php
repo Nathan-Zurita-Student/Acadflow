@@ -23,6 +23,8 @@ class User extends Authenticatable
         'google_id',
         'plan',
         'plan_status',
+        'pending_plan',
+        'plan_cycle',
         'plan_expires_at',
         'asaas_customer_id',
         'asaas_subscription_id',
@@ -45,12 +47,23 @@ class User extends Authenticatable
         ];
     }
 
+    /** Admin "supremo": acesso total e gratuito, sem passar por cobrança. */
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
     /**
      * Plano efetivo do usuário. Se a assinatura paga venceu (sem renovar
      * dentro da tolerância), cai automaticamente para "free".
      */
     public function effectivePlan(): string
     {
+        // Admin tem tudo liberado, independentemente de assinatura.
+        if ($this->isAdmin()) {
+            return 'ultra';
+        }
+
         $plan = $this->plan ?: 'free';
 
         if ($plan === 'free') {

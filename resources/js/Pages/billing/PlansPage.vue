@@ -9,7 +9,7 @@
     </div>
 
     <!-- Plano atual -->
-    <div v-if="current" class="card flex items-center justify-between">
+    <div v-if="current" class="card flex items-center justify-between gap-3">
       <div>
         <p class="text-xs text-dark-400">Seu plano atual</p>
         <p class="text-lg font-bold text-white capitalize">
@@ -17,15 +17,37 @@
           <span v-if="current.status === 'overdue'" class="text-xs text-red-400 font-medium ml-2">pagamento atrasado</span>
           <span v-else-if="current.status === 'canceled'" class="text-xs text-amber-400 font-medium ml-2">cancelado</span>
         </p>
+        <!-- Aviso de vigência: até quando o acesso continua válido -->
+        <p v-if="statusNote" class="text-xs mt-1" :class="statusNoteClass">{{ statusNote }}</p>
+        <p v-if="pendingNote" class="text-xs text-accent-300 mt-1">{{ pendingNote }}</p>
       </div>
       <button
         v-if="current.plan !== 'free' && current.status !== 'canceled'"
-        class="btn-danger text-sm"
+        class="btn-danger text-sm flex-shrink-0"
         :disabled="busy"
         @click="onCancel"
       >
         Cancelar assinatura
       </button>
+    </div>
+
+    <!-- Alternância Mensal / Anual -->
+    <div class="flex items-center justify-center gap-2">
+      <div class="inline-flex rounded-lg bg-dark-800 p-1">
+        <button
+          class="px-4 py-1.5 text-sm font-medium rounded-md transition-colors"
+          :class="cycle === 'monthly' ? 'bg-accent-500 text-white' : 'text-dark-300 hover:text-white'"
+          @click="cycle = 'monthly'"
+        >Mensal</button>
+        <button
+          class="px-4 py-1.5 text-sm font-medium rounded-md transition-colors flex items-center gap-1.5"
+          :class="cycle === 'annual' ? 'bg-accent-500 text-white' : 'text-dark-300 hover:text-white'"
+          @click="cycle = 'annual'"
+        >
+          Anual
+          <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-green-500/20 text-green-400">2 MESES GRÁTIS</span>
+        </button>
+      </div>
     </div>
 
     <!-- Loading -->
@@ -51,9 +73,14 @@
 
         <div class="my-4">
           <span class="text-2xl font-bold text-white">
-            {{ plan.price === 0 ? 'Grátis' : formatPrice(plan.price) }}
+            {{ priceFor(plan) === 0 ? 'Grátis' : formatPrice(priceFor(plan)) }}
           </span>
-          <span v-if="plan.price > 0" class="text-xs text-dark-400">/mês</span>
+          <span v-if="priceFor(plan) > 0" class="text-xs text-dark-400">
+            /{{ cycle === 'annual' ? 'ano' : 'mês' }}
+          </span>
+          <p v-if="cycle === 'annual' && plan.prices.annual > 0" class="text-[11px] text-green-400 mt-1">
+            Economize {{ formatPrice(annualSavings(plan)) }} por ano
+          </p>
         </div>
 
         <ul class="space-y-2 text-sm text-dark-200 flex-1">
@@ -73,24 +100,23 @@
 
         <button
           class="mt-5 text-sm w-full"
-          :class="current?.plan === plan.key ? 'btn-secondary cursor-default' : 'btn-primary'"
-          :disabled="busy || current?.plan === plan.key || plan.key === 'free'"
+          :class="buttonInfo(plan).disabled ? 'btn-secondary cursor-default' : 'btn-primary'"
+          :disabled="busy || buttonInfo(plan).disabled"
           @click="onSelect(plan)"
         >
-          <template v-if="current?.plan === plan.key">Plano atual</template>
-          <template v-else-if="plan.key === 'free'">Gratuito</template>
-          <template v-else>Assinar {{ plan.name }}</template>
+          {{ buttonInfo(plan).label }}
         </button>
       </div>
     </div>
 
-    <!-- Modal de CPF/CNPJ -->
+    <!-- Modal de CPF/CNPJ (só na 1ª assinatura) -->
     <div v-if="selected" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" @click.self="selected = null">
       <div class="card w-full max-w-sm space-y-4">
         <div>
           <h3 class="text-base font-bold text-white">Assinar {{ selected.name }}</h3>
           <p class="text-xs text-dark-400 mt-1">
-            {{ formatPrice(selected.price) }}/mês. Informe seu CPF ou CNPJ para gerar a cobrança.
+            {{ formatPrice(priceFor(selected)) }}/{{ cycle === 'annual' ? 'ano' : 'mês' }}.
+            Informe seu CPF ou CNPJ para gerar a cobrança.
           </p>
         </div>
 
@@ -124,7 +150,7 @@ import { billingApi, type PlansResponse } from '@/api/billing'
 import { useToast } from '@/composables/useToast'
 import { useAuthStore } from '@/stores/auth'
 import Icon from '@/components/ui/Icon.vue'
-import type { Plan } from '@/types'
+import type { Plan, BillingCycle } from '@/types'
 
 defineProps<{ embedded?: boolean }>()
 
@@ -136,20 +162,81 @@ const loading = ref(true)
 const busy = ref(false)
 const plans = ref<Plan[]>([])
 const current = ref<PlansResponse['current'] | null>(null)
+const cycle = ref<BillingCycle>('monthly')
 const selected = ref<Plan | null>(null)
 const cpf = ref('')
+
+const RANK: Record<string, number> = { free: 0, pro: 1, ultra: 2 }
 
 const currentPlanName = computed(() => {
   const p = plans.value.find(pl => pl.key === current.value?.plan)
   return p?.name ?? 'Gratuito'
 })
 
+// "acesso até DD/MM" — para cancelado/atrasado o usuário continua usando até vencer
+const statusNote = computed(() => {
+  const c = current.value
+  if (!c || c.plan === 'free' || !c.expires_at) return ''
+  const date = formatDate(c.expires_at)
+  if (c.status === 'canceled') return `Acesso garantido até ${date}.`
+  if (c.status === 'overdue') return `Regularize o pagamento. Acesso até ${date}.`
+  if (c.status === 'active') return `Renova automaticamente em ${date}.`
+  return ''
+})
+
+const statusNoteClass = computed(() =>
+  current.value?.status === 'overdue' ? 'text-red-400' : 'text-dark-400',
+)
+
+const pendingNote = computed(() => {
+  const c = current.value
+  if (!c?.pending_plan) return ''
+  const p = plans.value.find(pl => pl.key === c.pending_plan)
+  return `Mudança para ${p?.name ?? c.pending_plan} aguardando confirmação do pagamento.`
+})
+
 function formatPrice(value: number) {
   return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 }
 
+function formatDate(iso: string) {
+  return new Date(iso).toLocaleDateString('pt-BR')
+}
+
 function formatLimit(value: number | null) {
   return value === null ? 'Ilimitados' : value
+}
+
+function priceFor(plan: Plan) {
+  return plan.prices[cycle.value]
+}
+
+function annualSavings(plan: Plan) {
+  return plan.prices.monthly * 12 - plan.prices.annual
+}
+
+/** Rótulo + estado do botão de cada card conforme o plano/ciclo atual do usuário. */
+function buttonInfo(plan: Plan): { label: string; disabled: boolean } {
+  const c = current.value
+  if (plan.key === 'free') return { label: 'Gratuito', disabled: true }
+  if (c?.pending_plan === plan.key) return { label: 'Aguardando pagamento', disabled: true }
+
+  const isCurrentPlan = c?.plan === plan.key
+  const sameCycle = c?.cycle === cycle.value
+
+  if (isCurrentPlan) {
+    if (c?.status === 'canceled') return { label: `Reativar ${plan.name}`, disabled: false }
+    if (sameCycle) return { label: 'Plano atual', disabled: true }
+    return { label: cycle.value === 'annual' ? 'Mudar para anual' : 'Mudar para mensal', disabled: false }
+  }
+
+  if (c && c.plan !== 'free') {
+    return RANK[plan.key] > RANK[c.plan]
+      ? { label: 'Fazer upgrade', disabled: false }
+      : { label: `Mudar para ${plan.name}`, disabled: false }
+  }
+
+  return { label: `Assinar ${plan.name}`, disabled: false }
 }
 
 async function load() {
@@ -158,6 +245,7 @@ async function load() {
     const { data } = await billingApi.plans()
     plans.value = data.plans
     current.value = data.current
+    cycle.value = data.current.cycle ?? 'monthly'
   } catch {
     toast.error('Não foi possível carregar os planos.')
   } finally {
@@ -166,16 +254,25 @@ async function load() {
 }
 
 function onSelect(plan: Plan) {
-  if (plan.key === 'free' || current.value?.plan === plan.key) return
+  if (plan.key === 'free' || buttonInfo(plan).disabled) return
+  // Quem já tem cliente no ASAAS (qualquer assinatura anterior) não reinforma CPF.
+  if (current.value && current.value.plan !== 'free') {
+    submit(plan)
+    return
+  }
   selected.value = plan
   cpf.value = ''
 }
 
 async function confirmSubscribe() {
   if (!selected.value || cpf.value.length < 11) return
+  await submit(selected.value, cpf.value)
+}
+
+async function submit(plan: Plan, cpfValue = '') {
   busy.value = true
   try {
-    const { data } = await billingApi.subscribe(selected.value.key, cpf.value)
+    const { data } = await billingApi.subscribe(plan.key, cycle.value, cpfValue)
     if (data.invoice_url) {
       // Redireciona para a página de pagamento do ASAAS (Pix/cartão/boleto).
       window.location.href = data.invoice_url
@@ -192,11 +289,11 @@ async function confirmSubscribe() {
 }
 
 async function onCancel() {
-  if (!confirm('Tem certeza que deseja cancelar a assinatura?')) return
+  if (!confirm('Tem certeza que deseja cancelar a assinatura? Você mantém o acesso até o fim do período já pago.')) return
   busy.value = true
   try {
     await billingApi.cancel()
-    toast.success('Assinatura cancelada.')
+    toast.success('Assinatura cancelada. Você mantém o acesso até o vencimento.')
     await load()
     await auth.fetchMe()
   } catch {
