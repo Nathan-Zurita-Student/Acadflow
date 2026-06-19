@@ -37,13 +37,13 @@ return [
             'name'        => 'Pro',
             'description' => 'Para grupos que levam os trabalhos a sério.',
             'prices' => [
-                'monthly' => 19.90,
-                'annual'  => 199.00, // 19,90 × 10 (2 meses grátis)
+                'monthly' => 12.90,
+                'annual'  => 129.00, // 12,90 × 10 (2 meses grátis)
             ],
             'limits' => [
                 'projects'      => 10,
                 'members'       => 15,
-                'ai_per_month'  => 100,
+                'ai_per_month'  => 50,
             ],
         ],
 
