@@ -57,6 +57,7 @@ class TaskController extends Controller
             'status'      => $data['status'] ?? 'backlog',
             'priority'    => $data['priority'] ?? 'medium',
             'due_date'    => $data['due_date'] ?? null,
+            'start_date'  => $data['start_date'] ?? null,
             'position'    => $maxPos + 1,
         ]);
 
@@ -117,6 +118,9 @@ class TaskController extends Controller
         }
         if (array_key_exists('due_date', $data)) {
             $fields['due_date'] = $data['due_date'];
+        }
+        if (array_key_exists('start_date', $data)) {
+            $fields['start_date'] = $data['start_date'];
         }
         if (array_key_exists('assignee_ids', $data)) {
             $ids = $data['assignee_ids'] ?? [];

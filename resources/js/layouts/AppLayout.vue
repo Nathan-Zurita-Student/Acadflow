@@ -46,11 +46,12 @@
           </template>
         </NavItem>
         <NavItem to="/projects" icon="folder" :label="sidebarCollapsed ? '' : 'Projetos'" :collapsed="sidebarCollapsed" />
+        <NavItem to="/calendar" icon="calendar" :label="sidebarCollapsed ? '' : 'Calendário'" :collapsed="sidebarCollapsed" />
 
         <!-- Current project sub-nav -->
         <template v-if="currentProject && !sidebarCollapsed">
           <div class="mt-4 mb-2 mx-1 px-3 py-2 rounded-lg bg-accent-600/10 border border-accent-500/25">
-            <p class="text-[10px] font-semibold text-accent-400/80 uppercase tracking-wider">Projeto</p>
+            <p class="text-[10px] font-semibold text-accent-400/80 uppercase tracking-wider">Projeto:</p>
             <p class="text-sm font-bold text-white truncate leading-tight">{{ currentProject.name }}</p>
           </div>
           <div class="ml-2 pl-3 border-l border-dark-700">
@@ -81,6 +82,7 @@
       </div>
     </aside>
     <Toast />
+    <ConfirmDialog />
 
     <!-- Overlay mobile -->
     <div v-if="sidebarOpen" @click="sidebarOpen = false"
@@ -146,6 +148,7 @@ import NavItem from '@/components/ui/NavItem.vue'
 import UserAvatar from '@/components/ui/UserAvatar.vue'
 import NotificationBell from '@/components/ui/NotificationBell.vue'
 import Toast from '@/components/ui/Toast.vue'
+import ConfirmDialog from '@/components/ui/ConfirmDialog.vue'
 
 const auth = useAuthStore()
 const projectsStore = useProjectsStore()

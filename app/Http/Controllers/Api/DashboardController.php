@@ -146,4 +146,50 @@ class DashboardController extends Controller
 
         return response()->json($tasks);
     }
+
+    /**
+     * Tarefas de TODOS os projetos do usuário (dono ou membro) cujo intervalo
+     * [início, entrega] cruza a janela [from, to]. Alimenta a visão de Calendário.
+     */
+    public function calendar(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        $from = $request->date('from')?->toDateString() ?? now()->startOfMonth()->subWeek()->toDateString();
+        $to   = $request->date('to')?->toDateString()   ?? now()->endOfMonth()->addWeek()->toDateString();
+
+        $projectIds = Project::where('owner_id', $user->id)
+            ->orWhereHas('members', fn($q) => $q->where('users.id', $user->id))
+            ->pluck('id');
+
+        $tasks = Task::with(['project:id,name', 'assignee:id,name,avatar', 'assignees:id,name,avatar'])
+            ->whereIn('project_id', $projectIds)
+            // Sobreposição de intervalos: usa due_date quando não há start_date e
+            // vice-versa. Se ambos forem nulos, o COALESCE vira NULL e a tarefa fica de fora.
+            ->where(function ($q) use ($from, $to) {
+                $q->whereRaw('COALESCE(start_date, due_date) <= ?', [$to])
+                  ->whereRaw('COALESCE(due_date, start_date) >= ?', [$from]);
+            })
+            ->orderBy('due_date')
+            ->limit(500)
+            ->get()
+            ->map(fn($t) => [
+                'id'         => $t->id,
+                'title'      => $t->title,
+                'status'     => $t->status,
+                'priority'   => $t->priority,
+                'start_date' => $t->start_date?->toDateString(),
+                'due_date'   => $t->due_date?->toDateString(),
+                'is_overdue' => $t->isOverdue(),
+                'project'    => ['id' => $t->project->id, 'name' => $t->project->name],
+                'assignee'   => $t->assignee
+                    ? ['id' => $t->assignee->id, 'name' => $t->assignee->name, 'avatar' => $t->assignee->avatar]
+                    : null,
+                'assignees'  => $t->assignees
+                    ->map(fn($u) => ['id' => $u->id, 'name' => $u->name, 'avatar' => $u->avatar])
+                    ->values(),
+            ]);
+
+        return response()->json($tasks);
+    }
 }

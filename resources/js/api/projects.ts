@@ -1,5 +1,5 @@
 import api from './client'
-import type { Project, ProjectDashboard, MemberStats, Task, Attachment, Meeting, ProjectNote, ProjectWebhook, ProjectColumn } from '@/types'
+import type { Project, ProjectDashboard, MemberStats, Task, Attachment, Meeting, ProjectNote, ProjectWebhook, ProjectColumn, CalendarTask } from '@/types'
 
 export const projectsApi = {
   list: () => api.get<Project[]>('/projects'),
@@ -74,6 +74,11 @@ export const dashboardApi = {
   global:   () => api.get('/dashboard'),
   myTasks:  () => api.get('/my-tasks'),
   users:    (q: string) => api.get('/users/search', { params: { q } }),
+}
+
+export const calendarApi = {
+  /** Tarefas dos projetos do usuário cujo intervalo cruza a janela [from, to] (YYYY-MM-DD). */
+  range: (from: string, to: string) => api.get<CalendarTask[]>('/calendar', { params: { from, to } }),
 }
 
 export interface AiPlanTask {

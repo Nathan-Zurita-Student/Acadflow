@@ -78,9 +78,15 @@
                 </select>
               </div>
             </div>
-            <div>
-              <label class="label">Prazo</label>
-              <input v-model="form.due_date" type="date" class="input" />
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="label">Data de início</label>
+                <input v-model="form.start_date" type="date" class="input" />
+              </div>
+              <div>
+                <label class="label">Prazo</label>
+                <input v-model="form.due_date" type="date" class="input" />
+              </div>
             </div>
 
             <!-- ── Alocação de membros ─────────────────────── -->
@@ -713,6 +719,7 @@ const form = ref({
   status:      props.task?.status      ?? props.defaultStatus ?? 'backlog',
   priority:    props.task?.priority    ?? 'medium',
   due_date:    props.task?.due_date    ?? '',
+  start_date:  props.task?.start_date  ?? '',
 })
 
 async function refreshComments() {
@@ -857,6 +864,7 @@ async function duplicateTask() {
       status: form.value.status,
       priority: form.value.priority,
       due_date: form.value.due_date,
+      start_date: form.value.start_date,
       assignee_ids: selectedIds.value,
     })
     toast.success('Tarefa duplicada.')

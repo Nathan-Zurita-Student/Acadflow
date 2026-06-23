@@ -124,6 +124,7 @@ import { useTasksStore } from '@/stores/tasks'
 import { useProjectsStore } from '@/stores/projects'
 import { useAuthStore } from '@/stores/auth'
 import { useToast } from '@/composables/useToast'
+import { useConfirm } from '@/composables/useConfirm'
 import { useRealtime } from '@/composables/useRealtime'
 import { tasksApi, columnsApi } from '@/api/projects'
 import type { Task, TaskStatus, KanbanColumnDef } from '@/types'
@@ -356,7 +357,8 @@ function handleApprovalChange(taskId: number, status: string, note?: string) {
 }
 
 async function deleteTask(task: Task) {
-  if (!confirm(`Excluir a tarefa "${task.title}"? Esta ação não pode ser desfeita.`)) return
+  const { confirm } = useConfirm()
+  if (!await confirm({ message: `Excluir a tarefa "${task.title}"? Esta ação não pode ser desfeita.`, variant: 'danger' })) return
   const before = [...store.tasks]
   store.removeTask(task.id)
   if (selectedTask.value?.id === task.id) closeModal()

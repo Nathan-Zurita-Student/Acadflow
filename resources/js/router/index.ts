@@ -42,6 +42,11 @@ const router = createRouter({
           component: () => import('@/Pages/MyTasksPage.vue'),
         },
         {
+          path: 'calendar',
+          name: 'calendar',
+          component: () => import('@/Pages/CalendarPage.vue'),
+        },
+        {
           path: 'projects',
           name: 'projects',
           component: () => import('@/Pages/projects/ProjectsPage.vue'),

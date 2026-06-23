@@ -58,6 +58,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useProjectsStore } from '@/stores/projects'
 import { useToast } from '@/composables/useToast'
+import { useConfirm } from '@/composables/useConfirm'
 
 const route = useRoute()
 const router = useRouter()
@@ -89,7 +90,8 @@ async function saveProject() {
 }
 
 async function confirmDelete() {
-  if (!confirm(`Excluir "${project.value?.name}"? Esta ação é irreversível.`)) return
+  const { confirm } = useConfirm()
+  if (!await confirm({ title: 'Excluir projeto', message: `Excluir "${project.value?.name}"? Esta ação é irreversível.`, variant: 'danger' })) return
   try {
     await projectsStore.deleteProject(projectId)
     toast.success('Projeto excluído.')

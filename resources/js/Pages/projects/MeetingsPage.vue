@@ -125,6 +125,7 @@ import { storeToRefs } from 'pinia'
 import { useProjectsStore } from '@/stores/projects'
 import { useAuthStore } from '@/stores/auth'
 import { useToast } from '@/composables/useToast'
+import { useConfirm } from '@/composables/useConfirm'
 import { meetingsApi } from '@/api/projects'
 import MeetingCard from '@/components/ui/MeetingCard.vue'
 import type { Meeting } from '@/types'
@@ -199,7 +200,8 @@ async function saveForm() {
 }
 
 async function deleteMeeting(m: Meeting) {
-  if (!confirm(`Remover "${m.title}"?`)) return
+  const { confirm } = useConfirm()
+  if (!await confirm({ message: `Remover "${m.title}"?`, confirmText: 'Remover', variant: 'danger' })) return
   try {
     await meetingsApi.delete(projectId, m.id)
     meetings.value = meetings.value.filter(x => x.id !== m.id)

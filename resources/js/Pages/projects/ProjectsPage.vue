@@ -5,7 +5,7 @@
         <h1 class="text-xl font-bold text-white">Projetos</h1>
         <p class="text-dark-400 text-sm">{{ filtered.length }} de {{ projects.length }} projeto{{ projects.length !== 1 ? 's' : '' }}</p>
       </div>
-      <button @click="showCreate = true" class="btn-primary">
+      <button v-if="projects.length" @click="showCreate = true" class="btn-primary">
         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
         </svg>
@@ -96,6 +96,7 @@ import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
 import { useProjectsStore } from '@/stores/projects'
 import { useToast } from '@/composables/useToast'
+import { useConfirm } from '@/composables/useConfirm'
 import ProjectCard from '@/components/ui/ProjectCard.vue'
 import ProjectModal from '@/components/ui/ProjectModal.vue'
 import type { Project } from '@/types'
@@ -150,7 +151,8 @@ const filtered = computed(() => {
 function goToProject(id: number) { router.push(`/projects/${id}`) }
 
 async function deleteProject(id: number) {
-  if (!confirm('Tem certeza que deseja excluir este projeto?')) return
+  const { confirm } = useConfirm()
+  if (!await confirm({ title: 'Excluir projeto', message: 'Tem certeza que deseja excluir este projeto?', variant: 'danger' })) return
   await store.deleteProject(id)
   toast.success('Projeto excluído.')
 }

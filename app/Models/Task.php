@@ -23,6 +23,7 @@ class Task extends Model
         'status',
         'priority',
         'due_date',
+        'start_date',
         'position',
         'approval_status',
         'rejection_note',
@@ -32,6 +33,7 @@ class Task extends Model
     {
         return [
             'due_date' => 'date',
+            'start_date' => 'date',
             'position' => 'integer',
         ];
     }

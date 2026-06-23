@@ -147,6 +147,7 @@ import { useNotificationsStore } from '@/stores/notifications'
 import { usePolling } from '@/composables/usePolling'
 import { useBrowserNotifications } from '@/composables/useBrowserNotifications'
 import { useToast } from '@/composables/useToast'
+import { useConfirm } from '@/composables/useConfirm'
 import type { AppNotification } from '@/api/notifications'
 import { useTimeAgo } from '@/composables/useTimeAgo'
 import { projectInvitationsApi } from '@/api/projects'
@@ -155,6 +156,7 @@ import Icon from '@/components/ui/Icon.vue'
 const store  = useNotificationsStore()
 const router = useRouter()
 const toast  = useToast()
+const { confirm } = useConfirm()
 const { supported, permission, requestPermission } = useBrowserNotifications()
 const open   = ref(false)
 const containerRef = ref<HTMLElement | null>(null)
@@ -180,7 +182,7 @@ onClickOutside(containerRef, () => { open.value = false })
 function toggle() { open.value = !open.value }
 
 async function clearAll() {
-  if (!confirm('Limpar todas as notificações? Esta ação não pode ser desfeita.')) return
+  if (!await confirm({ title: 'Limpar notificações', message: 'Limpar todas as notificações? Esta ação não pode ser desfeita.', confirmText: 'Limpar', variant: 'danger' })) return
   try {
     await store.clearAll()
     toast.success('Notificações limpas.')

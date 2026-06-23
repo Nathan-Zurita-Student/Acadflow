@@ -147,6 +147,7 @@ import { ref, computed, onMounted, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import { useProjectsStore } from '@/stores/projects'
 import { useToast } from '@/composables/useToast'
+import { useConfirm } from '@/composables/useConfirm'
 import { useMarkdown } from '@/composables/useMarkdown'
 import { notesApi } from '@/api/projects'
 import Icon from '@/components/ui/Icon.vue'
@@ -287,7 +288,8 @@ async function saveNote() {
 }
 
 async function deleteNote(note: ProjectNote) {
-  if (!confirm(`Remover "${note.title}"?`)) return
+  const { confirm } = useConfirm()
+  if (!await confirm({ message: `Remover "${note.title}"?`, confirmText: 'Remover', variant: 'danger' })) return
   try {
     await notesApi.delete(projectId, note.id)
     notes.value = notes.value.filter(n => n.id !== note.id)

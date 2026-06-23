@@ -19,6 +19,7 @@ class StoreTaskRequest extends FormRequest
                                 ->where('project_id', $this->route('project')->id)],
             'priority'     => ['nullable', 'in:low,medium,high,urgent'],
             'due_date'     => ['nullable', 'date'],
+            'start_date'   => ['nullable', 'date'],
             'assignee_ids' => ['nullable', 'array'],
             'assignee_ids.*' => ['integer', 'exists:users,id'],
             'tag_ids'      => ['nullable', 'array'],

@@ -60,6 +60,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
     Route::get('my-tasks', [DashboardController::class, 'myTasks'])->name('dashboard.my-tasks');
+    Route::get('calendar', [DashboardController::class, 'calendar'])->name('calendar.index');
     Route::get('users/search', [DashboardController::class, 'searchUsers'])->name('users.search');
 
     Route::prefix('projects')->name('projects.')->group(function () {

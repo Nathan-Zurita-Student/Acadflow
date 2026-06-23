@@ -185,6 +185,7 @@ import { useRouter } from 'vue-router'
 import { dashboardApi, tasksApi } from '@/api/projects'
 import { useRealtimeStore } from '@/stores/realtime'
 import { useToast } from '@/composables/useToast'
+import { useConfirm } from '@/composables/useConfirm'
 import TaskModal from '@/components/tasks/TaskModal.vue'
 
 const router = useRouter()
@@ -337,7 +338,8 @@ function goToKanban(task: any) {
 }
 
 async function deleteTask(task: any) {
-  if (!confirm(`Excluir a tarefa "${task.title}"? Esta ação não pode ser desfeita.`)) return
+  const { confirm } = useConfirm()
+  if (!await confirm({ message: `Excluir a tarefa "${task.title}"? Esta ação não pode ser desfeita.`, variant: 'danger' })) return
   // Remoção otimista — o broadcast confirma para os demais usuários
   const before = allTasks.value
   allTasks.value = allTasks.value.filter(t => t.id !== task.id)

@@ -166,6 +166,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useToast } from '@/composables/useToast'
+import { useConfirm } from '@/composables/useConfirm'
 import { projectsApi, columnsApi } from '@/api/projects'
 import Icon from '@/components/ui/Icon.vue'
 import PlansPage from '@/Pages/billing/PlansPage.vue'
@@ -305,7 +306,8 @@ async function addColumn() {
 
 async function removeColumn(col: ProjectColumn) {
   if (!selectedProjectId.value) return
-  if (!confirm(`Excluir a coluna "${col.label}"? As tarefas dela voltam para a primeira coluna.`)) return
+  const { confirm } = useConfirm()
+  if (!await confirm({ title: 'Excluir coluna', message: `Excluir a coluna "${col.label}"? As tarefas dela voltam para a primeira coluna.`, variant: 'danger' })) return
   try {
     await columnsApi.delete(selectedProjectId.value, col.id)
     columns.value = columns.value.filter(c => c.id !== col.id)

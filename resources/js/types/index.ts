@@ -102,6 +102,7 @@ export interface Task {
   status: TaskStatus
   priority: TaskPriority
   due_date: string | null
+  start_date: string | null
   position: number
   is_overdue: boolean
   assignee: Pick<User, 'id' | 'name' | 'avatar'> | null
@@ -188,4 +189,18 @@ export interface ProjectDashboard {
   member_stats: MemberStats[]
   risk_level: 'low' | 'medium' | 'high'
   weekly_completions: Array<{ date: string; count: number }>
+}
+
+/** Tarefa no formato enxuto retornado pelo endpoint /calendar. */
+export interface CalendarTask {
+  id: number
+  title: string
+  status: TaskStatus
+  priority: TaskPriority
+  start_date: string | null
+  due_date: string | null
+  is_overdue: boolean
+  project: { id: number; name: string }
+  assignee: Pick<User, 'id' | 'name' | 'avatar'> | null
+  assignees: Array<Pick<User, 'id' | 'name' | 'avatar'>>
 }

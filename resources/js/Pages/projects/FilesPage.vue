@@ -216,11 +216,13 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { attachmentsApi } from '@/api/projects'
 import { useToast } from '@/composables/useToast'
+import { useConfirm } from '@/composables/useConfirm'
 import type { Attachment } from '@/types'
 
 const route = useRoute()
 const projectId = Number(route.params.id)
 const toast = useToast()
+const { confirm } = useConfirm()
 const loading = ref(true)
 const uploading = ref(false)
 const attachments = ref<Attachment[]>([])
@@ -296,7 +298,7 @@ async function handleUpload() {
 }
 
 async function deleteFile(id: number) {
-  if (!confirm('Excluir este arquivo?')) return
+  if (!await confirm({ message: 'Excluir este arquivo?', variant: 'danger' })) return
   await attachmentsApi.delete(projectId, id)
   attachments.value = attachments.value.filter(a => a.id !== id)
   toast.success('Arquivo excluído.')
