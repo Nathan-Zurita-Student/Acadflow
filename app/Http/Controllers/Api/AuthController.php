@@ -11,6 +11,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Laravel\Socialite\Facades\Socialite;
 
@@ -20,8 +21,9 @@ class AuthController extends Controller
     {
         $avatarUrl = null;
         if ($request->hasFile('avatar')) {
-            $path = $request->file('avatar')->store('avatars', 'public');
-            $avatarUrl = Storage::url($path);
+            $disk = config('filesystems.uploads', 'public');
+            $path = $request->file('avatar')->storePublicly('avatars', $disk);
+            $avatarUrl = Storage::disk($disk)->url($path);
         }
 
         $user = User::create([
@@ -78,12 +80,13 @@ class AuthController extends Controller
         }
 
         if ($request->hasFile('avatar')) {
-            if ($user->avatar) {
-                $oldPath = str_replace('/storage/', '', parse_url($user->avatar, PHP_URL_PATH));
-                Storage::disk('public')->delete($oldPath);
+            $disk = config('filesystems.uploads', 'public');
+            // Remove o avatar anterior (uploads nossos sempre ficam em /avatars/).
+            if ($user->avatar && str_contains($user->avatar, '/avatars/')) {
+                Storage::disk($disk)->delete('avatars/' . Str::after($user->avatar, '/avatars/'));
             }
-            $path = $request->file('avatar')->store('avatars', 'public');
-            $data['avatar'] = Storage::url($path);
+            $path = $request->file('avatar')->storePublicly('avatars', $disk);
+            $data['avatar'] = Storage::disk($disk)->url($path);
         }
 
         $user->update($data);

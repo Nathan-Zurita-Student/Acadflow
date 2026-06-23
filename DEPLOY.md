@@ -94,34 +94,42 @@ php artisan serve    # backend
 
 ---
 
-## ✅ Solução definitiva (recomendada): object storage
+## ✅ Uploads persistentes (object storage) — JÁ IMPLEMENTADO
 
-Como o disco do Laravel Cloud é efêmero, mesmo com o `storage:link` rodando a cada
-deploy os **arquivos enviados podem se perder** entre deploys (o link aponta para
-uma pasta que foi recriada vazia). A correção profissional é **não guardar uploads
-no disco local** e sim em um **bucket S3-compatível** (o Laravel Cloud provisiona
-um para você).
+O disco do Laravel Cloud é efêmero: a cada deploy ele é recriado vazio, então
+arquivos salvos no disco local **somem** (e o usuário teria que reenviar a foto).
+Para resolver de vez, o código agora usa um **disco configurável** para avatares e
+anexos, definido pela variável `UPLOAD_DISK`:
 
-Passo a passo (quando quiser fazer):
+- **Local (dev):** `UPLOAD_DISK` não definido → usa `public` (igual antes, com `storage:link`).
+- **Produção (Laravel Cloud):** `UPLOAD_DISK=s3` → arquivos vão para o **object storage**
+  e **persistem entre deploys**. Ninguém precisa reenviar nada. ✅
 
-1. No Laravel Cloud, crie/conecte um **bucket de object storage**.
-2. No `.env` do ambiente, defina:
+Referência no código: `config('filesystems.uploads')` em
+[config/filesystems.php](config/filesystems.php), usado por
+[AuthController](app/Http/Controllers/Api/AuthController.php) (avatares) e
+[AttachmentController](app/Http/Controllers/Api/AttachmentController.php) (anexos).
+Dependência adicionada: `league/flysystem-aws-s3-v3`.
+
+### Como ligar no Laravel Cloud (uma vez só)
+
+1. **Crie um bucket de Object Storage** no painel do Laravel Cloud e **conecte-o ao
+   ambiente**. O Laravel Cloud injeta automaticamente as variáveis de conexão
+   (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_DEFAULT_REGION`,
+   `AWS_BUCKET`, `AWS_ENDPOINT`, `AWS_URL`).
+2. **Habilite acesso público** no bucket (ou use a URL pública/CDN que o Laravel
+   Cloud fornece como `AWS_URL`) — é o que faz as fotos carregarem direto no `<img>`.
+3. Adicione **uma** variável de ambiente:
    ```env
-   FILESYSTEM_DISK=s3
-   AWS_ACCESS_KEY_ID=...
-   AWS_SECRET_ACCESS_KEY=...
-   AWS_DEFAULT_REGION=...
-   AWS_BUCKET=...
-   AWS_URL=...            # URL pública do bucket
-   AWS_USE_PATH_STYLE_ENDPOINT=false
+   UPLOAD_DISK=s3
    ```
-3. Garanta que os uploads usem o disco padrão. Hoje o código fixa o disco `public`
-   (ex.: `->store('avatars', 'public')` em
-   [`AuthController`](app/Http/Controllers/Api/AuthController.php) e
-   [`AttachmentController`](app/Http/Controllers/Api/AttachmentController.php)).
-   Trocar `'public'` por `config('filesystems.default')` (ou `'s3'`) faz os arquivos
-   irem para o bucket e **persistirem** entre deploys — e aí o `storage:link` deixa
-   de ser necessário para eles.
+4. Faça o deploy. A partir daí todo avatar/anexo enviado fica no bucket para sempre.
+
+> **Transição:** fotos enviadas *antes* dessa mudança ficaram no disco efêmero e já
+> se perderam — o usuário envia uma vez e pronto, nunca mais some. Tudo que for
+> enviado depois de ligar o `UPLOAD_DISK=s3` é permanente.
+
+> **Não** precisa mexer em `FILESYSTEM_DISK` — só `UPLOAD_DISK` controla os uploads.
 
 > Enquanto não migrar para object storage, o `app:deploy` no Deploy Command já
 > resolve o sintoma (link recriado) e mantém as fotos aparecendo após cada deploy.

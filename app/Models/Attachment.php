@@ -39,6 +39,6 @@ class Attachment extends Model
 
     public function getUrlAttribute(): string
     {
-        return url(Storage::disk('public')->url($this->path));
+        return url(Storage::disk(config('filesystems.uploads', 'public'))->url($this->path));
     }
 }

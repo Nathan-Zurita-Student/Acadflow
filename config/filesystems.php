@@ -13,7 +13,21 @@ return [
     |
     */
 
-    'default' => env('FILESYSTEM_DISK', 'local'),
+    'default' => env('FILESYSTEM_DISK', 'public'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Disco de Uploads (avatares e anexos)
+    |--------------------------------------------------------------------------
+    |
+    | Disco usado para os arquivos enviados pelos usuários. Localmente fica em
+    | 'public' (com storage:link). Em produção (Laravel Cloud) defina
+    | UPLOAD_DISK=s3 para que os arquivos fiquem no object storage e
+    | PERSISTAM entre deploys — sem o usuário precisar reenviar nada.
+    |
+    */
+
+    'uploads' => env('UPLOAD_DISK', 'public'),
 
     /*
     |--------------------------------------------------------------------------

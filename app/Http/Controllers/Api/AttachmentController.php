@@ -39,7 +39,7 @@ class AttachmentController extends Controller
         ]);
 
         $file = $request->file('file');
-        $path = $file->store('attachments/' . $project->id, 'public');
+        $path = $file->storePublicly('attachments/' . $project->id, config('filesystems.uploads', 'public'));
 
         $customName = $request->input('name');
         $extension  = $file->getClientOriginalExtension();
@@ -81,7 +81,7 @@ class AttachmentController extends Controller
     {
         $this->authorize('view', $project);
 
-        return Storage::disk('public')->response($attachment->path, $attachment->name, [
+        return Storage::disk(config('filesystems.uploads', 'public'))->response($attachment->path, $attachment->name, [
             'Content-Type'        => $attachment->mime_type,
             'Content-Disposition' => 'inline; filename="' . $attachment->name . '"',
         ]);
@@ -91,14 +91,14 @@ class AttachmentController extends Controller
     {
         $this->authorize('view', $project);
 
-        return Storage::disk('public')->download($attachment->path, $attachment->name);
+        return Storage::disk(config('filesystems.uploads', 'public'))->download($attachment->path, $attachment->name);
     }
 
     public function destroy(Request $request, Project $project, Attachment $attachment): JsonResponse
     {
         $this->authorize('view', $project);
 
-        Storage::disk('public')->delete($attachment->path);
+        Storage::disk(config('filesystems.uploads', 'public'))->delete($attachment->path);
         $attachment->delete();
 
         return response()->json(null, 204);
