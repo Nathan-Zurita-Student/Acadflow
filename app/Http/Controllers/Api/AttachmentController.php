@@ -39,7 +39,7 @@ class AttachmentController extends Controller
         ]);
 
         $file = $request->file('file');
-        $path = $file->storePublicly('attachments/' . $project->id, config('filesystems.uploads', 'public'));
+        $path = $file->store('attachments/' . $project->id, config('filesystems.uploads', 'public'));
 
         $customName = $request->input('name');
         $extension  = $file->getClientOriginalExtension();

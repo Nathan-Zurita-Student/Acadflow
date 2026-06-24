@@ -22,7 +22,7 @@ class AuthController extends Controller
         $avatarUrl = null;
         if ($request->hasFile('avatar')) {
             $disk = config('filesystems.uploads', 'public');
-            $path = $request->file('avatar')->storePublicly('avatars', $disk);
+            $path = $request->file('avatar')->store('avatars', $disk);
             $avatarUrl = Storage::disk($disk)->url($path);
         }
 
@@ -85,7 +85,7 @@ class AuthController extends Controller
             if ($user->avatar && str_contains($user->avatar, '/avatars/')) {
                 Storage::disk($disk)->delete('avatars/' . Str::after($user->avatar, '/avatars/'));
             }
-            $path = $request->file('avatar')->storePublicly('avatars', $disk);
+            $path = $request->file('avatar')->store('avatars', $disk);
             $data['avatar'] = Storage::disk($disk)->url($path);
         }
 
