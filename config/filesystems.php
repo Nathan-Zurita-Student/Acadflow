@@ -55,7 +55,10 @@ return [
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
-            'url' => rtrim(env('APP_URL', 'http://localhost'), '/').'/storage',
+            // URL relativa (independente de host): assim os avatares/anexos
+            // funcionam em qualquer domínio (localhost, *.test, produção) sem
+            // depender de APP_URL estar correto. Em produção, prefira UPLOAD_DISK=s3.
+            'url' => '/storage',
             'visibility' => 'public',
             'throw' => false,
             'report' => false,
