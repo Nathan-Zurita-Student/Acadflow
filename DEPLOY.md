@@ -1,135 +1,255 @@
-# 🚀 Colinha de Deploy — AcadFlow
+# 🚀 Deploy do AcadFlow no Laravel Cloud — do zero (passo a passo)
 
-Guia rápido de tudo que precisa rodar ao subir uma atualização, e por que as
-fotos de perfil quebravam a cada deploy.
+Guia completo para recriar o projeto no Laravel Cloud com **tudo configurado
+corretamente**, na ordem certa. Siga de cima para baixo.
 
 ---
 
-## TL;DR (o que fazer)
+## O que o AcadFlow precisa (resumo)
 
-No **Laravel Cloud**, configure o **Deploy Command** do ambiente para:
+| Recurso | Precisa? | Observação |
+|--------|----------|------------|
+| PHP 8.3+ | ✅ | exigido pelo `composer.json` |
+| Node (build do Vite) | ✅ | `npm run build` gera o front |
+| Banco **MySQL** | ✅ | migrations + dados |
+| **Object Storage (S3)** | ✅ | **uploads persistentes** (fotos/anexos) — o que vinha falhando |
+| Worker de fila | ❌ | nada usa fila (eventos são `ShouldBroadcastNow`) |
+| Agendador (cron) | ❌ | não há tarefas agendadas |
+| Reverb (tempo real) | ⚪ opcional | sem ele, o app usa *polling* automaticamente |
+| E-mail (SMTP) | ⚪ opcional | só se for usar recuperação de senha por e-mail |
 
-```bash
-php artisan app:deploy
+---
+
+## Passo 0 — Antes de apagar o projeto atual
+
+Guarde os segredos que você vai reaproveitar (vão para as variáveis do projeto novo):
+
+- `APP_KEY` (pode reusar a atual ou gerar outra)
+- `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`
+- `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL`
+- `ASAAS_API_KEY`, `ASAAS_BASE_URL`, `ASAAS_WEBHOOK_TOKEN`, `PLAN_GRACE_DAYS`
+
+> Se houver dados em produção que importam, exporte o banco antes. Se é recomeço
+> limpo, pode ignorar.
+
+---
+
+## Passo 1 — Apagar o projeto antigo
+
+No painel do Laravel Cloud → projeto antigo → **Settings** → **Delete project**.
+Apaga junto os recursos (banco/bucket antigos) para não pagar/confundir.
+
+---
+
+## Passo 2 — Criar o projeto novo e conectar o Git
+
+1. **New Project** (ou New Application).
+2. Conecte o **repositório GitHub** do AcadFlow.
+3. Branch de produção: **`main`**.
+4. Ambiente: **production**.
+5. **Não faça deploy ainda** — primeiro vamos criar banco, storage e variáveis.
+
+---
+
+## Passo 3 — Banco de dados (MySQL)
+
+1. No projeto → seção de **Database** → **Create Database** → tipo **MySQL**.
+2. **Conecte ao ambiente** (production).
+3. O Laravel Cloud injeta sozinho: `DB_CONNECTION`, `DB_HOST`, `DB_PORT`,
+   `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`. (Não precisa digitar.)
+
+---
+
+## Passo 4 — Object Storage (uploads) — **do jeito do Laravel Cloud**
+
+É isto que faz as fotos de perfil/anexos **persistirem** entre deploys.
+
+> ⚠️ **Importante:** no Laravel Cloud você **NÃO** usa o disco `s3` nem variáveis
+> `AWS_*`. O Laravel Cloud provisiona um Object Storage (Cloudflare R2) e o liga
+> **automaticamente no disco `public`** através da variável `LARAVEL_CLOUD_DISK_CONFIG`
+> (ele mesmo injeta essa variável). O disco `public` deixa de ser local e passa a
+> ser o R2 persistente — sem você configurar nada de credencial.
+
+1. No projeto → seção **Storage** → **crie/anexe um Object Storage** ao ambiente.
+2. O Laravel Cloud injeta sozinho `LARAVEL_CLOUD_DISK_CONFIG` e deixa
+   `FILESYSTEM_DISK=public`. Não precisa mexer em `AWS_*`.
+3. Como o app usa o disco **`public`** para uploads (padrão), os arquivos já vão
+   para o R2 e **persistem**.
+
+> ✅ **Use `UPLOAD_DISK=public`** (ou **não** defina essa variável — o padrão já é
+> `public`). **NÃO** use `UPLOAD_DISK=s3` — é isso que gera o erro
+> *"region is required"* (o disco `s3` fica sem credenciais, porque o Cloud
+> configura o `public`, não o `s3`).
+>
+> Como conferir: nas variáveis deve existir `LARAVEL_CLOUD_DISK_CONFIG` (com um
+> `bucket` e uma `url` tipo `https://fls-....laravel.cloud`).
+
+---
+
+## Passo 5 — Variáveis de ambiente
+
+Em **Environment Variables** do ambiente, garanta o conjunto abaixo.
+As marcadas como *(automática)* já vêm dos Passos 3 e 4 — **não duplique**.
+
+```env
+# App
+APP_NAME=AcadFlow
+APP_ENV=production
+APP_KEY=base64:COLE_SUA_CHAVE
+APP_DEBUG=false
+APP_URL=https://SEU-DOMINIO.laravel.cloud      # ajuste no Passo 8
+
+# Banco (automática — vem do MySQL conectado)
+DB_CONNECTION=mysql
+
+# Sessão / cache / fila (nada usa fila de fato)
+SESSION_DRIVER=database
+CACHE_STORE=database
+QUEUE_CONNECTION=database
+
+# Tempo real DESLIGADO (simples e estável). App cai p/ polling sozinho.
+# ⚠️ NÃO use "reverb" sem ter o servidor Reverb configurado — quebra o build.
+BROADCAST_CONNECTION=null
+
+# Uploads → disco "public" (que o Laravel Cloud liga no R2 automaticamente).
+# NÃO use "s3" aqui — dá erro de "region". Pode até omitir (o padrão é public).
+UPLOAD_DISK=public
+# LARAVEL_CLOUD_DISK_CONFIG e FILESYSTEM_DISK=public vêm automáticos do Cloud.
+
+# Google OAuth (atualize o REDIRECT no Passo 8)
+GOOGLE_CLIENT_ID=...
+GOOGLE_CLIENT_SECRET=...
+GOOGLE_REDIRECT_URI=https://SEU-DOMINIO.laravel.cloud/api/auth/google/callback
+
+# IA (Anthropic)
+ANTHROPIC_API_KEY=...
+ANTHROPIC_MODEL=claude-haiku-4-5
+
+# Pagamentos (Asaas)
+ASAAS_API_KEY=...
+ASAAS_BASE_URL=https://api.asaas.com/v3
+ASAAS_WEBHOOK_TOKEN=...
+PLAN_GRACE_DAYS=3
 ```
 
-Pronto. A partir daí **você nunca mais precisa rodar `php artisan storage:link` na mão.**
-O `app:deploy` já faz isso (e mais) automaticamente a cada deploy.
-
-> Onde fica: painel do Laravel Cloud → seu **Environment** → **Settings / Deployments**
-> → campo **Deploy Command** (também chamado de "deployment hook" / comando pós-build).
-
----
-
-## Por que as imagens de perfil sumiam?
-
-1. Os avatares são salvos no disco `public` (`storage/app/public/avatars/...`) e a URL
-   gerada é tipo `/storage/avatars/foto.jpg`.
-2. Esse caminho só funciona se existir o **link simbólico** `public/storage` →
-   `storage/app/public`. Esse link é criado pelo comando `php artisan storage:link`.
-3. O link **não vai para o Git** (está no `.gitignore`) e o sistema de arquivos do
-   Laravel Cloud é **efêmero**: ele é recriado do zero a cada deploy. Logo, o link
-   some e as imagens passam a dar 404 — até você rodar `storage:link` de novo.
-
-**Isso é normal em projetos profissionais?**
-Rodar `storage:link` é normal — mas **na mão, não**. Em produção ele entra no
-comando de deploy (é o que estamos fazendo aqui). E, para uploads de usuário, o
-padrão profissional é guardar os arquivos em **object storage** (ver a seção
-"Solução definitiva" mais abaixo), o que faz o problema do symlink desaparecer.
+> **APP_KEY:** se o Laravel Cloud não gerar sozinho, rode local
+> `php artisan key:generate --show` e cole o valor (começa com `base64:`).
+>
+> **Opcionais:** `APP_TIMEZONE=America/Sao_Paulo` e `APP_LOCALE=pt_BR` se quiser
+> horários/idioma do Brasil.
 
 ---
 
-## O que o `php artisan app:deploy` faz
+## Passo 6 — Build e Deploy Command
 
-Veja em [`app/Console/Commands/DeployCommand.php`](app/Console/Commands/DeployCommand.php).
-Ele roda, em ordem:
+1. **Build** (o Laravel Cloud detecta Laravel + `package.json` e roda sozinho):
+   `composer install --no-dev` e `npm ci && npm run build`. Só confirme que o
+   build do front (`npm run build`) está ativado.
+2. **Deploy Command** do ambiente — coloque **exatamente**:
+   ```bash
+   php artisan app:deploy
+   ```
+   Isso roda migrations + `storage:link` + caches a cada deploy (ver apêndice).
+3. **PHP version:** 8.3 (ou superior).
+
+> O `Procfile`/`Dockerfile` do repositório **não** são usados pelo Laravel Cloud —
+> pode ignorá-los.
+
+---
+
+## Passo 7 — Primeiro deploy
+
+1. Dispare o **deploy** (botão Deploy ou um `git push` na branch `main`).
+2. Acompanhe os **Logs** do deploy. Você deve ver o `app:deploy` rodar:
+   `Migrations → Storage link → Config cache → View cache → Queue restart`.
+3. Se falhar, leia a primeira linha do erro nos **Logs** (não o “Server Error”
+   genérico da tela).
+
+---
+
+## Passo 8 — Domínio + Google OAuth + Asaas
+
+Com a URL final do ambiente (ex.: `https://acadflow-xxxx.laravel.cloud` ou seu
+domínio próprio):
+
+1. Ajuste **`APP_URL`** para essa URL.
+2. Ajuste **`GOOGLE_REDIRECT_URI`** para `…/api/auth/google/callback`.
+3. No **Google Cloud Console** → Credenciais → seu OAuth Client → adicione essa
+   URL em **Authorized redirect URIs** (senão o login Google dá erro de redirect).
+4. No **Asaas** → webhook → aponte para a nova URL (se você usa webhook de
+   pagamento).
+5. Redeploy para aplicar as variáveis alteradas.
+
+---
+
+## Passo 9 — Checklist de verificação (pós-deploy)
+
+- [ ] Abre a home, faz **login** (e login Google, se usa).
+- [ ] **Cria um projeto** e uma **tarefa**.
+- [ ] **Troca a foto de perfil** → a imagem aparece. ✅
+- [ ] Faz um novo deploy de teste → a foto **continua aparecendo** (persistiu!). ✅
+- [ ] Upload de **arquivo** num projeto → abre/baixa normalmente.
+- [ ] Calendário carrega as tarefas.
+
+Se a foto subir mas **não exibir** (erro 403 na imagem), o bucket está privado →
+me avise para eu trocar para servir via aplicação.
+
+---
+
+## (Opcional) Tempo real com Reverb
+
+O app funciona 100% sem isso (usa polling). Para ligar atualizações ao vivo:
+
+1. No Laravel Cloud, habilite **Reverb** para o ambiente (ele provisiona o
+   servidor de WebSocket e injeta `REVERB_APP_ID/KEY/SECRET/HOST/PORT/SCHEME`).
+2. Troque `BROADCAST_CONNECTION=null` por `BROADCAST_CONNECTION=reverb`.
+3. Defina as variáveis de **build** do front (precisam existir ANTES do build):
+   ```env
+   VITE_REVERB_APP_KEY=${REVERB_APP_KEY}
+   VITE_REVERB_HOST=${REVERB_HOST}
+   VITE_REVERB_PORT=443
+   VITE_REVERB_SCHEME=https
+   ```
+4. Redeploy (para o front ser reconstruído com as `VITE_*`).
+
+> Sem essas `VITE_*`, o front não tenta conectar e cai em polling — sem erros.
+
+---
+
+## Apêndice A — O que o `php artisan app:deploy` faz
+
+Ver [app/Console/Commands/DeployCommand.php](app/Console/Commands/DeployCommand.php):
 
 | Passo | Comando | Para quê |
 |------|---------|----------|
-| 1 | `migrate --force` | aplica migrations pendentes no banco |
-| 2 | `storage:link --force` | **recria o link público** (resolve as fotos) |
-| 3 | `config:cache` | cacheia configs (mais performance) |
-| 4 | `view:cache` | cacheia as views |
-| 5 | `queue:restart` | reinicia os workers de fila com o código novo |
+| 1 | `migrate --force` | aplica migrations |
+| 2 | `storage:link --force` | link público do storage (disco local) |
+| 3 | `config:cache` | cacheia config |
+| 4 | `view:cache` | cacheia views |
+| 5 | `queue:restart` | reinicia workers (inofensivo se não houver) |
 
-> `route:cache` é intencionalmente omitido porque `routes/web.php` usa uma rota
-> com closure (catch-all do Inertia), que não pode ser cacheada.
+> `route:cache` é omitido de propósito (a rota catch-all do Inertia usa closure).
 
----
+## Apêndice B — Por que os uploads precisam do Object Storage
 
-## Colinha de comandos
+O sistema de arquivos do contêiner do Laravel Cloud é **efêmero** (recriado a cada
+deploy). No disco local, os arquivos enviados somem. No Laravel Cloud, ao anexar um
+Object Storage, ele liga o disco **`public`** ao R2 (via `LARAVEL_CLOUD_DISK_CONFIG`),
+que **persiste**. O app usa `config('filesystems.uploads')` (padrão `public`) em
+[config/filesystems.php](config/filesystems.php), então basta manter
+`UPLOAD_DISK=public`. Referências:
+[AuthController](app/Http/Controllers/Api/AuthController.php) (avatar, via `store()`
+sem ACL — compatível com R2) e
+[AttachmentController](app/Http/Controllers/Api/AttachmentController.php).
 
-### Subir atualização no Laravel Cloud
-Nada manual: faça o `git push` para a branch do ambiente. O build roda
-`composer install`, `npm run build` e, no fim, o **Deploy Command** (`app:deploy`).
+> Fora do Laravel Cloud (ex.: AWS S3 próprio), aí sim você usaria `UPLOAD_DISK=s3`
+> com as variáveis `AWS_*` do seu bucket.
 
-### Deploy manual (VPS / Docker / servidor próprio)
+## Apêndice C — Deploy manual (VPS/local), fora do Laravel Cloud
+
 ```bash
 git pull
 composer install --no-dev --optimize-autoloader
 npm ci && npm run build
-php artisan app:deploy        # migrations + storage:link + caches + queue restart
+php artisan app:deploy
 ```
-
-### Comandos avulsos úteis
-```bash
-php artisan storage:link --force   # recria só o link público do storage
-php artisan migrate --force        # roda migrations sem perguntar (produção)
-php artisan optimize:clear         # limpa TODOS os caches (config/route/view/event)
-php artisan config:cache           # recacheia config
-php artisan queue:work             # processa a fila (workers)
-php artisan reverb:start           # servidor de websockets (tempo real)
-```
-
-### Rodar localmente (desenvolvimento)
-```bash
-composer install
-npm install
-cp .env.example .env && php artisan key:generate
-php artisan migrate --seed
-php artisan storage:link
-npm run dev          # Vite (frontend)
-php artisan serve    # backend
-```
-
----
-
-## ✅ Uploads persistentes (object storage) — JÁ IMPLEMENTADO
-
-O disco do Laravel Cloud é efêmero: a cada deploy ele é recriado vazio, então
-arquivos salvos no disco local **somem** (e o usuário teria que reenviar a foto).
-Para resolver de vez, o código agora usa um **disco configurável** para avatares e
-anexos, definido pela variável `UPLOAD_DISK`:
-
-- **Local (dev):** `UPLOAD_DISK` não definido → usa `public` (igual antes, com `storage:link`).
-- **Produção (Laravel Cloud):** `UPLOAD_DISK=s3` → arquivos vão para o **object storage**
-  e **persistem entre deploys**. Ninguém precisa reenviar nada. ✅
-
-Referência no código: `config('filesystems.uploads')` em
-[config/filesystems.php](config/filesystems.php), usado por
-[AuthController](app/Http/Controllers/Api/AuthController.php) (avatares) e
-[AttachmentController](app/Http/Controllers/Api/AttachmentController.php) (anexos).
-Dependência adicionada: `league/flysystem-aws-s3-v3`.
-
-### Como ligar no Laravel Cloud (uma vez só)
-
-1. **Crie um bucket de Object Storage** no painel do Laravel Cloud e **conecte-o ao
-   ambiente**. O Laravel Cloud injeta automaticamente as variáveis de conexão
-   (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_DEFAULT_REGION`,
-   `AWS_BUCKET`, `AWS_ENDPOINT`, `AWS_URL`).
-2. **Habilite acesso público** no bucket (ou use a URL pública/CDN que o Laravel
-   Cloud fornece como `AWS_URL`) — é o que faz as fotos carregarem direto no `<img>`.
-3. Adicione **uma** variável de ambiente:
-   ```env
-   UPLOAD_DISK=s3
-   ```
-4. Faça o deploy. A partir daí todo avatar/anexo enviado fica no bucket para sempre.
-
-> **Transição:** fotos enviadas *antes* dessa mudança ficaram no disco efêmero e já
-> se perderam — o usuário envia uma vez e pronto, nunca mais some. Tudo que for
-> enviado depois de ligar o `UPLOAD_DISK=s3` é permanente.
-
-> **Não** precisa mexer em `FILESYSTEM_DISK` — só `UPLOAD_DISK` controla os uploads.
-
-> Enquanto não migrar para object storage, o `app:deploy` no Deploy Command já
-> resolve o sintoma (link recriado) e mantém as fotos aparecendo após cada deploy.
