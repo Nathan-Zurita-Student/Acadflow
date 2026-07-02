@@ -63,31 +63,32 @@
     >
       <template v-if="selected">
         <!-- Top bar -->
-        <div class="flex items-center gap-2 px-4 py-3 border-b border-dark-700 flex-shrink-0">
-          <button @click="selected = null" class="md:hidden p-1.5 rounded-lg hover:bg-dark-700 text-dark-400 hover:text-dark-200 transition-colors flex-shrink-0">
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div class="flex items-center gap-2 px-3 sm:px-4 py-2.5 sm:py-3 border-b border-dark-700 flex-shrink-0">
+          <button @click="selected = null" class="md:hidden p-1.5 -ml-1 rounded-lg hover:bg-dark-700 text-dark-400 hover:text-dark-200 transition-colors flex-shrink-0">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
             </svg>
           </button>
           <input
             v-model="selected.title"
-            class="flex-1 bg-transparent text-lg font-bold text-dark-100 border-none outline-none placeholder-dark-600"
+            class="flex-1 min-w-0 bg-transparent text-base sm:text-lg font-bold text-dark-100 border-none outline-none placeholder-dark-600"
             placeholder="Título da nota"
             @change="saveNote"
           />
-          <div class="flex items-center gap-2 flex-shrink-0">
+          <div class="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
             <span class="text-[10px] text-dark-600 hidden sm:block whitespace-nowrap">{{ saveStatus }}</span>
-            <!-- View mode toggle -->
-            <div class="flex items-center gap-0.5 bg-dark-800 border border-dark-700 rounded-lg p-0.5">
+            <!-- View mode toggle (Dividir só faz sentido em telas largas) -->
+            <div class="flex items-center gap-0.5 bg-dark-900 border border-dark-700 rounded-lg p-0.5">
               <button v-for="m in viewModes" :key="m.value"
                 @click="viewMode = m.value"
                 :title="m.label"
-                :class="['px-2 py-1 rounded-md text-xs transition-colors',
+                :class="['px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors',
+                  m.value === 'split' ? 'hidden md:block' : '',
                   viewMode === m.value ? 'bg-dark-600 text-white' : 'text-dark-400 hover:text-dark-200']">
                 {{ m.label }}
               </button>
             </div>
-            <button @click="deleteNote(selected)" class="p-1.5 rounded-lg hover:bg-red-600/20 text-dark-500 hover:text-red-400 transition-colors">
+            <button @click="deleteNote(selected)" class="p-1.5 rounded-lg hover:bg-red-600/20 text-dark-500 hover:text-red-400 transition-colors flex-shrink-0">
               <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -97,9 +98,9 @@
         </div>
 
         <!-- Formatting toolbar (hidden in pure preview) -->
-        <div v-if="viewMode !== 'preview'" class="flex items-center gap-0.5 px-3 py-1.5 border-b border-dark-700 flex-shrink-0 overflow-x-auto">
+        <div v-if="viewMode !== 'preview'" class="flex items-center gap-0.5 px-2 sm:px-3 py-1.5 border-b border-dark-700 flex-shrink-0 overflow-x-auto">
           <button v-for="t in toolbar" :key="t.label" @click="t.action" :title="t.label"
-            class="px-2 py-1 rounded-md text-dark-400 hover:text-dark-100 hover:bg-dark-700 transition-colors flex-shrink-0 text-sm">
+            class="p-1.5 rounded-md text-dark-400 hover:text-dark-100 hover:bg-dark-700 transition-colors flex-shrink-0">
             <Icon :name="t.icon" :size="18" />
           </button>
         </div>
@@ -110,14 +111,14 @@
             v-if="viewMode !== 'preview'"
             ref="editorRef"
             v-model="selected.content"
-            class="flex-1 resize-none bg-transparent text-dark-300 text-sm leading-relaxed p-5 outline-none placeholder-dark-700 font-mono min-w-0"
+            class="flex-1 resize-none bg-transparent text-dark-300 text-sm leading-relaxed p-4 sm:p-5 outline-none placeholder-dark-700 font-mono min-w-0"
             placeholder="Comece a escrever... (suporta Markdown: # título, **negrito**, - lista, - [ ] checklist, > citação, `código`, | tabela |)"
             @input="debounceSave"
             @keydown="onEditorKeydown"
           />
           <div
             v-if="viewMode !== 'edit'"
-            class="md-preview overflow-y-auto p-5 text-sm text-dark-200 min-w-0"
+            class="md-preview overflow-y-auto p-4 sm:p-5 text-sm text-dark-200 min-w-0"
             :class="viewMode === 'split' ? 'hidden md:block md:flex-1 border-l border-dark-700' : 'flex-1'"
             v-html="renderedContent"
           />
@@ -166,7 +167,9 @@ const selected   = ref<ProjectNote | null>(null)
 const loading    = ref(true)
 const saveStatus = ref('')
 const searchQuery = ref('')
-const viewMode   = ref<'edit' | 'split' | 'preview'>('split')
+const viewMode   = ref<'edit' | 'split' | 'preview'>(
+  typeof window !== 'undefined' && window.innerWidth < 768 ? 'edit' : 'split'
+)
 const editorRef  = ref<HTMLTextAreaElement | null>(null)
 let saveTimer: ReturnType<typeof setTimeout> | null = null
 

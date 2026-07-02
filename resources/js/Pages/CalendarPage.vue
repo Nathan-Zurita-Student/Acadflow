@@ -37,51 +37,56 @@
     </div>
 
     <!-- Filtros -->
-    <div class="flex flex-wrap items-center gap-2">
-      <div class="relative min-w-[180px] max-w-xs flex-1">
-        <svg class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-dark-500 pointer-events-none"
+    <div class="space-y-3">
+      <!-- Search (100% da largura) -->
+      <div class="relative w-full">
+        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-dark-500 pointer-events-none"
           fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
         <input v-model="searchQuery" placeholder="Buscar tarefa..."
-          class="w-full text-xs bg-dark-800 border border-dark-700 rounded-lg pl-7 pr-3 py-2 text-dark-200 placeholder-dark-600 focus:outline-none focus:border-accent-500" />
+          class="w-full text-sm bg-dark-800 border border-dark-700 rounded-xl pl-9 pr-3 py-2 text-dark-200 placeholder-dark-600 focus:outline-none focus:border-accent-500" />
       </div>
 
-      <select v-model="filterProject" class="text-xs bg-dark-800 border border-dark-700 rounded-xl px-3 py-2 text-dark-300 focus:outline-none focus:border-accent-500">
-        <option value="">Todos os projetos</option>
-        <option v-for="p in uniqueProjects" :key="p.id" :value="p.id">{{ p.name }}</option>
-      </select>
+      <!-- Selects em grade 2x2 -->
+      <div class="grid grid-cols-2 gap-2">
+        <select v-model="filterProject" class="w-full text-sm bg-dark-800 border border-dark-700 rounded-xl px-3 py-2 text-dark-300 focus:outline-none focus:border-accent-500">
+          <option value="">Todos os projetos</option>
+          <option v-for="p in uniqueProjects" :key="p.id" :value="p.id">{{ p.name }}</option>
+        </select>
 
-      <select v-model="filterMember" class="text-xs bg-dark-800 border border-dark-700 rounded-xl px-3 py-2 text-dark-300 focus:outline-none focus:border-accent-500">
-        <option value="">Todos os membros</option>
-        <option v-for="m in uniqueMembers" :key="m.id" :value="m.id">{{ m.name }}</option>
-      </select>
+        <select v-model="filterMember" class="w-full text-sm bg-dark-800 border border-dark-700 rounded-xl px-3 py-2 text-dark-300 focus:outline-none focus:border-accent-500">
+          <option value="">Todos os membros</option>
+          <option v-for="m in uniqueMembers" :key="m.id" :value="m.id">{{ m.name }}</option>
+        </select>
 
-      <select v-model="filterStatus" class="text-xs bg-dark-800 border border-dark-700 rounded-xl px-3 py-2 text-dark-300 focus:outline-none focus:border-accent-500">
-        <option value="">Todos os status</option>
-        <option v-for="s in uniqueStatuses" :key="s" :value="s">{{ statusLabel(s) }}</option>
-      </select>
+        <select v-model="filterStatus" class="w-full text-sm bg-dark-800 border border-dark-700 rounded-xl px-3 py-2 text-dark-300 focus:outline-none focus:border-accent-500">
+          <option value="">Todos os status</option>
+          <option v-for="s in uniqueStatuses" :key="s" :value="s">{{ statusLabel(s) }}</option>
+        </select>
 
-      <select v-model="filterPriority" class="text-xs bg-dark-800 border border-dark-700 rounded-xl px-3 py-2 text-dark-300 focus:outline-none focus:border-accent-500">
-        <option value="">Todas as prioridades</option>
-        <option value="urgent">Urgente</option>
-        <option value="high">Alta</option>
-        <option value="medium">Média</option>
-        <option value="low">Baixa</option>
-      </select>
+        <select v-model="filterPriority" class="w-full text-sm bg-dark-800 border border-dark-700 rounded-xl px-3 py-2 text-dark-300 focus:outline-none focus:border-accent-500">
+          <option value="">Todas as prioridades</option>
+          <option value="urgent">Urgente</option>
+          <option value="high">Alta</option>
+          <option value="medium">Média</option>
+          <option value="low">Baixa</option>
+        </select>
+      </div>
 
-      <button v-if="hasFilters" @click="clearFilters"
-        class="text-xs text-dark-500 hover:text-dark-300 px-2 py-1.5 rounded-lg hover:bg-dark-700 transition-colors">
-        Limpar
-      </button>
-
-      <!-- Legenda + contagem -->
-      <div class="ml-auto flex items-center gap-3 text-[11px] text-dark-400">
-        <span v-for="c in legend" :key="c.key" class="hidden sm:flex items-center gap-1.5">
-          <span :class="['w-2.5 h-2.5 rounded-sm', DOT_CLASSES[c.key]]" />
-          {{ c.label }}
-        </span>
-        <span class="text-dark-500">{{ filteredTasks.length }} tarefa{{ filteredTasks.length !== 1 ? 's' : '' }}</span>
+      <!-- Limpar + legenda + contagem -->
+      <div class="flex flex-wrap items-center gap-3">
+        <button v-if="hasFilters" @click="clearFilters"
+          class="text-xs text-dark-500 hover:text-dark-300 px-2 py-1.5 rounded-lg hover:bg-dark-700 transition-colors">
+          Limpar
+        </button>
+        <div class="ml-auto flex items-center gap-3 text-[11px] text-dark-400">
+          <span v-for="c in legend" :key="c.key" class="hidden sm:flex items-center gap-1.5">
+            <span :class="['w-2.5 h-2.5 rounded-sm', DOT_CLASSES[c.key]]" />
+            {{ c.label }}
+          </span>
+          <span class="text-dark-500">{{ filteredTasks.length }} tarefa{{ filteredTasks.length !== 1 ? 's' : '' }}</span>
+        </div>
       </div>
     </div>
 

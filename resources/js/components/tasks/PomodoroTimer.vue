@@ -39,7 +39,7 @@
         <!-- Time display -->
         <div class="absolute inset-0 flex flex-col items-center justify-center">
           <span class="text-4xl font-bold tabular-nums" :class="phaseStyle.text">{{ display }}</span>
-          <span class="text-xs text-dark-500 mt-1">{{ remaining }} seg restantes</span>
+          <!-- <span class="text-xs text-dark-500 mt-1">{{ remaining }} seg restantes</span> -->
         </div>
       </div>
     </div>

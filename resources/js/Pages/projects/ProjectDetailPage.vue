@@ -10,7 +10,7 @@
     </div>
 
     <!-- Quick nav + Editar -->
-    <div class="flex gap-2 flex-wrap">
+    <div class="flex gap-1 flex-wrap">
       <RouterLink :to="`/projects/${projectId}/kanban`" class="btn-secondary text-xs">
         Kanban
       </RouterLink>

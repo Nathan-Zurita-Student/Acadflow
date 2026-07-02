@@ -93,6 +93,24 @@
     opacity: 1;
   }
 
+  /* iOS/Safari: normaliza os campos de data para não renderizarem como um
+     "retângulo vazio" desalinhado. Alinha o valor à esquerda e verticalmente,
+     sem forçar altura (padding + fonte já mantêm o campo alinhado aos vizinhos)
+     nem mexer na appearance nativa (preserva o ícone no desktop e o seletor no iOS). */
+  input[type="date"]::-webkit-date-and-time-value,
+  input[type="datetime-local"]::-webkit-date-and-time-value,
+  input[type="time"]::-webkit-date-and-time-value {
+    text-align: left;
+    margin: 0;
+  }
+  input[type="date"]::-webkit-datetime-edit,
+  input[type="datetime-local"]::-webkit-datetime-edit,
+  input[type="time"]::-webkit-datetime-edit {
+    padding: 0;
+    line-height: 1.4;
+    color: rgb(var(--d-100));
+  }
+
   /* Select options: force dark background in browsers that allow it */
   select option {
     background-color: rgb(var(--d-800));
