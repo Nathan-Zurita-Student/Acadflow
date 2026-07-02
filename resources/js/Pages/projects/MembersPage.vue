@@ -64,52 +64,31 @@
         <div class="flex items-start gap-4">
           <UserAvatar :user="s.user" class="w-12 h-12 rounded-xl bg-accent-600/20 text-lg font-bold text-accent-400 flex-shrink-0" />
           <div class="flex-1 min-w-0">
-            <div class="flex items-start justify-between gap-2">
-              <div class="min-w-0">
-                <div class="flex items-center gap-2 flex-wrap">
-                  <h3 class="font-semibold text-white">{{ s.user.name }}</h3>
-                  <span
-                    v-if="isProjectOwner(s.user.id)"
-                    class="text-xs text-amber-400 bg-amber-400/10 border border-amber-400/20 px-1.5 py-0.5 rounded-md"
-                  >
-                    Lider do projeto
-                  </span>
-                </div>
-                <p class="text-xs text-dark-500 truncate">{{ s.user.email }}</p>
-              </div>
-              <span :class="['w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold flex-shrink-0', gradeClass(s.grade)]">
-                {{ s.grade }}
+            <div class="flex items-center gap-2 flex-wrap pr-6">
+              <h3 class="font-semibold text-white truncate">{{ s.user.name }}</h3>
+              <span
+                v-if="isProjectOwner(s.user.id)"
+                class="text-xs text-amber-400 bg-amber-400/10 border border-amber-400/20 px-2 py-0.5 rounded-md whitespace-nowrap"
+              >
+                Líder do Projeto
               </span>
             </div>
 
-            <div class="mt-3 grid grid-cols-3 gap-3 text-center">
-              <div>
-                <p class="text-lg font-bold text-white">{{ s.total_tasks }}</p>
-                <p class="text-xs text-dark-500">Total</p>
+            <!-- Estatísticas em lista vertical -->
+            <div class="mt-3 space-y-1.5">
+              <div class="flex items-center justify-between">
+                <span class="text-sm text-dark-400">Total</span>
+                <span class="text-sm font-semibold text-white">{{ s.total_tasks }}</span>
               </div>
-              <div>
-                <p class="text-lg font-bold text-emerald-400">{{ s.completed_tasks }}</p>
-                <p class="text-xs text-dark-500">Feitas</p>
+              <div class="flex items-center justify-between">
+                <span class="text-sm text-dark-400">Feitas</span>
+                <span class="text-sm font-semibold text-emerald-400">{{ s.completed_tasks }}</span>
               </div>
-              <div>
-                <p class="text-lg font-bold" :class="s.overdue_tasks > 0 ? 'text-red-400' : 'text-dark-500'">
+              <div class="flex items-center justify-between">
+                <span class="text-sm text-dark-400">Atrasadas</span>
+                <span class="text-sm font-semibold" :class="s.overdue_tasks > 0 ? 'text-red-400' : 'text-dark-400'">
                   {{ s.overdue_tasks }}
-                </p>
-                <p class="text-xs text-dark-500">Atrasadas</p>
-              </div>
-            </div>
-
-            <div class="mt-3">
-              <div class="flex items-center justify-between mb-1">
-                <span class="text-xs text-dark-500">Produtividade</span>
-                <span class="text-xs font-medium text-dark-300">{{ s.score }}%</span>
-              </div>
-              <div class="h-1.5 bg-dark-700 rounded-full overflow-hidden">
-                <div
-                  class="h-full rounded-full transition-all duration-700"
-                  :class="scoreBarColor(s.score)"
-                  :style="{ width: s.score + '%' }"
-                />
+                </span>
               </div>
             </div>
           </div>
@@ -328,22 +307,6 @@ async function leaveProject() {
     leaveLoading.value = false
     leaving.value = false
   }
-}
-
-function gradeClass(grade: string) {
-  return {
-    A: 'bg-emerald-600/20 text-emerald-400',
-    B: 'bg-blue-600/20 text-blue-400',
-    C: 'bg-amber-600/20 text-amber-400',
-    D: 'bg-red-600/20 text-red-400',
-  }[grade] ?? ''
-}
-
-function scoreBarColor(score: number) {
-  if (score >= 85) return 'bg-emerald-500'
-  if (score >= 70) return 'bg-blue-500'
-  if (score >= 50) return 'bg-amber-500'
-  return 'bg-red-500'
 }
 
 const chartSeries = computed(() => [

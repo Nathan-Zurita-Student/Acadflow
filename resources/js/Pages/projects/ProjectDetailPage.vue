@@ -1,29 +1,15 @@
 ﻿<template>
   <div class="space-y-6 animate-fade-in" v-if="dashboard">
     <!-- Header -->
-    <div class="flex items-start justify-between">
+    <div class="flex items-start justify-between gap-3">
       <div>
-        <div class="flex items-center gap-2 text-sm text-dark-500 mb-1">
-          <RouterLink to="/projects" class="hover:text-dark-300">Projetos</RouterLink>
-          <span>/</span>
-          <span class="text-dark-300">{{ dashboard.project.name }}</span>
-        </div>
         <h1 class="text-xl font-bold text-white">{{ dashboard.project.name }}</h1>
         <p v-if="dashboard.project.description" class="text-dark-400 text-sm mt-1">{{ dashboard.project.description }}</p>
       </div>
-      <div class="flex items-center gap-2">
-        <RiskBadge :level="dashboard.risk_level" />
-        <button @click="showEdit = true" class="btn-secondary">
-          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-          </svg>
-          Editar
-        </button>
-      </div>
+      <RiskBadge :level="dashboard.risk_level" />
     </div>
 
-    <!-- Quick nav -->
+    <!-- Quick nav + Editar -->
     <div class="flex gap-2 flex-wrap">
       <RouterLink :to="`/projects/${projectId}/kanban`" class="btn-secondary text-xs">
         Kanban
@@ -34,6 +20,13 @@
       <RouterLink :to="`/projects/${projectId}/files`" class="btn-secondary text-xs">
         Arquivos
       </RouterLink>
+      <button @click="showEdit = true" class="btn-warning text-xs">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+        </svg>
+        Editar
+      </button>
     </div>
 
     <!-- Stats -->
@@ -56,13 +49,27 @@
       <!-- Tasks by status donut -->
       <div class="card">
         <h3 class="text-sm font-semibold text-white mb-4">Tarefas por Status</h3>
-        <apexchart type="donut" height="220" :options="donutOptions" :series="donutSeries" />
+        <apexchart v-if="dashboard.tasks_total > 0" type="donut" height="220" :options="donutOptions" :series="donutSeries" />
+        <div v-else class="flex flex-col items-center justify-center gap-2 text-dark-500" style="height: 220px">
+          <svg class="w-9 h-9" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+          </svg>
+          <p class="text-sm">Nenhuma tarefa</p>
+        </div>
       </div>
 
       <!-- Weekly burndown -->
       <div class="card">
         <h3 class="text-sm font-semibold text-white mb-4">Conclusões da Semana</h3>
-        <apexchart type="bar" height="220" :options="barOptions" :series="barSeries" />
+        <apexchart v-if="hasWeeklyCompletions" type="bar" height="220" :options="barOptions" :series="barSeries" />
+        <div v-else class="flex flex-col items-center justify-center gap-2 text-dark-500" style="height: 220px">
+          <svg class="w-9 h-9" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+          </svg>
+          <p class="text-sm">Ainda não possui conclusões</p>
+        </div>
       </div>
     </div>
 
@@ -83,9 +90,10 @@
     <!-- Members + Activity -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <div class="card">
-        <h3 class="text-sm font-semibold text-white mb-4">Membros</h3>
+        <h3 class="text-sm font-semibold text-white mb-4">Membros do Projeto</h3>
         <div class="space-y-3">
-          <MemberRow v-for="s in dashboard.member_stats" :key="s.user.id" :stat="s" />
+          <MemberRow v-for="s in dashboard.member_stats" :key="s.user.id" :stat="s"
+            :is-leader="dashboard.project.owner?.id === s.user.id" />
         </div>
       </div>
 
@@ -207,6 +215,9 @@ const donutOptions = computed(() => ({
 }))
 
 type WeeklyEntry = { date: string; count: number }
+const hasWeeklyCompletions = computed(() =>
+  (dashboard.value?.weekly_completions ?? []).some((d: WeeklyEntry) => d.count > 0)
+)
 const barSeries = computed(() => [{
   name: 'Concluídas',
   data: dashboard.value?.weekly_completions.map((d: WeeklyEntry) => d.count) ?? [],

@@ -1,5 +1,5 @@
 <template>
-  <div class="flex h-[calc(100vh-112px)] animate-fade-in overflow-hidden">
+  <div class="flex h-full min-h-[70vh] rounded-xl border border-dark-700 bg-dark-800 overflow-hidden animate-fade-in">
     <!-- Sidebar: notes list (hidden on mobile when a note is selected) -->
     <aside
       :class="[
@@ -17,12 +17,12 @@
         </button>
         <!-- Search -->
         <div class="relative">
-          <svg class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-dark-500 pointer-events-none"
+          <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-dark-500 pointer-events-none"
             fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
           <input v-model="searchQuery" placeholder="Buscar nas notas..."
-            class="w-full text-xs bg-dark-800 border border-dark-700 rounded-lg pl-7 pr-3 py-1.5 text-dark-200 placeholder-dark-600 focus:outline-none focus:border-accent-500" />
+            class="w-full text-sm bg-dark-900 border border-dark-700 rounded-lg pl-9 pr-3 py-2 text-dark-200 placeholder-dark-600 focus:outline-none focus:border-accent-500" />
         </div>
       </div>
 

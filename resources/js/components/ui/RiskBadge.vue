@@ -1,7 +1,7 @@
 <template>
   <span :class="['badge text-xs font-semibold', classes]">
     <span class="w-1.5 h-1.5 rounded-full" :class="dotClass" />
-    Risco {{ label }} para a entrega
+    Risco {{ label }}
   </span>
 </template>
 

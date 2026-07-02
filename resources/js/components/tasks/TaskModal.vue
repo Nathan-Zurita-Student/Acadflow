@@ -84,7 +84,7 @@
                 <input v-model="form.start_date" type="date" class="input" />
               </div>
               <div>
-                <label class="label">Prazo</label>
+                <label class="label">Data de entrega</label>
                 <input v-model="form.due_date" type="date" class="input" />
               </div>
             </div>
@@ -135,10 +135,11 @@
                   </svg>
                 </button>
 
-                <!-- Dropdown -->
+                <!-- Painel inline: abre para baixo com animação suave -->
+                <transition name="member-expand">
                 <div
                   v-if="pickerOpen"
-                  class="absolute z-10 top-full left-0 right-0 mt-1 bg-dark-800 border border-dark-700 rounded-xl shadow-2xl overflow-hidden"
+                  class="mt-2 bg-dark-900 border border-dark-700 rounded-xl overflow-hidden"
                 >
                   <!-- Search -->
                   <div class="p-2 border-b border-dark-700">
@@ -199,6 +200,7 @@
                     >Confirmar</button>
                   </div>
                 </div>
+                </transition>
               </div>
 
               <!-- Read-only for non-leaders -->
@@ -1006,3 +1008,22 @@ function formatSize(bytes: number) {
 }
 const { timeAgo } = useTimeAgo()
 </script>
+
+<style scoped>
+/* Expansão suave (para baixo) do painel de membros alocados */
+.member-expand-enter-active,
+.member-expand-leave-active {
+  transition: max-height 0.28s ease, opacity 0.22s ease;
+  overflow: hidden;
+}
+.member-expand-enter-from,
+.member-expand-leave-to {
+  max-height: 0;
+  opacity: 0;
+}
+.member-expand-enter-to,
+.member-expand-leave-from {
+  max-height: 400px;
+  opacity: 1;
+}
+</style>

@@ -30,22 +30,22 @@
     </div>
 
     <!-- Filtros -->
-    <div v-if="!loading" class="flex flex-wrap items-center gap-2">
-      <!-- Search -->
-      <div class="relative min-w-[200px] max-w-xs flex-1">
-        <svg class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-dark-500 pointer-events-none"
+    <div v-if="!loading" class="space-y-3">
+      <!-- Search (100% da largura) -->
+      <div class="relative w-full">
+        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-dark-500 pointer-events-none"
           fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
         <input v-model="searchQuery" placeholder="Buscar tarefas..."
-          class="w-full text-xs bg-dark-800 border border-dark-700 rounded-lg pl-7 pr-3 py-1.5 text-dark-200 placeholder-dark-600 focus:outline-none focus:border-accent-500" />
+          class="w-full text-sm bg-dark-800 border border-dark-700 rounded-xl pl-9 pr-3 py-2 text-dark-200 placeholder-dark-600 focus:outline-none focus:border-accent-500" />
       </div>
 
-      <!-- Status -->
+      <!-- Abas de status (ocupam toda a largura) -->
       <div class="flex items-center gap-1 bg-dark-800 border border-dark-700 rounded-xl p-1">
         <button v-for="f in statusFilters" :key="f.value"
           @click="filterStatus = f.value"
-          :class="['px-3 py-1.5 rounded-lg text-xs font-medium transition-colors',
+          :class="['flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
             filterStatus === f.value
               ? 'bg-accent-600 text-white'
               : 'text-dark-400 hover:text-dark-200']">
@@ -53,31 +53,34 @@
         </button>
       </div>
 
-      <!-- Projeto -->
-      <select v-model="filterProject"
-        class="text-xs bg-dark-800 border border-dark-700 rounded-xl px-3 py-2 text-dark-300 focus:outline-none focus:border-accent-500">
-        <option value="">Todos os projetos</option>
-        <option v-for="p in uniqueProjects" :key="p.id" :value="p.id">{{ p.name }}</option>
-      </select>
+      <!-- Projeto + Urgência (50% cada) -->
+      <div class="grid grid-cols-2 gap-2">
+        <select v-model="filterProject"
+          class="w-full text-sm bg-dark-800 border border-dark-700 rounded-xl px-3 py-2 text-dark-300 focus:outline-none focus:border-accent-500">
+          <option value="">Todos os projetos</option>
+          <option v-for="p in uniqueProjects" :key="p.id" :value="p.id">{{ p.name }}</option>
+        </select>
 
-      <!-- Urgência -->
-      <select v-model="filterUrgency"
-        class="text-xs bg-dark-800 border border-dark-700 rounded-xl px-3 py-2 text-dark-300 focus:outline-none focus:border-accent-500">
-        <option value="">Todas as urgências</option>
-        <option value="overdue">Atrasadas</option>
-        <option value="today">Vencem hoje</option>
-        <option value="week">Vencem essa semana</option>
-        <option value="no_date">Sem prazo</option>
-      </select>
+        <select v-model="filterUrgency"
+          class="w-full text-sm bg-dark-800 border border-dark-700 rounded-xl px-3 py-2 text-dark-300 focus:outline-none focus:border-accent-500">
+          <option value="">Todas as urgências</option>
+          <option value="overdue">Atrasadas</option>
+          <option value="today">Vencem hoje</option>
+          <option value="week">Vencem essa semana</option>
+          <option value="no_date">Sem prazo</option>
+        </select>
+      </div>
 
-      <button
-        v-if="filterStatus !== 'active' || filterProject || filterUrgency || searchQuery"
-        @click="filterStatus = 'active'; filterProject = ''; filterUrgency = ''; searchQuery = ''"
-        class="text-xs text-dark-500 hover:text-dark-300 px-2 py-1.5 rounded-lg hover:bg-dark-700 transition-colors">
-        Limpar
-      </button>
-
-      <div class="ml-auto text-xs text-dark-500">{{ filteredTasks.length }} tarefa{{ filteredTasks.length !== 1 ? 's' : '' }}</div>
+      <!-- Limpar + contador (lado direito, abaixo do filtro de urgência) -->
+      <div class="flex items-center justify-end gap-3">
+        <!-- <button
+          v-if="filterStatus !== 'active' || filterProject || filterUrgency || searchQuery"
+          @click="filterStatus = 'active'; filterProject = ''; filterUrgency = ''; searchQuery = ''"
+          class="text-xs text-dark-500 hover:text-dark-300 px-2 py-1.5 rounded-lg hover:bg-dark-700 transition-colors">
+          Limpar
+        </button> -->
+        <span class="text-xs text-dark-500">{{ filteredTasks.length }} tarefa{{ filteredTasks.length !== 1 ? 's' : '' }}</span>
+      </div>
     </div>
 
     <!-- Loading -->

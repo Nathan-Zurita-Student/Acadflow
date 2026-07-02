@@ -22,11 +22,11 @@
             <textarea v-model="form.description" class="input resize-none" rows="3"
               placeholder="Descreva o projeto..." />
           </div>
+          <div>
+            <label class="label">Categoria</label>
+            <input v-model="form.category" class="input" placeholder="Ex: TCC, IC, Extensão" />
+          </div>
           <div class="grid grid-cols-2 gap-4">
-            <div>
-              <label class="label">Categoria</label>
-              <input v-model="form.category" class="input" placeholder="Ex: TCC, IC, Extensão" />
-            </div>
             <div>
               <label class="label">Status</label>
               <select v-model="form.status" class="input">
@@ -36,10 +36,10 @@
                 <option value="completed">Concluído</option>
               </select>
             </div>
-          </div>
-          <div>
-            <label class="label">Prazo final</label>
-            <input v-model="form.deadline" type="date" class="input" />
+            <div>
+              <label class="label">Prazo final</label>
+              <input v-model="form.deadline" type="date" class="input" />
+            </div>
           </div>
 
           <p v-if="error" class="text-sm text-red-400 bg-red-400/10 border border-red-400/20 rounded-lg px-3 py-2">{{ error }}</p>

@@ -88,15 +88,13 @@
               <label class="label">Descrição</label>
               <textarea v-model="form.description" class="input resize-none" rows="2" placeholder="Pauta da reunião..." />
             </div>
-            <div class="grid grid-cols-2 gap-4">
-              <div>
-                <label class="label">Data e hora *</label>
-                <input v-model="form.scheduled_at" type="datetime-local" class="input" required />
-              </div>
-              <div>
-                <label class="label">Local / Link</label>
-                <input v-model="form.location" class="input" placeholder="Sala 3, Google Meet..." />
-              </div>
+            <div>
+              <label class="label">Data e hora *</label>
+              <input v-model="form.scheduled_at" type="datetime-local" class="input" required />
+            </div>
+            <div>
+              <label class="label">Local / Link</label>
+              <input v-model="form.location" class="input" placeholder="Sala 3, Google Meet..." />
             </div>
             <div>
               <label class="label">Ata / Notas</label>

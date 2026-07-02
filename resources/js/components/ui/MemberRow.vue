@@ -14,7 +14,11 @@
         </div>
         <p class="text-xs text-dark-500 mt-0.5">{{ stat.participation }}%</p>
       </div>
-      <span :class="['w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold', gradeClass]">
+      <span v-if="isLeader"
+        class="px-2 py-1 rounded-lg text-xs font-semibold bg-amber-500/15 text-amber-400 whitespace-nowrap">
+        Líder
+      </span>
+      <span v-else :class="['w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold', gradeClass]">
         {{ stat.grade }}
       </span>
     </div>
@@ -26,7 +30,9 @@ import { computed } from 'vue'
 import type { MemberStats } from '@/types'
 import UserAvatar from './UserAvatar.vue'
 
-const props = defineProps<{ stat: MemberStats }>()
+const props = withDefaults(defineProps<{ stat: MemberStats; isLeader?: boolean }>(), {
+  isLeader: false,
+})
 
 const scoreColor = computed(() => {
   if (props.stat.score >= 85) return 'bg-emerald-500'

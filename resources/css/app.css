@@ -68,6 +68,31 @@
     color-scheme: dark;
   }
 
+  /* Torna o ícone do seletor de data/hora sempre visível no tema escuro.
+     Por padrão o indicador nativo pode renderizar escuro sobre fundo escuro,
+     aparecendo como um "retângulo vazio". Substituímos por um ícone de
+     calendário SVG determinístico, na cor dark-400. */
+  input[type="date"]::-webkit-calendar-picker-indicator,
+  input[type="datetime-local"]::-webkit-calendar-picker-indicator,
+  input[type="time"]::-webkit-calendar-picker-indicator,
+  input[type="month"]::-webkit-calendar-picker-indicator,
+  input[type="week"]::-webkit-calendar-picker-indicator {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' viewBox='0 0 24 24' stroke='%2394a3b8' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'/%3E%3C/svg%3E");
+    background-size: 16px 16px;
+    background-position: center;
+    background-repeat: no-repeat;
+    cursor: pointer;
+    opacity: 0.8;
+    transition: opacity .15s ease;
+  }
+  input[type="date"]::-webkit-calendar-picker-indicator:hover,
+  input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover,
+  input[type="time"]::-webkit-calendar-picker-indicator:hover,
+  input[type="month"]::-webkit-calendar-picker-indicator:hover,
+  input[type="week"]::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
+  }
+
   /* Select options: force dark background in browsers that allow it */
   select option {
     background-color: rgb(var(--d-800));
@@ -99,6 +124,11 @@
     @apply inline-flex items-center gap-2 px-4 py-2 bg-red-600/20 hover:bg-red-600/30
            text-red-400 text-sm font-medium rounded-lg border border-red-600/30
            transition-all duration-150;
+  }
+  .btn-warning {
+    @apply inline-flex items-center gap-2 px-4 py-2 bg-amber-500/15 hover:bg-amber-500/25
+           text-amber-400 text-sm font-medium rounded-lg border border-amber-500/30
+           transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-amber-500/40;
   }
   .card {
     @apply bg-dark-800 border border-dark-700 rounded-xl p-5;
