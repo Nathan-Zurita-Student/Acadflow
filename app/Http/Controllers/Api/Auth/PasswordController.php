@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\ChangePasswordRequest;
 use App\Notifications\Auth\PasswordChangedNotification;
 use App\Services\Auth\SessionService;
+use App\Support\SafeNotify;
 use Illuminate\Http\JsonResponse;
 
 class PasswordController extends Controller
@@ -28,7 +29,10 @@ class PasswordController extends Controller
         $this->sessions->destroyOthers($user, $request->session()->getId());
         $user->tokens()->delete();
 
-        $user->notify(new PasswordChangedNotification());
+        SafeNotify::attempt(
+            fn () => $user->notify(new PasswordChangedNotification()),
+            'password_changed',
+        );
         event(new PasswordChanged($user));
 
         return response()->json(['message' => 'Senha alterada com sucesso.']);

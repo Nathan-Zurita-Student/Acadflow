@@ -5,6 +5,7 @@ namespace App\Services\Auth;
 use App\Models\EmailVerificationCode;
 use App\Models\User;
 use App\Notifications\Auth\EmailVerificationCodeNotification;
+use App\Support\SafeNotify;
 use Illuminate\Auth\Events\Verified;
 
 class EmailVerificationService
@@ -20,7 +21,10 @@ class EmailVerificationService
 
         $code = $this->codes->issue(EmailVerificationCode::class, $user);
 
-        $user->notify(new EmailVerificationCodeNotification($code));
+        SafeNotify::attempt(
+            fn () => $user->notify(new EmailVerificationCodeNotification($code)),
+            'email_verification',
+        );
     }
 
     /**

@@ -7,6 +7,7 @@ use App\Models\EmailChangeCode;
 use App\Models\User;
 use App\Notifications\Auth\EmailChangeCodeNotification;
 use App\Notifications\Auth\EmailChangedNotification;
+use App\Support\SafeNotify;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Validation\ValidationException;
 
@@ -19,8 +20,10 @@ class EmailChangeService
     {
         $code = $this->codes->issue(EmailChangeCode::class, $user, ['new_email' => $newEmail]);
 
-        Notification::route('mail', $newEmail)
-            ->notify(new EmailChangeCodeNotification($code));
+        SafeNotify::attempt(
+            fn () => Notification::route('mail', $newEmail)->notify(new EmailChangeCodeNotification($code)),
+            'email_change_code',
+        );
     }
 
     /**
@@ -49,8 +52,10 @@ class EmailChangeService
 
         $this->codes->consume($record);
 
-        Notification::route('mail', $oldEmail)
-            ->notify(new EmailChangedNotification($newEmail));
+        SafeNotify::attempt(
+            fn () => Notification::route('mail', $oldEmail)->notify(new EmailChangedNotification($newEmail)),
+            'email_changed',
+        );
 
         event(new EmailChanged($user, $oldEmail, $newEmail));
 

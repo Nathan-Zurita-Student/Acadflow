@@ -9,6 +9,7 @@ use App\Models\PasswordResetCode;
 use App\Models\User;
 use App\Notifications\Auth\AccountDeletedNotification;
 use App\Services\AsaasService;
+use App\Support\SafeNotify;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 
@@ -62,9 +63,12 @@ class AccountDeletionService
             $user->delete();
         });
 
-        // Fora da transação: avisos e auditoria (envio de e-mail não é transacional).
-        Notification::route('mail', $originalEmail)
-            ->notify(new AccountDeletedNotification());
+        // Fora da transação: avisos e auditoria. O e-mail é best-effort — uma
+        // falha de envio NÃO reverte nem quebra a exclusão já concluída.
+        SafeNotify::attempt(
+            fn () => Notification::route('mail', $originalEmail)->notify(new AccountDeletedNotification()),
+            'account_deleted',
+        );
 
         event(new AccountDeleted($user, $subscriptionCanceled));
     }

@@ -5,6 +5,7 @@ namespace App\Services\Auth;
 use App\Models\PasswordResetCode;
 use App\Models\User;
 use App\Notifications\Auth\PasswordResetCodeNotification;
+use App\Support\SafeNotify;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Validation\ValidationException;
 
@@ -29,7 +30,10 @@ class PasswordResetService
 
         $code = $this->codes->issue(PasswordResetCode::class, $user);
 
-        $user->notify(new PasswordResetCodeNotification($code));
+        SafeNotify::attempt(
+            fn () => $user->notify(new PasswordResetCodeNotification($code)),
+            'password_reset',
+        );
     }
 
     /**
