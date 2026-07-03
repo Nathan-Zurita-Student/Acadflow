@@ -59,11 +59,11 @@
           @approval-change="(taskId, status, note) => $emit('approval-change', taskId, status, note)"
         />
       </template>
-      <template #footer>
+      <!-- <template #footer>
         <div v-if="!tasks.length" class="h-16 flex items-center justify-center">
           <p class="text-xs text-dark-600">Arraste tarefas aqui</p>
         </div>
-      </template>
+      </template> -->
     </draggable>
   </div>
 </template>
