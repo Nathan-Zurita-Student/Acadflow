@@ -22,6 +22,25 @@ const router = createRouter({
       meta: { guest: true },
     },
     {
+      path: '/forgot-password',
+      name: 'forgot-password',
+      component: () => import('@/Pages/auth/ForgotPasswordPage.vue'),
+      meta: { guest: true },
+    },
+    {
+      path: '/reset-password',
+      name: 'reset-password',
+      component: () => import('@/Pages/auth/ResetPasswordPage.vue'),
+      meta: { guest: true },
+    },
+    {
+      // Tela de confirmação de e-mail: requer login, mas NÃO e-mail verificado.
+      path: '/verify-email',
+      name: 'verify-email',
+      component: () => import('@/Pages/auth/VerifyEmailPage.vue'),
+      meta: { auth: true },
+    },
+    {
       path: '/auth/callback',
       name: 'auth-callback',
       component: () => import('@/Pages/auth/AuthCallbackPage.vue'),
@@ -109,12 +128,31 @@ const router = createRouter({
 router.beforeEach(async (to) => {
   const auth = useAuthStore()
 
-  if (auth.isAuthenticated && !auth.user) {
+  // Hidrata a sessão (via cookie) na primeira navegação.
+  if (!auth.ready) {
     await auth.fetchMe()
   }
 
-  if (to.meta.auth && !auth.isAuthenticated) return '/login'
-  if (to.meta.guest && auth.isAuthenticated) return '/'
+  // Rotas protegidas exigem sessão.
+  if (to.meta.auth && !auth.isAuthenticated) {
+    const query = to.fullPath !== '/' ? { redirect: to.fullPath } : {}
+    return { path: '/login', query }
+  }
+
+  // Rotas de convidado: se já logado, manda para o destino adequado.
+  if (to.meta.guest && auth.isAuthenticated) {
+    return auth.isVerified ? '/' : '/verify-email'
+  }
+
+  // Gate de verificação: logado mas sem e-mail verificado só acessa /verify-email.
+  if (auth.isAuthenticated && !auth.isVerified && to.meta.auth && to.name !== 'verify-email') {
+    return '/verify-email'
+  }
+
+  // Já verificado não precisa da tela de verificação.
+  if (to.name === 'verify-email' && auth.isVerified) {
+    return '/'
+  }
 })
 
 export default router

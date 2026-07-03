@@ -11,6 +11,7 @@ export interface User {
   plan?: PlanKey
   plan_status?: string | null
   plan_expires_at?: string | null
+  email_verified?: boolean
   created_at: string
 }
 

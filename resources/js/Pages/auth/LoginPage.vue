@@ -24,8 +24,11 @@
             <input v-model="form.email" type="email" class="input" placeholder="seu@email.com" />
           </div>
           <div>
-            <label class="label">Senha</label>
-            <input v-model="form.password" type="password" class="input" placeholder="••••••••" />
+            <div class="flex items-center justify-between">
+              <label class="label">Senha</label>
+              <RouterLink to="/forgot-password" class="text-xs text-accent-400 hover:text-accent-300">Esqueci minha senha</RouterLink>
+            </div>
+            <input v-model="form.password" type="password" class="input" placeholder="••••••••" autocomplete="current-password" />
           </div>
 
           <p v-if="error" class="text-sm text-red-400 bg-red-400/10 border border-red-400/20 rounded-lg px-3 py-2">

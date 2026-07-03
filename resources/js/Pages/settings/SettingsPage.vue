@@ -46,15 +46,11 @@
       </div>
       <div>
         <label class="label">E-mail (login)</label>
-        <input v-model="profile.email" type="email" class="input" placeholder="seu@email.com" />
-      </div>
-      <div>
-        <label class="label">Nova senha <span class="text-dark-600 font-normal">(deixe em branco para manter)</span></label>
-        <input v-model="profile.password" type="password" class="input" placeholder="Mínimo 8 caracteres" autocomplete="new-password" />
-      </div>
-      <div v-if="profile.password">
-        <label class="label">Confirmar nova senha</label>
-        <input v-model="profile.password_confirmation" type="password" class="input" placeholder="Repita a senha" autocomplete="new-password" />
+        <input :value="auth.user?.email" type="email" class="input opacity-70 cursor-not-allowed" disabled />
+        <p class="text-xs text-dark-500 mt-1">
+          Para trocar o e-mail ou a senha, use a aba
+          <RouterLink to="/settings/security" class="text-accent-400 hover:text-accent-300">Segurança</RouterLink>.
+        </p>
       </div>
 
       <button @click="saveProfile" :disabled="savingProfile" class="btn-primary justify-center w-full">
@@ -62,6 +58,9 @@
         <span v-else>Salvar perfil</span>
       </button>
     </div>
+
+    <!-- SEGURANÇA -->
+    <SecuritySettings v-else-if="activeTab === 'security'" />
 
     <!-- PLANOS (reaproveita a página de planos) -->
     <PlansPage v-else-if="activeTab === 'plans'" :embedded="true" />
@@ -170,6 +169,7 @@ import { useConfirm } from '@/composables/useConfirm'
 import { projectsApi, columnsApi } from '@/api/projects'
 import Icon from '@/components/ui/Icon.vue'
 import PlansPage from '@/Pages/billing/PlansPage.vue'
+import SecuritySettings from '@/Pages/settings/SecuritySettings.vue'
 import type { Project, ProjectColumn } from '@/types'
 
 const route = useRoute()
@@ -177,9 +177,10 @@ const auth = useAuthStore()
 const toast = useToast()
 
 const tabs = [
-  { key: 'profile', label: 'Perfil' },
-  { key: 'plans',   label: 'Planos' },
-  { key: 'kanban',  label: 'Kanban' },
+  { key: 'profile',  label: 'Perfil' },
+  { key: 'security', label: 'Segurança' },
+  { key: 'plans',    label: 'Planos' },
+  { key: 'kanban',   label: 'Kanban' },
 ]
 const activeTab = computed(() => {
   const t = route.params.tab as string
@@ -195,9 +196,6 @@ const avatarPreview = ref<string | null>(auth.user?.avatar ?? null)
 const profile = ref({
   name: auth.user?.name ?? '',
   display_name: auth.user?.display_name ?? '',
-  email: auth.user?.email ?? '',
-  password: '',
-  password_confirmation: '',
 })
 const displayInitial = computed(() =>
   (profile.value.display_name || profile.value.name)?.[0]?.toUpperCase() ?? '?'
@@ -211,24 +209,13 @@ function onAvatarSelect(e: Event) {
 }
 
 async function saveProfile() {
-  if (profile.value.password && profile.value.password !== profile.value.password_confirmation) {
-    toast.error('As senhas não coincidem.')
-    return
-  }
   savingProfile.value = true
   try {
     const fd = new FormData()
     fd.append('name', profile.value.name)
     fd.append('display_name', profile.value.display_name)
-    fd.append('email', profile.value.email)
-    if (profile.value.password) {
-      fd.append('password', profile.value.password)
-      fd.append('password_confirmation', profile.value.password_confirmation)
-    }
     if (avatarFile.value) fd.append('avatar', avatarFile.value)
     await auth.updateProfile(fd)
-    profile.value.password = ''
-    profile.value.password_confirmation = ''
     toast.success('Perfil atualizado!')
   } catch (e: any) {
     toast.error(e.response?.data?.message ?? 'Erro ao salvar perfil.')

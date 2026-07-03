@@ -5,29 +5,20 @@ import type { User } from '@/types'
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<User | null>(null)
-  const token = ref<string | null>(localStorage.getItem('token'))
   const loading = ref(false)
+  // `ready` indica que já tentamos hidratar a sessão via /auth/me ao menos uma vez.
+  const ready = ref(false)
 
-  const isAuthenticated = computed(() => !!token.value)
-
-  function setToken(t: string) {
-    token.value = t
-    localStorage.setItem('token', t)
-  }
-
-  function clearAuth() {
-    user.value = null
-    token.value = null
-    localStorage.removeItem('token')
-  }
+  const isAuthenticated = computed(() => !!user.value)
+  const isVerified = computed(() => !!user.value?.email_verified)
 
   async function login(email: string, password: string) {
     loading.value = true
     try {
+      await authApi.csrf()
       const { data } = await authApi.login({ email, password })
-      setToken(data.token)
       user.value = data.user
-      return data
+      return data.user
     } finally {
       loading.value = false
     }
@@ -36,6 +27,7 @@ export const useAuthStore = defineStore('auth', () => {
   async function register(name: string, email: string, password: string, avatar?: File | null) {
     loading.value = true
     try {
+      await authApi.csrf()
       const payload = new FormData()
       payload.append('name', name)
       payload.append('email', email)
@@ -44,34 +36,43 @@ export const useAuthStore = defineStore('auth', () => {
       if (avatar) payload.append('avatar', avatar)
 
       const { data } = await authApi.register(payload)
-      setToken(data.token)
       user.value = data.user
-      return data
+      return data.user
     } finally {
       loading.value = false
     }
   }
 
   async function logout() {
-    try { await authApi.logout() } catch {}
-    clearAuth()
+    try { await authApi.logout() } catch { /* ignora */ }
+    user.value = null
   }
 
+  /** Hidrata o usuário a partir do cookie de sessão. Nunca lança. */
   async function fetchMe() {
-    if (!token.value) return
     try {
       const { data } = await authApi.me()
-      user.value = data
+      user.value = data.user
     } catch {
-      clearAuth()
+      user.value = null
+    } finally {
+      ready.value = true
     }
+  }
+
+  function setUser(u: User | null) {
+    user.value = u
   }
 
   async function updateProfile(formData: FormData) {
     const { data } = await authApi.updateProfile(formData)
-    user.value = data
-    return data
+    user.value = data.user
+    return data.user
   }
 
-  return { user, token, loading, isAuthenticated, setToken, login, register, logout, fetchMe, clearAuth, updateProfile }
+  return {
+    user, loading, ready,
+    isAuthenticated, isVerified,
+    login, register, logout, fetchMe, setUser, updateProfile,
+  }
 })

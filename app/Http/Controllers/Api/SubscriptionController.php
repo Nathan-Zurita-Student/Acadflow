@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Events\Auth\SubscriptionCanceled;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Services\AsaasService;
@@ -133,6 +134,8 @@ class SubscriptionController extends Controller
 
         // Mantém o plano atual até expirar; abandona qualquer troca pendente.
         $user->update(['plan_status' => 'canceled', 'pending_plan' => null]);
+
+        event(new SubscriptionCanceled($user));
 
         return response()->json(['message' => 'Assinatura cancelada.']);
     }

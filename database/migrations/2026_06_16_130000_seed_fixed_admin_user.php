@@ -5,41 +5,44 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 /**
- * Admin "supremo" fixo do sistema. Garante que a conta exista em qualquer
- * ambiente (roda automaticamente no deploy do Laravel Cloud). É idempotente:
- * usa updateOrInsert, então rodar de novo não duplica nem quebra.
+ * Admin inicial do sistema, criado a partir de credenciais do AMBIENTE
+ * (ADMIN_EMAIL / ADMIN_PASSWORD / ADMIN_NAME). Nenhuma credencial é versionada.
+ * Sem ADMIN_EMAIL/ADMIN_PASSWORD definidos, a migration é um no-op.
  *
+ * Idempotente (updateOrInsert): promove uma conta existente a admin/ultra.
  * O acesso ilimitado vem de role=admin → User::effectivePlan() = 'ultra'.
  */
 return new class extends Migration
 {
-    private const EMAIL = 'nathanzurita8@gmail.com';
-
     public function up(): void
     {
+        $email    = env('ADMIN_EMAIL');
+        $password = env('ADMIN_PASSWORD');
+
+        if (! $email || ! $password) {
+            return;
+        }
+
         $now = now();
 
-        // Não definimos plan_expires_at: é coluna TIMESTAMP (MySQL vai só até 2038)
-        // e, para admin, effectivePlan() já retorna 'ultra' ignorando expiração.
         $attributes = [
-            'name'        => 'Nathan Zurita',
-            'role'        => 'admin',
-            'password'    => Hash::make('nb253545'),
-            'plan'        => 'ultra',
-            'plan_status' => 'active',
-            'plan_cycle'  => 'annual',
-            'updated_at'  => $now,
+            'name'              => env('ADMIN_NAME', 'Administrador'),
+            'role'              => 'admin',
+            'password'          => Hash::make($password),
+            'plan'              => 'ultra',
+            'plan_status'       => 'active',
+            'plan_cycle'        => 'annual',
+            'email_verified_at' => $now,
+            'updated_at'        => $now,
         ];
 
-        $existing = DB::table('users')->where('email', self::EMAIL)->first();
+        $existing = DB::table('users')->where('email', $email)->first();
 
         if ($existing) {
-            // Já existe (ex.: criado manualmente): só promove a admin/ultra,
-            // preservando created_at e qualquer outro dado.
-            DB::table('users')->where('email', self::EMAIL)->update($attributes);
+            DB::table('users')->where('email', $email)->update($attributes);
         } else {
             DB::table('users')->insert($attributes + [
-                'email'      => self::EMAIL,
+                'email'      => $email,
                 'created_at' => $now,
             ]);
         }
@@ -47,6 +50,8 @@ return new class extends Migration
 
     public function down(): void
     {
-        DB::table('users')->where('email', self::EMAIL)->delete();
+        if ($email = env('ADMIN_EMAIL')) {
+            DB::table('users')->where('email', $email)->delete();
+        }
     }
 };

@@ -18,12 +18,17 @@ return [
     |
     */
 
-    'stateful' => explode(',', env('SANCTUM_STATEFUL_DOMAINS', sprintf(
-        '%s%s',
-        'localhost,localhost:3000,127.0.0.1,127.0.0.1:8000,::1',
-        Sanctum::currentApplicationUrlWithPort(),
-        // Sanctum::currentRequestHost(),
-    ))),
+    // O host do próprio APP_URL é SEMPRE incluído (via currentApplicationUrlWithPort),
+    // garantindo que a SPA (mesmo domínio) seja tratada como stateful em produção,
+    // além dos hosts de desenvolvimento e do que vier em SANCTUM_STATEFUL_DOMAINS.
+    'stateful' => array_values(array_filter(array_unique(array_merge(
+        array_map('trim', array_filter(explode(',', (string) env('SANCTUM_STATEFUL_DOMAINS', '')))),
+        array_filter([
+            'localhost', 'localhost:8000', 'localhost:5173',
+            '127.0.0.1', '127.0.0.1:8000', '::1',
+            Sanctum::currentApplicationUrlWithPort(),
+        ]),
+    )))),
 
     /*
     |--------------------------------------------------------------------------
@@ -50,7 +55,7 @@ return [
     |
     */
 
-    'expiration' => null,
+    'expiration' => env('SANCTUM_TOKEN_EXPIRATION', 20160),
 
     /*
     |--------------------------------------------------------------------------

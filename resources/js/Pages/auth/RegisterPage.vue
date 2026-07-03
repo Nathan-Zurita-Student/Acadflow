@@ -49,7 +49,8 @@
           </div>
           <div>
             <label class="label">Senha</label>
-            <input v-model="form.password" type="password" class="input" placeholder="Mínimo 8 caracteres" />
+            <input v-model="form.password" type="password" class="input" placeholder="Mínimo 8 caracteres" autocomplete="new-password" />
+            <p class="text-xs text-dark-500 mt-1">Use maiúsculas, minúsculas, números e símbolos.</p>
           </div>
 
           <p v-if="error" class="text-sm text-red-400 bg-red-400/10 border border-red-400/20 rounded-lg px-3 py-2">
@@ -141,8 +142,8 @@ async function handleRegister() {
   loading.value = true
   try {
     await auth.register(form.value.name, form.value.email, form.value.password, avatarFile.value)
-    const redirect = route.query.redirect as string | undefined
-    router.push(redirect || '/')
+    // Nova conta entra não verificada → vai para a confirmação por código.
+    router.push('/verify-email')
   } catch (e: any) {
     const errs = e.response?.data?.errors as Record<string, string[]> | undefined
     error.value = errs ? (Object.values(errs)[0]?.[0] ?? 'Erro ao cadastrar.') : (e.response?.data?.message ?? 'Erro ao cadastrar.')

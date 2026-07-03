@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\Api\AiPlanController;
 use App\Http\Controllers\Api\AttachmentController;
-use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\InviteController;
 use App\Http\Controllers\Api\MeetingController;
@@ -27,27 +26,14 @@ Route::get('invite/{token}', [InviteController::class, 'info'])->name('invite.in
 // Webhook do ASAAS — público (autenticado pelo token no header), chamado pelo gateway
 Route::post('webhooks/asaas', [SubscriptionController::class, 'webhook'])->name('webhooks.asaas');
 
-Route::prefix('auth')->name('auth.')->group(function () {
-    Route::post('register', [AuthController::class, 'register'])->name('register');
-    Route::post('login', [AuthController::class, 'login'])->name('login');
+// As rotas de autenticação por sessão vivem em routes/web.php (grupo `web`).
 
-    // Login com Google (OAuth) — navegações de página inteira, sem auth
-    Route::get('google/redirect', [AuthController::class, 'redirectToGoogle'])->name('google.redirect');
-    Route::get('google/callback', [AuthController::class, 'handleGoogleCallback'])->name('google.callback');
-
-    Route::middleware('auth:sanctum')->group(function () {
-        Route::post('logout', [AuthController::class, 'logout'])->name('logout');
-        Route::get('me', [AuthController::class, 'me'])->name('me');
-        Route::post('profile', [AuthController::class, 'updateProfile'])->name('profile');
-    });
-});
-
-// Broadcasting auth — lets Echo authenticate private channels using Bearer tokens
+// Broadcasting auth — autentica canais privados do Echo via sessão/cookie.
 Route::middleware('auth:sanctum')->post('broadcasting/auth', function (Request $request) {
     return Broadcast::auth($request);
 })->name('broadcasting.auth');
 
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::post('notifications/{notification}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
     Route::post('notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');

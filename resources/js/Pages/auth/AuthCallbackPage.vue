@@ -14,15 +14,15 @@ const auth = useAuthStore()
 const router = useRouter()
 const route = useRoute()
 
+// O login com Google agora estabelece a sessão no servidor e redireciona para
+// a raiz — sem token na URL. Esta rota é mantida por compatibilidade: hidrata a
+// sessão e encaminha o usuário.
 onMounted(async () => {
-  const token = route.query.token as string | undefined
-  if (!token || route.query.error) {
+  if (route.query.error) {
     router.replace('/login?error=google')
     return
   }
-  auth.setToken(token)
   await auth.fetchMe()
-  if (auth.user) router.replace('/')
-  else router.replace('/login?error=google')
+  router.replace(auth.isAuthenticated ? '/' : '/login?error=google')
 })
 </script>

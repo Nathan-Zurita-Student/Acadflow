@@ -19,12 +19,17 @@ try {
     enabledTransports: ['ws', 'wss'],
     authorizer: (channel: { name: string }) => ({
       authorize: (socketId: string, callback: (error: boolean, data: unknown) => void) => {
+        // Autenticação por SESSÃO/cookie: envia o cookie de sessão + o header CSRF.
+        const xsrf = decodeURIComponent(
+          document.cookie.match(/(?:^|;\s*)XSRF-TOKEN=([^;]+)/)?.[1] ?? ''
+        )
         fetch('/api/broadcasting/auth', {
           method: 'POST',
+          credentials: 'include',
           headers: {
             'Content-Type': 'application/json',
             Accept: 'application/json',
-            Authorization: `Bearer ${localStorage.getItem('token') ?? ''}`,
+            'X-XSRF-TOKEN': xsrf,
           },
           body: JSON.stringify({ socket_id: socketId, channel_name: channel.name }),
         })

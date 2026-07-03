@@ -2,16 +2,19 @@
 
 namespace App\Models;
 
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
 
     protected $fillable = [
         'name',
@@ -31,6 +34,8 @@ class User extends Authenticatable
         'cpf_cnpj',
         'ai_usage_count',
         'ai_usage_period',
+        'last_login_at',
+        'last_login_ip',
     ];
 
     protected $hidden = [
@@ -43,6 +48,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'plan_expires_at'   => 'datetime',
+            'last_login_at'     => 'datetime',
             'password'          => 'hashed',
         ];
     }
@@ -141,5 +147,34 @@ class User extends Authenticatable
     public function notifications(): HasMany
     {
         return $this->hasMany(Notification::class);
+    }
+
+    public function emailVerificationCode(): HasOne
+    {
+        return $this->hasOne(EmailVerificationCode::class);
+    }
+
+    public function passwordResetCode(): HasOne
+    {
+        return $this->hasOne(PasswordResetCode::class);
+    }
+
+    public function emailChangeCode(): HasOne
+    {
+        return $this->hasOne(EmailChangeCode::class);
+    }
+
+    public function authLogs(): HasMany
+    {
+        return $this->hasMany(AuthLog::class);
+    }
+
+    /** Registra o último login (data + IP) sem disparar eventos do model. */
+    public function recordLogin(?string $ip): void
+    {
+        $this->forceFill([
+            'last_login_at' => now(),
+            'last_login_ip' => $ip,
+        ])->saveQuietly();
     }
 }
