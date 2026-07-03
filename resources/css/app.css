@@ -111,39 +111,6 @@
     color: rgb(var(--d-100));
   }
 
-  /* iOS Safari: o campo de data nativo vem com "aparência de botão" (fundo claro,
-     cantos e alinhamento próprios) que ignora o .input e destoa dos demais campos,
-     e o indicador de calendário renderiza como um retângulo vazio. Só no iOS
-     (detectado por @supports -webkit-touch-callout, falso no Chromium/Firefox
-     desktop, que já renderizam certo) zeramos a appearance e desenhamos nosso
-     próprio ícone de calendário à direita. O seletor nativo continua abrindo ao
-     tocar no campo. */
-  @supports (-webkit-touch-callout: none) {
-    input[type="date"],
-    input[type="datetime-local"],
-    input[type="time"],
-    input[type="month"],
-    input[type="week"] {
-      -webkit-appearance: none;
-      appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' viewBox='0 0 24 24' stroke='%2394a3b8' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 0.75rem center;
-      background-size: 16px 16px;
-      padding-right: 2.25rem;
-    }
-    /* Esconde o indicador nativo (redundante e "quebrado" no iOS); o toque no
-       campo já abre o seletor. */
-    input[type="date"]::-webkit-calendar-picker-indicator,
-    input[type="datetime-local"]::-webkit-calendar-picker-indicator,
-    input[type="time"]::-webkit-calendar-picker-indicator,
-    input[type="month"]::-webkit-calendar-picker-indicator,
-    input[type="week"]::-webkit-calendar-picker-indicator {
-      -webkit-appearance: none;
-      opacity: 0;
-    }
-  }
-
   /* Select options: force dark background in browsers that allow it */
   select option {
     background-color: rgb(var(--d-800));
