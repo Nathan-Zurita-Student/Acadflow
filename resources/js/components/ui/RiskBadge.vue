@@ -1,9 +1,9 @@
-<template>
+<!-- <template>
   <span :class="['badge text-xs font-semibold', classes]">
     <span class="w-1.5 h-1.5 rounded-full" :class="dotClass" />
     Risco {{ label }}
   </span>
-</template>
+</template> -->
 
 <script setup lang="ts">
 import { computed } from 'vue'

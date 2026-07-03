@@ -173,6 +173,39 @@
 }
 
 /* =====================================================================
+   KANBAN DRAG — arraste suave, fácil e agradável
+   Classes aplicadas pelo SortableJS (vuedraggable). Ficam fora de @layer
+   para ter precedência previsível; o clone flutuante (.kanban-drag) é
+   anexado ao <body> (fallbackOnBody), então precisa ser CSS global.
+   ===================================================================== */
+
+/* Placeholder no destino: uma "moldura" tracejada em accent onde a task cairá */
+.kanban-ghost {
+  background: rgb(var(--accent-600) / 0.08) !important;
+  border: 2px dashed rgb(var(--accent-500) / 0.55) !important;
+  border-radius: 0.5rem;
+}
+.kanban-ghost > * { visibility: hidden; }
+
+/* Item escolhido (no momento em que é "pego") */
+.kanban-chosen { cursor: grabbing; }
+
+/* Clone que flutua seguindo o dedo/mouse — levantado, nítido e com brilho sutil.
+   Obs.: NÃO usar transform aqui (o SortableJS usa transform p/ posicionar). */
+.kanban-drag {
+  cursor: grabbing !important;
+  opacity: 1 !important;
+  /* Sem transição: o clone segue o ponteiro 1:1 (senão a transition-all do
+     card faz ele "perseguir" o dedo com atraso, parecendo grudado). */
+  transition: none !important;
+  will-change: transform;
+  border-color: rgb(var(--accent-500) / 0.65) !important;
+  box-shadow:
+    0 20px 40px -12px rgb(0 0 0 / 0.7),
+    0 0 0 1px rgb(var(--accent-500) / 0.35);
+}
+
+/* =====================================================================
    MOBILE
    ===================================================================== */
 

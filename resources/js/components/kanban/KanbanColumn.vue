@@ -25,21 +25,26 @@
       :list="tasks"
       group="kanban"
       item-key="id"
-      :animation="160"
+      :animation="200"
+      easing="cubic-bezier(0.22, 1, 0.36, 1)"
       ghost-class="kanban-ghost"
+      chosen-class="kanban-chosen"
+      drag-class="kanban-drag"
       filter=".kanban-no-drag, select, button, textarea, input, a, option"
       :prevent-on-filter="false"
-      :scroll="true"
-      :scrollSensitivity="120"
-      :scrollSpeed="18"
-      :bubbleScroll="true"
+      :scroll="false"
       :forceFallback="true"
-      :fallbackTolerance="4"
-      :delay="120"
+      :fallbackOnBody="true"
+      :fallbackTolerance="3"
+      :swapThreshold="0.6"
+      :emptyInsertThreshold="34"
+      :delay="80"
       :delayOnTouchOnly="true"
-      :touchStartThreshold="6"
+      :touchStartThreshold="5"
       class="flex-1 bg-dark-900/50 border border-dark-700/60 rounded-xl p-2 space-y-2 transition-colors min-h-[80px]"
       @change="$emit('reorder')"
+      @start="$emit('drag-start')"
+      @end="$emit('drag-end')"
     >
       <template #item="{ element: task, index }">
         <KanbanCard
@@ -85,6 +90,8 @@ defineEmits<{
   (e: 'approval-change', taskId: number, status: string, note?: string): void
   (e: 'task-delete', task: Task): void
   (e: 'reorder'): void
+  (e: 'drag-start'): void
+  (e: 'drag-end'): void
 }>()
 
 const pendingCount = computed(() => props.tasks.filter(t => t.approval_status === 'pending').length)
@@ -104,9 +111,3 @@ const dotColor = computed(() =>
     ?? 'bg-slate-500'
 )
 </script>
-
-<style scoped>
-.kanban-ghost {
-  opacity: 0.45;
-}
-</style>

@@ -1,6 +1,6 @@
 ﻿<template>
   <div
-    class="bg-dark-800 border rounded-lg p-3 cursor-grab active:cursor-grabbing transition-all duration-150 group select-none"
+    class="bg-dark-800 border rounded-lg p-3 cursor-grab active:cursor-grabbing transition-all duration-150 group select-none hover:shadow-lg hover:shadow-black/20"
     :class="cardBorderClass"
     @click.self="$emit('click')"
   >

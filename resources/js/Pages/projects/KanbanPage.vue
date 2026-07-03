@@ -79,7 +79,7 @@
     <p v-if="!selectedTask && !showCreate" class="text-[10px] text-dark-600">Pressione <kbd class="px-1 py-0.5 rounded bg-dark-700 text-dark-400 font-mono">N</kbd> para nova tarefa</p>
 
     <!-- Board -->
-    <div class="kanban-board min-h-[60vh]" style="-webkit-overflow-scrolling:touch">
+    <div ref="boardRef" class="kanban-board min-h-[60vh]" style="-webkit-overflow-scrolling:touch">
       <KanbanColumn
         v-for="col in columns" :key="col.status"
         :column="col"
@@ -93,6 +93,8 @@
         @status-change="handleStatusChange"
         @approval-change="handleApprovalChange"
         @reorder="scheduleBoardPersist"
+        @drag-start="onDragStart"
+        @drag-end="onDragEnd"
       />
     </div>
 
@@ -291,6 +293,95 @@ function onKeyDown(e: KeyboardEvent) {
   }
 }
 
+// ── Auto-scroll do quadro ao arrastar perto das bordas da tela ──
+// Implementação própria (o autoscroll nativo do SortableJS é pouco confiável).
+// Rastreamos o ponteiro em listeners na FASE DE CAPTURA em window (disparam
+// antes de qualquer handler do SortableJS e não podem ser bloqueados), e um
+// laço de rAF rola o quadro na horizontal e o container de scroll vertical.
+const boardRef = ref<HTMLElement | null>(null)
+let dragRAF: number | null = null
+let isDragging = false
+let ptrX = -1        // -1 = posição ainda desconhecida (evita rolagem espúria)
+let ptrY = -1
+let vScroller: HTMLElement | null = null
+
+const H_EDGE = 110   // distância (px) da borda horizontal para começar a rolar
+const V_EDGE = 90    // idem, vertical
+const SCROLL_MAX = 28 // velocidade máxima (px/frame)
+const CAP = { capture: true, passive: true } as const
+
+function readPointer(e: PointerEvent | TouchEvent | MouseEvent | DragEvent) {
+  const t = (e as TouchEvent).touches?.[0] ?? (e as TouchEvent).changedTouches?.[0]
+  const x = t ? t.clientX : (e as PointerEvent).clientX
+  const y = t ? t.clientY : (e as PointerEvent).clientY
+  if (typeof x === 'number' && !Number.isNaN(x)) ptrX = x
+  if (typeof y === 'number' && !Number.isNaN(y)) ptrY = y
+}
+
+function edgeSpeed(dist: number, edge: number) {
+  return Math.ceil(Math.min(1, Math.max(0, edge - dist) / edge) * SCROLL_MAX)
+}
+
+// Reemite um movimento sintético para o SortableJS reavaliar a coluna de
+// destino enquanto o quadro rola com o ponteiro parado na borda.
+function syntheticMove() {
+  if (ptrX < 0) return
+  try {
+    const opts = { clientX: ptrX, clientY: ptrY, bubbles: true, cancelable: true, view: window }
+    if (typeof PointerEvent === 'function') {
+      document.dispatchEvent(new PointerEvent('pointermove', { ...opts, pointerType: 'touch' }))
+    }
+    document.dispatchEvent(new MouseEvent('mousemove', opts))
+  } catch { /* ignora */ }
+}
+
+function autoScrollFrame() {
+  if (!isDragging) { dragRAF = null; return }
+  if (ptrX >= 0) {
+    const board = boardRef.value
+    const vw = window.innerWidth
+    let moved = false
+    if (board) {
+      let dx = 0
+      if (ptrX < H_EDGE)           dx = -edgeSpeed(ptrX, H_EDGE)
+      else if (ptrX > vw - H_EDGE) dx = edgeSpeed(vw - ptrX, H_EDGE)
+      if (dx) { board.scrollLeft += dx; moved = true }
+    }
+    if (vScroller) {
+      const r = vScroller.getBoundingClientRect()
+      let dy = 0
+      if (ptrY < r.top + V_EDGE)         dy = -edgeSpeed(ptrY - r.top, V_EDGE)
+      else if (ptrY > r.bottom - V_EDGE) dy = edgeSpeed(r.bottom - ptrY, V_EDGE)
+      if (dy) { vScroller.scrollTop += dy; moved = true }
+    }
+    if (moved) syntheticMove()
+  }
+  dragRAF = requestAnimationFrame(autoScrollFrame)
+}
+
+function onDragStart() {
+  isDragging = true
+  ptrX = -1; ptrY = -1
+  vScroller = boardRef.value?.closest('main') ?? null
+  // desliga o scroll-snap durante o arraste para o autoscroll ficar suave
+  if (boardRef.value) boardRef.value.style.scrollSnapType = 'none'
+  window.addEventListener('pointermove', readPointer, CAP)
+  window.addEventListener('touchmove', readPointer, CAP)
+  window.addEventListener('mousemove', readPointer, CAP)
+  window.addEventListener('dragover', readPointer, CAP)
+  if (dragRAF == null) dragRAF = requestAnimationFrame(autoScrollFrame)
+}
+
+function onDragEnd() {
+  isDragging = false
+  if (dragRAF != null) { cancelAnimationFrame(dragRAF); dragRAF = null }
+  if (boardRef.value) boardRef.value.style.scrollSnapType = ''
+  window.removeEventListener('pointermove', readPointer, CAP)
+  window.removeEventListener('touchmove', readPointer, CAP)
+  window.removeEventListener('mousemove', readPointer, CAP)
+  window.removeEventListener('dragover', readPointer, CAP)
+}
+
 onMounted(async () => {
   store.fetchTasks(projectId)
   loadColumns()
@@ -311,6 +402,7 @@ onUnmounted(() => {
   stopPolling()
   document.removeEventListener('visibilitychange', onVisibilityChange)
   document.removeEventListener('keydown', onKeyDown)
+  onDragEnd() // garante remoção dos listeners de autoscroll e do rAF
   // useRealtime sai dos canais automaticamente no onUnmounted
 })
 
