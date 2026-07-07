@@ -18,19 +18,18 @@
 
       <form novalidate @submit.prevent="handleRegister">
         <!-- Avatar (opcional) -->
-        <div class="mb-3 flex flex-col items-center gap-1.5">
+        <div class="mb-3 flex flex-col items-center">
           <button type="button" class="avatar-picker group" @click="fileInput?.click()">
             <span class="avatar-glow" aria-hidden="true" />
-            <img v-if="avatarPreview" :src="avatarPreview" class="h-full w-full rounded-full object-cover" alt="Foto de perfil" />
-            <span v-else class="flex h-full w-full items-center justify-center rounded-full text-2xl font-semibold text-white" :style="{ background: previewColor }">
-              {{ form.name?.[0]?.toUpperCase() || '?' }}
-            </span>
-            <span class="avatar-overlay">
-              <svg class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            <template v-if="avatarPreview">
+              <img :src="avatarPreview" class="avatar-media" alt="Foto de perfil" />
+              <span class="avatar-overlay"><span class="avatar-cta">Trocar foto</span></span>
+            </template>
+            <span v-else class="avatar-empty">
+              <span class="avatar-cta">Selecionar foto de perfil</span>
             </span>
           </button>
           <input ref="fileInput" type="file" accept="image/*" class="hidden" @change="onAvatarChange" />
-          <p class="text-xs text-dark-500">Foto de perfil <span class="text-dark-600">(opcional)</span></p>
         </div>
 
         <AuthField
@@ -269,8 +268,8 @@ async function handleRegister() {
 /* Avatar picker */
 .avatar-picker {
   position: relative;
-  width: 4rem;
-  height: 4rem;
+  width: 5rem;
+  height: 5rem;
   border-radius: 9999px;
   cursor: pointer;
 }
@@ -283,15 +282,50 @@ async function handleRegister() {
   filter: blur(6px);
   transition: opacity 0.3s;
 }
-.avatar-picker:hover .avatar-glow { opacity: 0.7; }
-.avatar-picker > img,
-.avatar-picker > span:not(.avatar-glow) {
+.avatar-picker:hover .avatar-glow { opacity: 0.55; }
+
+/* Foto escolhida */
+.avatar-media {
   position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 9999px;
+  object-fit: cover;
   border: 2px solid rgb(var(--d-700));
   transition: border-color 0.25s;
 }
-.avatar-picker:hover > img,
-.avatar-picker:hover > span:not(.avatar-glow) { border-color: rgb(var(--accent-500)); }
+.avatar-picker:hover .avatar-media { border-color: rgb(var(--accent-500)); }
+
+/* Estado vazio: campo "selecionar" com borda tracejada */
+.avatar-empty {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 9999px;
+  border: 1.5px dashed rgb(var(--d-600));
+  background: rgb(var(--d-800) / 0.5);
+  transition: border-color 0.25s, background 0.25s;
+}
+.avatar-picker:hover .avatar-empty {
+  border-color: rgb(var(--accent-500));
+  background: rgb(var(--accent-500) / 0.08);
+}
+
+/* Texto dentro do círculo */
+.avatar-cta {
+  padding: 0 0.35rem;
+  text-align: center;
+  font-size: 9px;
+  font-weight: 600;
+  line-height: 1.15;
+  color: rgb(var(--d-300));
+}
+.avatar-picker:hover .avatar-empty .avatar-cta { color: rgb(var(--accent-300)); }
+
+/* Overlay para trocar quando já há foto */
 .avatar-overlay {
   position: absolute;
   inset: 0;
@@ -299,10 +333,11 @@ async function handleRegister() {
   align-items: center;
   justify-content: center;
   border-radius: 9999px;
-  background: rgb(0 0 0 / 0.5);
+  background: rgb(0 0 0 / 0.6);
   opacity: 0;
   transition: opacity 0.2s;
 }
+.avatar-overlay .avatar-cta { color: #fff; }
 .avatar-picker:hover .avatar-overlay { opacity: 1; }
 
 /* Checkbox de termos */
