@@ -104,6 +104,27 @@
       </ul>
     </div>
 
+    <!-- MEUS DADOS (LGPD) -->
+    <div class="card space-y-4">
+      <div>
+        <h2 class="text-base font-semibold text-white">Meus dados e privacidade</h2>
+        <p class="text-xs text-dark-500 mt-0.5">Baixe uma cópia dos seus dados pessoais em formato legível por máquina (LGPD).</p>
+      </div>
+      <button :disabled="exporting" class="btn-secondary justify-center w-full" @click="exportData">
+        <span v-if="exporting" class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+        <template v-else>
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+          Exportar meus dados
+        </template>
+      </button>
+      <p class="text-xs text-dark-500">
+        Consulte os
+        <RouterLink to="/termos" target="_blank" class="text-accent-400 hover:text-accent-300">Termos de Uso</RouterLink>
+        e a
+        <RouterLink to="/privacidade" target="_blank" class="text-accent-400 hover:text-accent-300">Política de Privacidade</RouterLink>.
+      </p>
+    </div>
+
     <!-- EXCLUIR CONTA -->
     <div class="card space-y-4 border-red-500/30">
       <div>
@@ -246,6 +267,29 @@ async function revokeOthers() {
     toast.success('As demais sessões foram encerradas.')
   } catch {
     toast.error('Erro ao encerrar sessões.')
+  }
+}
+
+// ── Exportar dados (LGPD) ──────────────────────
+const exporting = ref(false)
+
+async function exportData() {
+  exporting.value = true
+  try {
+    const { data } = await authApi.exportData()
+    const url = URL.createObjectURL(data as Blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `acadflow-meus-dados-${new Date().toISOString().slice(0, 10)}.json`
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    URL.revokeObjectURL(url)
+    toast.success('Seus dados foram exportados.')
+  } catch {
+    toast.error('Não foi possível exportar os dados agora.')
+  } finally {
+    exporting.value = false
   }
 }
 

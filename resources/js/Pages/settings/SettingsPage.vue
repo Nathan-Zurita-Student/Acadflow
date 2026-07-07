@@ -1,7 +1,7 @@
 <template>
-  <div class="space-y-6 animate-fade-in max-w-4xl mx-auto">
+  <div class="space-y-6 max-w-4xl mx-auto stagger-in">
     <div>
-      <h1 class="text-xl font-bold text-white">Configurações</h1>
+      <h1 class="text-2xl font-bold tracking-tight text-white">Configurações</h1>
       <p class="text-dark-400 text-sm mt-0.5">Gerencie seu perfil, plano e o Kanban dos seus projetos.</p>
     </div>
 

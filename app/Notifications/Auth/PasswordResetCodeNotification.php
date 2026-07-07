@@ -13,4 +13,9 @@ class PasswordResetCodeNotification extends CodeNotification
     {
         return 'Recebemos um pedido para redefinir sua senha. Use o código abaixo para continuar.';
     }
+
+    protected function heading(): string
+    {
+        return 'Redefinição de senha';
+    }
 }

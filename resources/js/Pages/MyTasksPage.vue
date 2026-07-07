@@ -1,10 +1,10 @@
 ﻿<template>
-  <div class="space-y-5 animate-fade-in">
+  <div class="space-y-5 stagger-in">
 
     <!-- Header -->
     <div class="flex items-center justify-between">
       <div>
-        <h1 class="text-xl font-bold text-white">Minhas Tarefas</h1>
+        <h1 class="text-2xl font-bold tracking-tight text-white">Minhas Tarefas</h1>
         <p class="text-dark-400 text-sm mt-0.5">Todas as tarefas que você tem em todos os projetos</p>
       </div>
     </div>
@@ -84,15 +84,15 @@
     </div>
 
     <!-- Loading -->
-    <div v-if="loading" class="space-y-2">
-      <div v-for="i in 6" :key="i" class="card animate-pulse h-16" />
+    <div v-if="loading" class="space-y-2 stagger-in">
+      <Skeleton v-for="i in 6" :key="i" h="4rem" rounded="rounded-xl" />
     </div>
 
     <!-- Lista de tarefas -->
-    <div v-else-if="filteredTasks.length" class="space-y-2">
+    <div v-else-if="filteredTasks.length" class="space-y-2 stagger-in">
       <div
         v-for="task in filteredTasks" :key="task.id"
-        class="card flex items-center gap-4 hover:border-dark-600 transition-colors cursor-pointer group py-3 px-4"
+        class="card card-glow flex items-center gap-4 cursor-pointer group py-3 px-4"
         @click="openTask(task)"
       >
         <!-- Urgência dot -->
@@ -157,19 +157,25 @@
       </div>
     </div>
 
-    <!-- Empty -->
-    <div v-else class="text-center py-20">
-      <div class="w-16 h-16 rounded-2xl bg-dark-800 flex items-center justify-center mx-auto mb-4">
-        <svg class="w-8 h-8 text-dark-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-        </svg>
-      </div>
-      <p class="text-dark-300 font-medium">Nenhuma tarefa encontrada</p>
-      <p class="text-dark-500 text-sm mt-1">
-        {{ allTasks.length ? 'Tente ajustar os filtros' : 'Você não tem tarefas alocadas no momento' }}
-      </p>
-    </div>
+    <!-- Empty / Tudo em dia -->
+    <template v-else>
+      <EmptyState
+        v-if="showAllDone"
+        :lottie="trophyData"
+        :lottie-size="180"
+        title="Tudo em dia!"
+        description="Você concluiu todas as suas tarefas. Bom trabalho! 🎉"
+      />
+      <EmptyState
+        v-else
+        :title="allTasks.length ? 'Nenhuma tarefa encontrada' : 'Nenhuma tarefa alocada'"
+        :description="allTasks.length ? 'Tente ajustar os filtros ou a busca.' : 'Você não tem tarefas atribuídas no momento.'"
+      >
+        <template #icon>
+          <svg class="relative h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        </template>
+      </EmptyState>
+    </template>
 
     <!-- Task Modal -->
     <TaskModal
@@ -190,6 +196,8 @@ import { useRealtimeStore } from '@/stores/realtime'
 import { useToast } from '@/composables/useToast'
 import { useConfirm } from '@/composables/useConfirm'
 import TaskModal from '@/components/tasks/TaskModal.vue'
+import Skeleton from '@/components/ui/Skeleton.vue'
+import EmptyState from '@/components/ui/EmptyState.vue'
 
 const router = useRouter()
 const realtimeStore = useRealtimeStore()
@@ -281,6 +289,22 @@ const filteredTasks = computed(() => {
 
   return list
 })
+
+// "Tudo em dia": tem tarefas, nenhuma pendente e sem filtros ativos → celebra com Lottie.
+const showAllDone = computed(() =>
+  allTasks.value.length > 0 &&
+  nonDoneTasks.value.length === 0 &&
+  filterStatus.value !== 'done' &&
+  !filterProject.value && !filterUrgency.value && !searchQuery.value,
+)
+
+// Lazy-load do Lottie do troféu (LottieFiles) só quando o estado aparece.
+const trophyData = ref<object | undefined>(undefined)
+watch(showAllDone, (v) => {
+  if (v && !trophyData.value) {
+    import('@/assets/lottie/success-trophy.json').then((m) => { trophyData.value = (m as any).default })
+  }
+}, { immediate: true })
 
 function urgencyDot(task: any) {
   if (task.is_overdue) return 'bg-red-500'

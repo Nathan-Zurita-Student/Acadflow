@@ -13,4 +13,9 @@ class EmailVerificationCodeNotification extends CodeNotification
     {
         return 'Use o código abaixo para confirmar seu endereço de e-mail e ativar sua conta.';
     }
+
+    protected function heading(): string
+    {
+        return 'Confirme seu e-mail';
+    }
 }

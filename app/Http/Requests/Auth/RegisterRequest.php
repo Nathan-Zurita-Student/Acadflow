@@ -32,6 +32,15 @@ class RegisterRequest extends FormRequest
             'email'    => ['required', 'email', 'max:255', Rule::unique('users', 'email')],
             'password' => PasswordPolicy::rules(),
             'avatar'   => ['nullable', 'image', 'max:20480'],
+            // LGPD: aceite explícito dos Termos de Uso e da Política de Privacidade.
+            'terms'    => ['accepted'],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'terms.accepted' => 'Você precisa aceitar os Termos de Uso e a Política de Privacidade.',
         ];
     }
 }

@@ -1,7 +1,10 @@
 ﻿<template>
-  <div class="card hover:border-dark-600 hover:bg-dark-750 cursor-pointer transition-all duration-200 group"
+  <div class="card card-glow group relative cursor-pointer overflow-hidden"
     @click="$emit('click')">
-    <div class="flex items-start justify-between mb-3">
+    <!-- Brilho que intensifica no hover -->
+    <span class="pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full bg-accent-500/0 blur-2xl transition-colors duration-500 group-hover:bg-accent-500/12" aria-hidden="true" />
+
+    <div class="relative flex items-start justify-between mb-3">
       <div class="flex-1 min-w-0">
         <h3 class="font-semibold text-dark-100 group-hover:text-white transition-colors truncate">
           {{ project.name }}

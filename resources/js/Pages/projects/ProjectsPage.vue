@@ -1,8 +1,8 @@
 ﻿<template>
-  <div class="space-y-5 animate-fade-in">
+  <div class="space-y-5">
     <div class="flex items-center justify-between">
       <div>
-        <h1 class="text-xl font-bold text-white">Projetos</h1>
+        <h1 class="text-2xl font-bold tracking-tight text-white">Projetos</h1>
         <p class="text-dark-400 text-sm">{{ filtered.length }} de {{ projects.length }} projeto{{ projects.length !== 1 ? 's' : '' }}</p>
       </div>
       <button v-if="projects.length" @click="showCreate = true" class="btn-primary">
@@ -56,44 +56,51 @@
     </div>
 
     <!-- Skeleton -->
-    <div v-if="loading" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-      <div v-for="i in 6" :key="i" class="card animate-pulse h-48" />
+    <div v-if="loading" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 stagger-in">
+      <Skeleton v-for="i in 6" :key="i" h="12rem" rounded="rounded-xl" />
     </div>
 
     <!-- Grid -->
-    <div v-else-if="filtered.length" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+    <div v-else-if="filtered.length" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 stagger-in">
       <ProjectCard v-for="p in filtered" :key="p.id" :project="p"
         @click="goToProject(p.id)"
         @delete="deleteProject(p.id)" />
     </div>
 
     <!-- Empty with search -->
-    <div v-else-if="searchQuery || filterStatus" class="text-center py-16">
-      <p class="text-dark-300 font-medium">Nenhum projeto encontrado</p>
-      <p class="text-dark-500 text-sm mt-1">Tente ajustar os filtros ou a busca</p>
-      <button @click="searchQuery = ''; filterStatus = ''"
-        class="btn-secondary mt-4">Limpar filtros</button>
-    </div>
+    <EmptyState
+      v-else-if="searchQuery || filterStatus"
+      title="Nenhum projeto encontrado"
+      description="Tente ajustar os filtros ou a busca."
+    >
+      <template #icon>
+        <svg class="relative h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      </template>
+      <template #action>
+        <button class="btn-secondary" @click="searchQuery = ''; filterStatus = ''">Limpar filtros</button>
+      </template>
+    </EmptyState>
 
     <!-- Empty no projects -->
-    <div v-else class="text-center py-20">
-      <div class="w-16 h-16 rounded-2xl bg-dark-800 flex items-center justify-center mx-auto mb-4">
-        <svg class="w-8 h-8 text-dark-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V7z" />
-        </svg>
-      </div>
-      <p class="text-dark-300 font-medium">Nenhum projeto</p>
-      <p class="text-dark-500 text-sm mt-1">Crie seu primeiro projeto ou entre via convite</p>
-      <button @click="showCreate = true" class="btn-primary mt-4">Criar projeto</button>
-    </div>
+    <EmptyState
+      v-else
+      title="Nenhum projeto ainda"
+      description="Crie seu primeiro projeto ou entre em um via convite."
+    >
+      <template #action>
+        <button class="btn-primary" @click="showCreate = true">
+          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+          Criar projeto
+        </button>
+      </template>
+    </EmptyState>
 
     <ProjectModal v-if="showCreate" @close="showCreate = false" @created="onCreated" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
 import { useProjectsStore } from '@/stores/projects'
@@ -101,6 +108,8 @@ import { useToast } from '@/composables/useToast'
 import { useConfirm } from '@/composables/useConfirm'
 import ProjectCard from '@/components/ui/ProjectCard.vue'
 import ProjectModal from '@/components/ui/ProjectModal.vue'
+import Skeleton from '@/components/ui/Skeleton.vue'
+import EmptyState from '@/components/ui/EmptyState.vue'
 import type { Project } from '@/types'
 
 const store   = useProjectsStore()
@@ -113,10 +122,16 @@ const searchQuery  = ref('')
 const filterStatus = ref('')
 const sortBy       = ref('name')
 
+function openCreate() { showCreate.value = true }
+
 onMounted(async () => {
+  // A Busca Global (Ctrl+K) e o atalho "N" disparam este evento.
+  window.addEventListener('acadflow:new-project', openCreate)
   try { await store.fetchProjects() }
   finally { loading.value = false }
 })
+
+onUnmounted(() => window.removeEventListener('acadflow:new-project', openCreate))
 
 const filtered = computed(() => {
   let list = [...projects.value] as Project[]

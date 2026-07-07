@@ -1,8 +1,8 @@
 ﻿<template>
-  <div class="space-y-4 animate-fade-in">
+  <div class="space-y-4 stagger-in">
     <div class="flex flex-wrap items-center justify-between gap-3">
       <div>
-        <h1 class="text-xl font-bold text-white">Kanban</h1>
+        <h1 class="text-2xl font-bold tracking-tight text-white">Kanban</h1>
         <p class="text-dark-400 text-sm">{{ store.tasks.length }} tarefa{{ store.tasks.length !== 1 ? 's' : '' }}</p>
       </div>
       <div class="flex items-center gap-2 sm:gap-3 flex-wrap">

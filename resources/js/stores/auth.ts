@@ -24,16 +24,23 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  async function register(name: string, email: string, password: string, avatar?: File | null) {
+  async function register(input: {
+    name: string
+    email: string
+    password: string
+    avatar?: File | null
+    terms?: boolean
+  }) {
     loading.value = true
     try {
       await authApi.csrf()
       const payload = new FormData()
-      payload.append('name', name)
-      payload.append('email', email)
-      payload.append('password', password)
-      payload.append('password_confirmation', password)
-      if (avatar) payload.append('avatar', avatar)
+      payload.append('name', input.name)
+      payload.append('email', input.email)
+      payload.append('password', input.password)
+      payload.append('password_confirmation', input.password)
+      if (input.avatar) payload.append('avatar', input.avatar)
+      if (input.terms) payload.append('terms', '1')
 
       const { data } = await authApi.register(payload)
       user.value = data.user

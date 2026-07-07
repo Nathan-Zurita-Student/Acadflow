@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\Project;
 use App\Models\ProjectInvitation;
 use App\Models\User;
+use App\Notifications\Projects\ProjectInvitationNotification;
 use App\Services\NotificationService;
 use App\Services\ProjectService;
+use App\Support\SafeNotify;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -63,6 +65,16 @@ class ProjectInvitationController extends Controller
                 'role'          => $invitation->role,
                 'invited_by'    => $request->user()->name,
             ]
+        );
+
+        // E-mail de convite (além da notificação in-app).
+        SafeNotify::attempt(
+            fn () => $invitedUser->notify(new ProjectInvitationNotification(
+                $project->name,
+                $request->user()->name,
+                $invitation->role,
+            )),
+            'project_invitation_email',
         );
 
         return response()->json(['message' => 'Convite enviado com sucesso.'], 201);

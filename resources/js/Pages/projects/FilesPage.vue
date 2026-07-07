@@ -1,8 +1,8 @@
 ﻿<template>
-  <div class="space-y-6 animate-fade-in">
+  <div class="space-y-6 stagger-in">
     <div class="flex items-center justify-between">
       <div>
-        <h1 class="text-xl font-bold text-white">Arquivos</h1>
+        <h1 class="text-2xl font-bold tracking-tight text-white">Arquivos</h1>
         <p class="text-dark-400 text-sm">{{ filtered.length }} de {{ attachments.length }} arquivo{{ attachments.length !== 1 ? 's' : '' }}</p>
       </div>
       <button @click="showUploadModal = true" class="btn-primary">
@@ -51,13 +51,13 @@
     </div>
 
     <!-- Files grid -->
-    <div v-if="loading" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-      <div v-for="i in 6" :key="i" class="card animate-pulse h-20" />
+    <div v-if="loading" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 stagger-in">
+      <Skeleton v-for="i in 6" :key="i" h="14rem" rounded="rounded-xl" />
     </div>
 
-    <div v-else-if="filtered.length" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+    <div v-else-if="filtered.length" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 stagger-in">
       <div v-for="a in filtered" :key="a.id"
-        class="card !p-0 overflow-hidden hover:border-dark-600 transition-colors group flex flex-col">
+        class="card card-glow !p-0 overflow-hidden group flex flex-col">
 
         <!-- Preview -->
         <div class="relative h-40 bg-dark-900/60 flex items-center justify-center overflow-hidden">
@@ -113,22 +113,31 @@
       </div>
     </div>
 
-    <div v-else-if="searchQuery || filterType" class="text-center py-12">
-      <p class="text-dark-300 font-medium">Nenhum arquivo encontrado</p>
-      <p class="text-dark-500 text-sm mt-1">Tente ajustar a busca ou o filtro de tipo</p>
-      <button @click="searchQuery = ''; filterType = ''" class="btn-secondary mt-4">Limpar filtros</button>
-    </div>
+    <EmptyState
+      v-else-if="searchQuery || filterType"
+      title="Nenhum arquivo encontrado"
+      description="Tente ajustar a busca ou o filtro de tipo."
+    >
+      <template #icon>
+        <svg class="relative h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      </template>
+      <template #action>
+        <button class="btn-secondary" @click="searchQuery = ''; filterType = ''">Limpar filtros</button>
+      </template>
+    </EmptyState>
 
-    <div v-else class="text-center py-16">
-      <div class="w-16 h-16 rounded-2xl bg-dark-800 flex items-center justify-center mx-auto mb-4">
-        <svg class="w-8 h-8 text-dark-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
-        </svg>
-      </div>
-      <p class="text-dark-300 font-medium">Nenhum arquivo</p>
-      <p class="text-dark-500 text-sm mt-1">Faça upload de documentos, imagens e mais</p>
-    </div>
+    <EmptyState
+      v-else
+      title="Nenhum arquivo ainda"
+      description="Faça upload de documentos, imagens, vídeos e muito mais."
+    >
+      <template #action>
+        <button class="btn-primary" @click="showUploadModal = true">
+          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+          Enviar arquivo
+        </button>
+      </template>
+    </EmptyState>
   </div>
 
   <!-- Upload Modal -->
@@ -217,6 +226,8 @@ import { useRoute } from 'vue-router'
 import { attachmentsApi } from '@/api/projects'
 import { useToast } from '@/composables/useToast'
 import { useConfirm } from '@/composables/useConfirm'
+import Skeleton from '@/components/ui/Skeleton.vue'
+import EmptyState from '@/components/ui/EmptyState.vue'
 import type { Attachment } from '@/types'
 
 const route = useRoute()

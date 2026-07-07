@@ -1,9 +1,9 @@
 ﻿<template>
-  <div class="space-y-6 animate-fade-in">
+  <div class="space-y-6 stagger-in">
     <!-- Header -->
     <div class="flex items-center justify-between">
       <div>
-        <h1 class="text-xl font-bold text-white">Olá, {{ auth.user?.display_name || auth.user?.name?.split(' ')[0] }}!</h1>
+        <h1 class="text-2xl font-bold tracking-tight text-white">Olá, <span class="text-gradient">{{ auth.user?.display_name || auth.user?.name?.split(' ')[0] }}</span>!</h1>
         <p class="text-dark-400 text-sm mt-0.5">Aqui está um resumo dos seus projetos.</p>
       </div>
       <RouterLink to="/projects" class="btn-primary text-sm">
@@ -16,7 +16,13 @@
 
     <!-- Stats skeleton -->
     <div v-if="loading" class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-      <div v-for="i in 4" :key="i" class="card animate-pulse h-24" />
+      <div v-for="i in 4" :key="i" class="card flex items-start gap-4">
+        <Skeleton w="2.5rem" h="2.5rem" rounded="rounded-lg" />
+        <div class="flex-1 space-y-2 py-0.5">
+          <Skeleton w="3rem" h="1.5rem" />
+          <Skeleton w="70%" h="0.7rem" />
+        </div>
+      </div>
     </div>
 
     <!-- Stats cards -->
@@ -34,7 +40,7 @@
       <div class="lg:col-span-2 card">
         <h3 class="text-sm font-semibold text-white mb-4">Tarefas Concluídas — Últimos 7 dias</h3>
         <apexchart v-if="!loading && weeklyOptions" type="area" height="200" :options="weeklyOptions" :series="weeklySeries" />
-        <div v-else class="h-[200px] animate-pulse bg-dark-700/30 rounded-lg" />
+        <Skeleton v-else h="200px" rounded="rounded-lg" />
       </div>
 
       <!-- Próximas entregas -->
@@ -44,7 +50,7 @@
           <RouterLink to="/my-tasks" class="text-xs text-accent-400 hover:text-accent-300">Ver todas →</RouterLink>
         </div>
         <div v-if="loading" class="space-y-2">
-          <div v-for="i in 4" :key="i" class="h-10 animate-pulse bg-dark-700/30 rounded-lg" />
+          <Skeleton v-for="i in 4" :key="i" h="2.5rem" rounded="rounded-lg" />
         </div>
         <div v-else-if="data?.upcoming?.length" class="space-y-2">
           <div
@@ -75,7 +81,7 @@
           <RouterLink to="/projects" class="text-xs text-accent-400 hover:text-accent-300">Ver todos →</RouterLink>
         </div>
         <div v-if="loading" class="space-y-2">
-          <div v-for="i in 4" :key="i" class="h-12 animate-pulse bg-dark-700/30 rounded-lg" />
+          <Skeleton v-for="i in 4" :key="i" h="3rem" rounded="rounded-lg" />
         </div>
         <div v-else-if="data?.projects.length" class="space-y-1">
           <div v-for="p in data.projects.slice(0, 6)" :key="p.id"
@@ -101,16 +107,25 @@
             <StatusBadge :status="p.status" />
           </div>
         </div>
-        <div v-else class="py-8 text-center">
-          <p class="text-dark-500 text-sm">Nenhum projeto. <RouterLink to="/projects" class="text-accent-400">Criar projeto</RouterLink></p>
-        </div>
+        <EmptyState
+          v-else
+          title="Nenhum projeto ainda"
+          description="Crie seu primeiro projeto para começar a organizar tarefas, prazos e sua equipe."
+        >
+          <template #action>
+            <RouterLink to="/projects" class="btn-primary text-sm">
+              <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+              Criar projeto
+            </RouterLink>
+          </template>
+        </EmptyState>
       </div>
 
       <!-- Recent activity -->
       <div class="card">
         <h3 class="text-sm font-semibold text-white mb-4">Atividade Recente</h3>
         <div v-if="loading" class="space-y-3">
-          <div v-for="i in 5" :key="i" class="h-10 animate-pulse bg-dark-700/30 rounded-lg" />
+          <Skeleton v-for="i in 5" :key="i" h="2.5rem" rounded="rounded-lg" />
         </div>
         <div v-else class="space-y-3">
           <template v-if="data?.recent_activity.length">
@@ -143,6 +158,8 @@ import { useRealtimeStore } from '@/stores/realtime'
 import StatCard from '@/components/ui/StatCard.vue'
 import StatusBadge from '@/components/ui/StatusBadge.vue'
 import UserAvatar from '@/components/ui/UserAvatar.vue'
+import Skeleton from '@/components/ui/Skeleton.vue'
+import EmptyState from '@/components/ui/EmptyState.vue'
 import { useTimeAgo } from '@/composables/useTimeAgo'
 
 const auth = useAuthStore()

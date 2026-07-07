@@ -76,6 +76,17 @@ export const dashboardApi = {
   users:    (q: string) => api.get('/users/search', { params: { q } }),
 }
 
+export interface GlobalSearchResults {
+  projects: Array<{ id: number; name: string; status: string }>
+  tasks: Array<{ id: number; title: string; status: string; priority: string; project: { id: number; name: string } }>
+  members: Array<{ id: number; name: string; email: string; avatar: string | null; project_id: number | null }>
+}
+
+export const searchApi = {
+  global: (q: string, signal?: AbortSignal) =>
+    api.get<GlobalSearchResults>('/search', { params: { q }, signal }),
+}
+
 export const calendarApi = {
   /** Tarefas dos projetos do usuário cujo intervalo cruza a janela [from, to] (YYYY-MM-DD). */
   range: (from: string, to: string) => api.get<CalendarTask[]>('/calendar', { params: { from, to } }),

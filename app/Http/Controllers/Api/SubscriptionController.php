@@ -5,7 +5,11 @@ namespace App\Http\Controllers\Api;
 use App\Events\Auth\SubscriptionCanceled;
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Notifications\Billing\SubscriptionActivatedNotification;
+use App\Notifications\Billing\SubscriptionCanceledNotification;
+use App\Notifications\Billing\SubscriptionOverdueNotification;
 use App\Services\AsaasService;
+use App\Support\SafeNotify;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -137,6 +141,11 @@ class SubscriptionController extends Controller
 
         event(new SubscriptionCanceled($user));
 
+        SafeNotify::attempt(
+            fn () => $user->notify(new SubscriptionCanceledNotification()),
+            'subscription_canceled_email',
+        );
+
         return response()->json(['message' => 'Assinatura cancelada.']);
     }
 
@@ -176,6 +185,7 @@ class SubscriptionController extends Controller
             case 'PAYMENT_RECEIVED':
                 $cycle = $user->plan_cycle ?? 'monthly';
                 $expiresAt = $cycle === 'annual' ? now()->addYear() : now()->addMonth();
+                $wasActive = $user->plan_status === 'active';
 
                 $user->update([
                     'plan'            => $user->pending_plan ?: $user->plan,
@@ -183,11 +193,26 @@ class SubscriptionController extends Controller
                     'plan_status'     => 'active',
                     'plan_expires_at' => $expiresAt->addDays((int) config('plans.grace_days')),
                 ]);
+
+                // Dedupe: CONFIRMED e RECEIVED chegam para o mesmo pagamento — envia só na 1ª vez.
+                if (! $wasActive) {
+                    SafeNotify::attempt(
+                        fn () => $user->notify(new SubscriptionActivatedNotification()),
+                        'subscription_activated_email',
+                    );
+                }
                 break;
 
             // Venceu sem pagar → marca como atrasado (effectivePlan derruba após expirar).
             case 'PAYMENT_OVERDUE':
+                $wasOverdue = $user->plan_status === 'overdue';
                 $user->update(['plan_status' => 'overdue']);
+                if (! $wasOverdue) {
+                    SafeNotify::attempt(
+                        fn () => $user->notify(new SubscriptionOverdueNotification()),
+                        'subscription_overdue_email',
+                    );
+                }
                 break;
 
             // Estorno/cobrança removida → volta para o gratuito.

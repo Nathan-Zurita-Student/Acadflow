@@ -1,4 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+/* Geist é a tipografia principal (premium); Inter permanece como fallback já em cache. */
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -123,21 +124,25 @@
    ===================================================================== */
 @layer components {
   .btn-primary {
-    @apply inline-flex items-center gap-2 px-4 py-2
-           text-white text-sm font-medium rounded-lg transition-all duration-150
+    @apply relative inline-flex items-center gap-2 px-4 py-2
+           text-white text-sm font-medium rounded-lg transition-all duration-200
            focus:outline-none focus:ring-2 focus:ring-offset-2
            focus:ring-offset-dark-900 disabled:opacity-50 disabled:cursor-not-allowed;
-    background-color: rgb(var(--accent-600) / 1);
+    background-image: linear-gradient(180deg, rgb(var(--accent-500)), rgb(var(--accent-600)));
+    box-shadow: 0 4px 14px -4px rgb(var(--accent-600) / 0.5), inset 0 1px 0 0 rgb(255 255 255 / 0.15);
     --tw-ring-color: rgb(var(--accent-500) / 1);
   }
   .btn-primary:hover:not(:disabled) {
-    background-color: rgb(var(--accent-500) / 1);
+    filter: brightness(1.08);
+    box-shadow: 0 6px 20px -4px rgb(var(--accent-600) / 0.65), inset 0 1px 0 0 rgb(255 255 255 / 0.2);
   }
+  .btn-primary:active:not(:disabled) { transform: scale(0.97); }
   .btn-secondary {
     @apply inline-flex items-center gap-2 px-4 py-2 bg-dark-700 hover:bg-dark-600
            text-dark-200 text-sm font-medium rounded-lg border border-dark-600
-           transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-dark-500;
+           transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-dark-500;
   }
+  .btn-secondary:active:not(:disabled) { transform: scale(0.97); }
   .btn-danger {
     @apply inline-flex items-center gap-2 px-4 py-2 bg-red-600/20 hover:bg-red-600/30
            text-red-400 text-sm font-medium rounded-lg border border-red-600/30
@@ -150,16 +155,140 @@
   }
   .card {
     @apply bg-dark-800 border border-dark-700 rounded-xl p-5;
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.2), 0 10px 30px -20px rgb(0 0 0 / 0.6);
+    transition: border-color 0.2s ease, box-shadow 0.25s ease, transform 0.2s ease;
+  }
+  /* Variante opt-in para cards clicáveis: hover com leve elevação. */
+  .card-interactive { @apply cursor-pointer; }
+  .card-interactive:hover {
+    border-color: rgb(var(--d-600));
+    transform: translateY(-2px);
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.2), 0 16px 40px -18px rgb(0 0 0 / 0.7);
   }
   .input {
     @apply w-full bg-dark-900 border border-dark-700 rounded-lg px-3 py-2 text-sm
-           text-dark-100 placeholder-dark-500 focus:outline-none focus:ring-2
-           focus:border-transparent transition-all;
-    --tw-ring-color: rgb(var(--accent-500) / 1);
+           text-dark-100 placeholder-dark-500 outline-none transition-all duration-200;
+  }
+  .input:focus {
+    border-color: rgb(var(--accent-500));
+    box-shadow: 0 0 0 4px rgb(var(--accent-500) / 0.15);
   }
   .label { @apply block text-sm font-medium text-dark-300 mb-1.5; }
+  /* Skeleton loading com shimmer — usado pelo componente Skeleton.vue. */
+  .skeleton {
+    @apply relative overflow-hidden rounded-md bg-dark-800;
+  }
+  .skeleton::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.06), transparent);
+    animation: shimmer 1.6s linear infinite;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .skeleton::after { animation: none; }
+  }
+
+  /* Entrada escalonada dos filhos diretos — aparição progressiva "viva". */
+  .stagger-in > * {
+    opacity: 0;
+    animation: rise 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  .stagger-in > *:nth-child(1) { animation-delay: 0.04s; }
+  .stagger-in > *:nth-child(2) { animation-delay: 0.10s; }
+  .stagger-in > *:nth-child(3) { animation-delay: 0.16s; }
+  .stagger-in > *:nth-child(4) { animation-delay: 0.22s; }
+  .stagger-in > *:nth-child(5) { animation-delay: 0.28s; }
+  .stagger-in > *:nth-child(6) { animation-delay: 0.34s; }
+  .stagger-in > *:nth-child(7) { animation-delay: 0.40s; }
+  .stagger-in > *:nth-child(8) { animation-delay: 0.46s; }
+
+  /* Card que reage ao hover com leve elevação + brilho em accent. */
+  .card-glow {
+    transition: border-color 0.25s ease, box-shadow 0.3s ease, transform 0.25s ease;
+  }
+  .card-glow:hover {
+    transform: translateY(-3px);
+    border-color: rgb(var(--accent-500) / 0.4);
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.2), 0 18px 44px -18px rgb(var(--accent-600) / 0.5);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .stagger-in > * { opacity: 1; animation: none; }
+  }
   .badge {
     @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  /* ===================================================================
+     PREMIUM — superfícies de vidro, brilho e microinterações.
+     Usadas nas telas de autenticação e reaproveitáveis em todo o app.
+     =================================================================== */
+
+  /* Glassmorphism: fundo translúcido + blur + hairline luminoso no topo. */
+  .glass {
+    background: linear-gradient(180deg, rgb(var(--d-800) / 0.72), rgb(var(--d-900) / 0.62));
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+    border: 1px solid rgb(255 255 255 / 0.08);
+    box-shadow:
+      0 24px 60px -18px rgb(0 0 0 / 0.55),
+      0 8px 24px -12px rgb(0 0 0 / 0.4),
+      inset 0 1px 0 0 rgb(255 255 255 / 0.06);
+  }
+  .glass-soft {
+    background: rgb(var(--d-800) / 0.5);
+    backdrop-filter: blur(14px) saturate(130%);
+    -webkit-backdrop-filter: blur(14px) saturate(130%);
+    border: 1px solid rgb(255 255 255 / 0.06);
+  }
+
+  /* Texto com gradiente — headings premium. */
+  .text-gradient {
+    background: linear-gradient(120deg, rgb(var(--d-50)), rgb(var(--accent-300)) 60%, rgb(var(--d-200)));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* Borda em gradiente ("hairline" luminoso) via máscara — sem custo de layout. */
+  .border-gradient {
+    position: relative;
+  }
+  .border-gradient::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(140deg, rgb(var(--accent-400) / 0.55), rgb(255 255 255 / 0.06) 40%, transparent 70%);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+            mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  /* Ripple: elemento absoluto que expande e some. */
+  .ripple {
+    position: absolute;
+    border-radius: 9999px;
+    transform: scale(0);
+    background: rgb(255 255 255 / 0.35);
+    pointer-events: none;
+    animation: ripple 0.6s ease-out forwards;
+  }
+
+  /* Input premium: base sólida + transição de foco (glow controlado por JS/estado). */
+  .input-premium {
+    @apply w-full rounded-xl border bg-dark-900/60 pl-11 pr-3 py-2.5 text-sm text-dark-100
+           placeholder-dark-500 transition-all duration-200 outline-none;
+    border-color: rgb(var(--d-700) / 1);
+  }
+  .input-premium:focus {
+    border-color: rgb(var(--accent-500) / 0.9);
+    box-shadow: 0 0 0 4px rgb(var(--accent-500) / 0.15);
+    background-color: rgb(var(--d-900) / 0.85);
   }
   /* Kanban horizontal scroll — touch-friendly */
   .kanban-board {
@@ -230,5 +359,19 @@
 @media (hover: none) {
   [class*="group-hover:opacity-100"] {
     opacity: 1 !important;
+  }
+}
+
+/* =====================================================================
+   ACESSIBILIDADE / PERFORMANCE
+   Respeita quem prefere menos movimento: reduz drasticamente animações
+   contínuas (background vivo, floats, auroras) mantendo a interface usável.
+   ===================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
   }
 }

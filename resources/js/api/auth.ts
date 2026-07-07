@@ -55,4 +55,7 @@ export const authApi = {
   // Conta
   deleteAccount: (current_password: string) =>
     api.delete('/auth/account', { data: { current_password } }),
+
+  // LGPD — exportação de dados pessoais (download JSON)
+  exportData: () => api.get('/auth/account/export', { responseType: 'blob' }),
 }

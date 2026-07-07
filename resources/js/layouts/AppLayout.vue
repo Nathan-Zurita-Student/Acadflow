@@ -1,14 +1,20 @@
 ﻿<template>
-  <div class="flex h-screen overflow-hidden bg-dark-950">
+  <div class="relative flex h-screen overflow-hidden bg-dark-950">
+    <!-- Background ambiente vivo (sutil) -->
+    <AppAmbience />
+
     <!-- Sidebar -->
     <aside
-      :class="['fixed inset-y-0 left-0 z-50 flex flex-col bg-dark-900 border-r border-dark-700/60 transition-all duration-300 lg:static lg:translate-x-0',
+      :class="['fixed inset-y-0 left-0 z-50 flex flex-col bg-dark-900/85 backdrop-blur-lg border-r border-dark-700/60 transition-all duration-300 lg:static lg:translate-x-0',
         sidebarOpen ? 'translate-x-0' : '-translate-x-full',
         sidebarCollapsed ? 'w-16' : 'w-64']"
     >
       <!-- Logo + collapse toggle -->
       <div class="flex items-center gap-3 px-4 py-4 border-b border-dark-700/60 flex-shrink-0">
-        <img src="/imagem/acadflow.png" alt="AcadFlow" class="h-8 w-8 object-contain flex-shrink-0" />
+        <span class="relative flex-shrink-0">
+          <span class="absolute -inset-1 rounded-full bg-accent-500/25 blur-md animate-glow-pulse" aria-hidden="true" />
+          <img src="/imagem/acadflow.png" alt="AcadFlow" class="relative h-8 w-8 object-contain" />
+        </span>
         <template v-if="!sidebarCollapsed">
           <span class="font-bold text-white text-sm tracking-wide">AcadFlow</span>
           <!-- Desktop: collapse -->
@@ -83,15 +89,18 @@
     </aside>
     <Toast />
     <ConfirmDialog />
+    <CommandPalette />
+    <ShortcutsHelp />
+    <OnboardingTour />
 
     <!-- Overlay mobile -->
     <div v-if="sidebarOpen" @click="sidebarOpen = false"
       class="fixed inset-0 z-40 bg-black/50 lg:hidden" />
 
     <!-- Main content -->
-    <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+    <div class="relative z-10 flex-1 flex flex-col min-w-0 overflow-hidden">
       <!-- Topbar -->
-      <header class="flex items-center gap-3 sm:gap-4 px-4 sm:px-6 py-3.5 bg-dark-900/80 backdrop-blur border-b border-dark-700/60 flex-shrink-0">
+      <header class="flex items-center gap-3 sm:gap-4 px-4 sm:px-6 py-3.5 bg-dark-900/70 backdrop-blur-md border-b border-dark-700/60 flex-shrink-0">
         <button @click="sidebarOpen = !sidebarOpen" class="lg:hidden p-2 rounded-lg hover:bg-dark-700">
           <svg class="w-5 h-5 text-dark-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
@@ -102,6 +111,17 @@
           <slot name="title" />
         </div>
         <div class="flex items-center gap-2 sm:gap-3">
+          <!-- Gatilho da Busca Global (Ctrl+K) -->
+          <button
+            type="button"
+            title="Buscar (Ctrl+K)"
+            class="flex items-center gap-2 rounded-lg border border-dark-700 bg-dark-800/60 px-2.5 py-1.5 text-dark-400 transition-colors hover:border-dark-600 hover:text-dark-200"
+            @click="openPalette"
+          >
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <span class="hidden text-sm lg:inline">Buscar…</span>
+            <kbd class="hidden rounded border border-dark-600 bg-dark-900 px-1.5 py-0.5 text-[10px] font-medium lg:inline">{{ searchHint }}</kbd>
+          </button>
           <span class="text-xs text-dark-500 bg-dark-800 border border-dark-700 px-2 py-1 rounded-md hidden lg:block">
             {{ currentDate }}
           </span>
@@ -128,7 +148,20 @@
 
       <!-- Page content -->
       <main class="flex-1 overflow-y-auto p-4 sm:p-6">
-        <RouterView />
+        <RouterView v-slot="{ Component, route: r }">
+          <!-- Só opacity + transform (compositor/GPU) — fluido em hardware modesto. -->
+          <transition
+            enter-active-class="transition duration-300 ease-out"
+            enter-from-class="opacity-0 translate-y-3"
+            enter-to-class="opacity-100 translate-y-0"
+            leave-active-class="transition duration-150 ease-in"
+            leave-from-class="opacity-100 translate-y-0"
+            leave-to-class="opacity-0 -translate-y-1"
+            mode="out-in"
+          >
+            <component :is="Component" :key="r.path" />
+          </transition>
+        </RouterView>
       </main>
     </div>
   </div>
@@ -149,6 +182,12 @@ import UserAvatar from '@/components/ui/UserAvatar.vue'
 import NotificationBell from '@/components/ui/NotificationBell.vue'
 import Toast from '@/components/ui/Toast.vue'
 import ConfirmDialog from '@/components/ui/ConfirmDialog.vue'
+import CommandPalette from '@/components/ui/CommandPalette.vue'
+import ShortcutsHelp from '@/components/ui/ShortcutsHelp.vue'
+import AppAmbience from '@/components/ui/AppAmbience.vue'
+import OnboardingTour from '@/components/ui/OnboardingTour.vue'
+import { useShortcuts } from '@/composables/useShortcuts'
+import { useOnboarding } from '@/composables/useOnboarding'
 
 const auth = useAuthStore()
 const projectsStore = useProjectsStore()
@@ -160,6 +199,11 @@ const route = useRoute()
 const sidebarOpen = ref(false)
 const sidebarCollapsed = ref(false)
 const myTasksCount = ref(0)
+
+// Atalhos globais + Busca Global (Ctrl+K)
+const { install: installShortcuts, uninstall: uninstallShortcuts, openPalette } = useShortcuts()
+const { maybeAutoStart } = useOnboarding()
+const searchHint = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent) ? '⌘K' : 'Ctrl K'
 
 const currentProject = computed(() => projectsStore.currentProject)
 const isSettingsActive = computed(() => route.path.startsWith('/settings'))
@@ -192,6 +236,9 @@ async function refreshMyTasksBadge() {
 }
 
 onMounted(async () => {
+  installShortcuts()
+  // Tour de boas-vindas no primeiro acesso (nunca repete sozinho).
+  maybeAutoStart(auth.user?.id)
   refreshMyTasksBadge()
 
   // Pede as permissões necessárias assim que o app carrega (notificações)
@@ -217,6 +264,7 @@ onMounted(async () => {
 })
 
 onUnmounted(() => {
+  uninstallShortcuts()
   if (echoChannel) {
     echo.leave(`App.Models.User.${auth.user?.id}`)
     echoChannel = null

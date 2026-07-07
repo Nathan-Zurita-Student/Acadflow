@@ -1,9 +1,9 @@
 ﻿<template>
-  <div class="max-w-4xl mx-auto space-y-6 animate-fade-in">
+  <div class="max-w-4xl mx-auto space-y-6 stagger-in">
     <!-- Header -->
     <div class="flex items-center justify-between">
       <div>
-        <h2 class="text-xl font-bold text-dark-100">Reuniões</h2>
+        <h2 class="text-2xl font-bold tracking-tight text-white">Reuniões</h2>
         <p class="text-sm text-dark-500 mt-0.5">{{ project?.name }}</p>
       </div>
       <button @click="openCreate" class="btn-primary">
@@ -15,8 +15,8 @@
     </div>
 
     <!-- Loading -->
-    <div v-if="loading" class="flex justify-center py-16">
-      <div class="w-8 h-8 border-2 border-accent-500/30 border-t-accent-500 rounded-full animate-spin" />
+    <div v-if="loading" class="space-y-3 stagger-in">
+      <Skeleton v-for="i in 3" :key="i" h="5.5rem" rounded="rounded-xl" />
     </div>
 
     <template v-else>
@@ -53,15 +53,21 @@
       </section>
 
       <!-- Empty state -->
-      <div v-if="!upcoming.length && !past.length"
-        class="flex flex-col items-center gap-3 py-20 text-dark-600">
-        <svg class="w-16 h-16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
-          <path stroke-linecap="round" stroke-linejoin="round"
-            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-        </svg>
-        <p class="text-sm font-medium">Nenhuma reunião agendada</p>
-        <p class="text-xs">Crie a primeira reunião do grupo!</p>
-      </div>
+      <EmptyState
+        v-if="!upcoming.length && !past.length"
+        title="Nenhuma reunião agendada"
+        description="Crie a primeira reunião do grupo e mantenha todos alinhados."
+      >
+        <template #icon>
+          <svg class="relative h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        </template>
+        <template #action>
+          <button class="btn-primary" @click="openCreate">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            Nova reunião
+          </button>
+        </template>
+      </EmptyState>
     </template>
 
     <!-- Create / Edit Modal -->
@@ -126,6 +132,8 @@ import { useToast } from '@/composables/useToast'
 import { useConfirm } from '@/composables/useConfirm'
 import { meetingsApi } from '@/api/projects'
 import MeetingCard from '@/components/ui/MeetingCard.vue'
+import Skeleton from '@/components/ui/Skeleton.vue'
+import EmptyState from '@/components/ui/EmptyState.vue'
 import type { Meeting } from '@/types'
 
 const route = useRoute()

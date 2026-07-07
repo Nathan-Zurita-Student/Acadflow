@@ -1,50 +1,53 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-dark-950 px-4">
-    <div class="w-full max-w-md animate-slide-up">
-      <div class="text-center mb-8">
-        <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-accent-600 mb-4 shadow-lg shadow-accent-600/30">
-          <svg class="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-          </svg>
+  <AuthLayout>
+    <div class="glass border-gradient rounded-2xl p-6 sm:p-8 animate-scale-in">
+      <!-- Ícone + cabeçalho -->
+      <div class="mb-6 text-center">
+        <div class="relative mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-accent-500/20 bg-accent-500/10 text-accent-300">
+          <span class="absolute -inset-2 rounded-full bg-accent-500/20 blur-xl animate-glow-pulse" aria-hidden="true" />
+          <svg class="relative h-7 w-7 animate-float-med" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
         </div>
-        <h1 class="text-2xl font-bold text-white">Confirme seu e-mail</h1>
-        <p class="text-dark-400 mt-1 text-sm">
+        <h1 class="text-[1.5rem] font-semibold tracking-tight text-white">Confirme seu e-mail</h1>
+        <p class="mt-1.5 text-sm text-dark-400">
           Enviamos um código de 6 dígitos para<br />
-          <span class="text-dark-200 font-medium">{{ auth.user?.email }}</span>
+          <span class="font-medium text-dark-100">{{ auth.user?.email }}</span>
         </p>
       </div>
 
-      <div class="card">
-        <form @submit.prevent="submit" class="space-y-5" novalidate>
-          <CodeInput v-model="code" :disabled="loading" @complete="submit" />
+      <form class="space-y-5" novalidate @submit.prevent="submit">
+        <CodeInput v-model="code" :disabled="loading" @complete="submit" />
 
-          <p v-if="error" class="text-sm text-red-400 bg-red-400/10 border border-red-400/20 rounded-lg px-3 py-2 text-center">
-            {{ error }}
-          </p>
+        <transition name="alert">
+          <div v-if="error" :key="error" class="flex items-center justify-center gap-2 rounded-xl border border-red-500/25 bg-red-500/10 px-3.5 py-2.5 text-sm text-red-300 animate-shake">
+            <svg class="h-4 w-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+            <span>{{ error }}</span>
+          </div>
+        </transition>
 
-          <button type="submit" :disabled="loading || code.length !== 6" class="btn-primary w-full justify-center">
-            <span v-if="loading" class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-            <span v-else>Confirmar</span>
-          </button>
-        </form>
+        <AuthSubmit :loading="loading" :disabled="code.length !== 6">
+          Confirmar
+          <template #loading>Confirmando…</template>
+        </AuthSubmit>
+      </form>
 
-        <div class="mt-5 text-center text-sm text-dark-400">
-          Não recebeu?
-          <button
-            :disabled="cooldown > 0 || resending"
-            class="text-accent-400 hover:text-accent-300 font-medium ml-1 disabled:text-dark-600 disabled:cursor-not-allowed"
-            @click="resend"
-          >
-            {{ cooldown > 0 ? `Reenviar em ${cooldown}s` : 'Reenviar código' }}
-          </button>
-        </div>
+      <div class="mt-5 text-center text-sm text-dark-400">
+        Não recebeu?
+        <button
+          :disabled="cooldown > 0 || resending"
+          class="ml-1 font-medium text-accent-400 transition-colors hover:text-accent-300 disabled:cursor-not-allowed disabled:text-dark-600"
+          @click="resend"
+        >
+          {{ cooldown > 0 ? `Reenviar em ${cooldown}s` : 'Reenviar código' }}
+        </button>
       </div>
-
-      <p class="mt-4 text-center text-sm text-dark-500">
-        <button class="hover:text-dark-300" @click="logout">Sair da conta</button>
-      </p>
     </div>
-  </div>
+
+    <template #footer>
+      <p class="text-center text-sm text-dark-500">
+        <button class="transition-colors hover:text-dark-300" @click="logout">Sair da conta</button>
+      </p>
+    </template>
+  </AuthLayout>
 </template>
 
 <script setup lang="ts">
@@ -54,6 +57,8 @@ import { useAuthStore } from '@/stores/auth'
 import { useToast } from '@/composables/useToast'
 import { authApi } from '@/api/auth'
 import CodeInput from '@/components/ui/CodeInput.vue'
+import AuthLayout from '@/components/auth/AuthLayout.vue'
+import AuthSubmit from '@/components/auth/AuthSubmit.vue'
 
 const auth = useAuthStore()
 const router = useRouter()
@@ -113,3 +118,8 @@ async function logout() {
 
 onUnmounted(() => timer && clearInterval(timer))
 </script>
+
+<style scoped>
+.alert-enter-active, .alert-leave-active { transition: opacity 0.25s, transform 0.25s; }
+.alert-enter-from, .alert-leave-to { opacity: 0; transform: translateY(-4px); }
+</style>

@@ -1,113 +1,168 @@
-﻿<template>
-  <div class="min-h-screen flex items-center justify-center bg-dark-950 px-4">
-    <div class="w-full max-w-md animate-slide-up">
-      <!-- Logo -->
-      <div class="text-center mb-8">
-        <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-accent-600 mb-4 shadow-lg shadow-accent-600/30">
-          <svg class="w-8 h-8" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <!-- Graduation cap -->
-            <path d="M16 6L2 13l14 7 14-7-14-7z" fill="white" fill-opacity="0.95"/>
-            <path d="M8 17v6c0 0 3.5 3 8 3s8-3 8-3v-6l-8 4-8-4z" fill="white" fill-opacity="0.75"/>
-            <!-- Flow line / tassel -->
-            <path d="M26 13v7" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
-            <circle cx="26" cy="21.5" r="1.5" fill="white" fill-opacity="0.8"/>
-          </svg>
-        </div>
-        <h1 class="text-2xl font-bold text-white">AcadFlow</h1>
-        <p class="text-dark-400 mt-1 text-sm">Entre na sua conta</p>
+<template>
+  <AuthLayout>
+    <div class="glass border-gradient rounded-2xl p-6 sm:p-8 animate-scale-in">
+      <!-- Cabeçalho -->
+      <header class="mb-6">
+        <h1 class="text-[1.6rem] font-semibold tracking-tight text-white">Bem-vindo de volta</h1>
+        <p class="mt-1 text-sm text-dark-400">Entre para continuar no AcadFlow</p>
+      </header>
+
+      <!-- SSO -->
+      <GoogleButton />
+
+      <!-- Divisor -->
+      <div class="my-5 flex items-center gap-3">
+        <div class="h-px flex-1 bg-gradient-to-r from-transparent to-dark-700" />
+        <span class="text-xs text-dark-500">ou entre com e-mail</span>
+        <div class="h-px flex-1 bg-gradient-to-l from-transparent to-dark-700" />
       </div>
 
-      <div class="card">
-        <form @submit.prevent="handleLogin" class="space-y-4" novalidate>
-          <div>
-            <label class="label">Email</label>
-            <input v-model="form.email" type="email" class="input" placeholder="seu@email.com" />
+      <!-- Formulário -->
+      <form novalidate @submit.prevent="handleLogin">
+        <AuthField
+          ref="emailField"
+          v-model="form.email"
+          label="E-mail"
+          icon="mail"
+          type="email"
+          inputmode="email"
+          autocomplete="email"
+          placeholder="seu@email.com"
+          :error="emailError"
+          :success="emailSuccess"
+          @blur="touched.email = true"
+          @enter="focusPassword"
+        />
+
+        <div>
+          <div class="mb-1.5 flex items-center justify-between">
+            <label class="text-[13px] font-medium text-dark-300">Senha</label>
+            <RouterLink to="/forgot-password" class="text-xs font-medium text-accent-400 transition-colors hover:text-accent-300">
+              Esqueci minha senha
+            </RouterLink>
           </div>
-          <div>
-            <div class="flex items-center justify-between">
-              <label class="label">Senha</label>
-              <RouterLink to="/forgot-password" class="text-xs text-accent-400 hover:text-accent-300">Esqueci minha senha</RouterLink>
-            </div>
-            <input v-model="form.password" type="password" class="input" placeholder="••••••••" autocomplete="current-password" />
-          </div>
-
-          <p v-if="error" class="text-sm text-red-400 bg-red-400/10 border border-red-400/20 rounded-lg px-3 py-2">
-            {{ error }}
-          </p>
-
-          <button type="submit" :disabled="loading" class="btn-primary w-full justify-center">
-            <span v-if="loading" class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-            <span v-else>Entrar</span>
-          </button>
-        </form>
-
-        <!-- Divisor -->
-        <div class="flex items-center gap-3 my-4">
-          <div class="flex-1 h-px bg-dark-700" />
-          <span class="text-xs text-dark-500">ou</span>
-          <div class="flex-1 h-px bg-dark-700" />
+          <AuthField
+            ref="passwordField"
+            v-model="form.password"
+            icon="lock"
+            type="password"
+            autocomplete="current-password"
+            placeholder="••••••••"
+            :error="passwordError"
+            @blur="touched.password = true"
+          />
         </div>
 
-        <!-- Entrar com Google -->
-        <a href="/api/auth/google/redirect"
-          class="w-full flex items-center justify-center gap-2.5 px-4 py-2.5 rounded-lg bg-white text-gray-700 text-sm font-medium hover:bg-gray-100 transition-colors">
-          <svg class="w-4 h-4" viewBox="0 0 48 48" aria-hidden="true">
-            <path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"/>
-            <path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z"/>
-            <path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238C29.211 35.091 26.715 36 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"/>
-            <path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303c-.792 2.237-2.231 4.166-4.087 5.571l6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z"/>
-          </svg>
-          Continuar com Google
-        </a>
+        <!-- Erro do servidor -->
+        <transition name="alert">
+          <div v-if="serverError" class="mb-4 flex items-start gap-2.5 rounded-xl border border-red-500/25 bg-red-500/10 px-3.5 py-2.5 text-sm text-red-300" :class="{ 'animate-shake': shakeKey }" :key="shakeKey">
+            <svg class="mt-0.5 h-4 w-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+            <span>{{ serverError }}</span>
+          </div>
+        </transition>
 
-        <p class="mt-4 text-center text-sm text-dark-400">
-          Não tem conta?
-          <RouterLink :to="route.query.redirect ? `/register?redirect=${encodeURIComponent(String(route.query.redirect))}` : '/register'" class="text-accent-400 hover:text-accent-300 font-medium ml-1">Cadastre-se</RouterLink>
-        </p>
-      </div>
+        <AuthSubmit :loading="loading" :success="success">
+          Entrar
+          <template #loading>Entrando…</template>
+          <template #success>Bem-vindo!</template>
+        </AuthSubmit>
+      </form>
     </div>
-  </div>
+
+    <template #footer>
+      <p class="text-center text-sm text-dark-400">
+        Não tem conta?
+        <RouterLink :to="registerLink" class="ml-1 font-medium text-accent-400 transition-colors hover:text-accent-300">
+          Cadastre-se gratuitamente
+        </RouterLink>
+      </p>
+    </template>
+  </AuthLayout>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { validateFields } from '@/composables/useFormValidation'
+import AuthLayout from '@/components/auth/AuthLayout.vue'
+import AuthField from '@/components/auth/AuthField.vue'
+import AuthSubmit from '@/components/auth/AuthSubmit.vue'
+import GoogleButton from '@/components/auth/GoogleButton.vue'
 
 const auth = useAuthStore()
 const router = useRouter()
-const route  = useRoute()
+const route = useRoute()
 
-const form = ref({ email: '', password: '' })
-const error = ref('')
+const form = reactive({ email: '', password: '' })
+const touched = reactive({ email: false, password: false })
+const submitted = ref(false)
+const serverError = ref('')
 const loading = ref(false)
+const success = ref(false)
+const shakeKey = ref(0)
 
-if (route.query.error === 'google') {
-  error.value = 'Não foi possível entrar com o Google. Tente novamente.'
+const emailField = ref<InstanceType<typeof AuthField> | null>(null)
+const passwordField = ref<InstanceType<typeof AuthField> | null>(null)
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+const emailValid = computed(() => EMAIL_RE.test(form.email.trim()))
+const emailError = computed(() => {
+  if (!(touched.email || submitted.value)) return ''
+  if (!form.email.trim()) return 'Informe seu e-mail'
+  if (!emailValid.value) return 'E-mail inválido'
+  return ''
+})
+const emailSuccess = computed(() => emailValid.value)
+
+const passwordError = computed(() => {
+  if (!(touched.password || submitted.value)) return ''
+  if (!form.password) return 'Informe sua senha'
+  return ''
+})
+
+const registerLink = computed(() =>
+  route.query.redirect ? `/register?redirect=${encodeURIComponent(String(route.query.redirect))}` : '/register',
+)
+
+onMounted(() => {
+  emailField.value?.focus()
+  if (route.query.error === 'google') serverError.value = 'Não foi possível entrar com o Google. Tente novamente.'
+})
+
+function focusPassword() {
+  passwordField.value?.focus()
 }
 
 async function handleLogin() {
-  error.value = ''
-
-  const msg = validateFields([
-    { value: form.value.email,    label: 'Email', rules: ['required', 'email'] },
-    { value: form.value.password, label: 'Senha', rules: ['required'] },
-  ])
-  if (msg) { error.value = msg; return }
+  submitted.value = true
+  serverError.value = ''
+  if (emailError.value || passwordError.value || !form.email || !form.password) {
+    if (emailError.value) emailField.value?.focus()
+    else passwordField.value?.focus()
+    return
+  }
 
   loading.value = true
   try {
-    await auth.login(form.value.email, form.value.password)
+    await auth.login(form.email, form.password)
+    success.value = true
     const redirect = route.query.redirect as string | undefined
-    router.push(redirect || '/')
+    setTimeout(() => router.push(redirect || '/'), 550)
   } catch (e: any) {
     const errs = e.response?.data?.errors as Record<string, string[]> | undefined
-    error.value = e.response?.data?.message
-      ?? (errs ? Object.values(errs)[0]?.[0] : undefined)
-      ?? 'Erro ao fazer login.'
+    serverError.value =
+      e.response?.data?.message ??
+      (errs ? Object.values(errs)[0]?.[0] : undefined) ??
+      'E-mail ou senha incorretos.'
+    shakeKey.value++
   } finally {
     loading.value = false
   }
 }
 </script>
+
+<style scoped>
+.alert-enter-active, .alert-leave-active { transition: opacity 0.25s, transform 0.25s; }
+.alert-enter-from, .alert-leave-to { opacity: 0; transform: translateY(-4px); }
+</style>

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\Auth\AccountController;
 use App\Http\Controllers\Api\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\Api\Auth\DataExportController;
 use App\Http\Controllers\Api\Auth\EmailChangeController;
 use App\Http\Controllers\Api\Auth\EmailVerificationController;
 use App\Http\Controllers\Api\Auth\GoogleAuthController;
@@ -58,6 +59,7 @@ Route::prefix('api/auth')->name('auth.')->group(function () {
             Route::delete('sessions/others', [SessionManagementController::class, 'destroyOthers'])->name('sessions.destroy-others');
             Route::delete('sessions/{id}', [SessionManagementController::class, 'destroy'])->name('sessions.destroy');
 
+            Route::get('account/export', DataExportController::class)->name('account.export');
             Route::delete('account', [AccountController::class, 'destroy'])->name('account.destroy');
         });
     });

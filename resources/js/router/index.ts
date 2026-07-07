@@ -45,6 +45,17 @@ const router = createRouter({
       name: 'auth-callback',
       component: () => import('@/Pages/auth/AuthCallbackPage.vue'),
     },
+    // Páginas legais — públicas (acessíveis logado ou não).
+    {
+      path: '/termos',
+      name: 'terms',
+      component: () => import('@/Pages/legal/TermsPage.vue'),
+    },
+    {
+      path: '/privacidade',
+      name: 'privacy',
+      component: () => import('@/Pages/legal/PrivacyPage.vue'),
+    },
     {
       path: '/',
       component: () => import('@/layouts/AppLayout.vue'),

@@ -48,6 +48,7 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::get('my-tasks', [DashboardController::class, 'myTasks'])->name('dashboard.my-tasks');
     Route::get('calendar', [DashboardController::class, 'calendar'])->name('calendar.index');
     Route::get('users/search', [DashboardController::class, 'searchUsers'])->name('users.search');
+    Route::get('search', \App\Http\Controllers\Api\SearchController::class)->name('search');
 
     Route::prefix('projects')->name('projects.')->group(function () {
         Route::get('/', [ProjectController::class, 'index'])->name('index');

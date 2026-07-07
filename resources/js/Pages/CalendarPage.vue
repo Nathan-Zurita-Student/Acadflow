@@ -1,9 +1,9 @@
 <template>
-  <div class="space-y-5 animate-fade-in">
+  <div class="space-y-5 stagger-in">
     <!-- Cabeçalho -->
     <div class="flex items-center justify-between">
       <div>
-        <h1 class="text-xl font-bold text-white">Calendário</h1>
+        <h1 class="text-2xl font-bold tracking-tight text-white">Calendário</h1>
         <p class="text-dark-400 text-sm">Prazos, carga de trabalho e entregas dos seus projetos</p>
       </div>
     </div>

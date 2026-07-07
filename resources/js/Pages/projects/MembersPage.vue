@@ -1,10 +1,10 @@
 ﻿<template>
-  <div class="space-y-6 animate-fade-in">
+  <div class="space-y-6 stagger-in">
 
     <!-- Header -->
     <div class="flex flex-wrap items-center justify-between gap-3">
       <div>
-        <h1 class="text-xl font-bold text-white">Membros</h1>
+        <h1 class="text-2xl font-bold tracking-tight text-white">Membros</h1>
         <p class="text-dark-400 text-sm">{{ stats.length }} membro{{ stats.length !== 1 ? 's' : '' }}</p>
       </div>
       <div class="flex items-center gap-2 flex-wrap">
@@ -37,16 +37,16 @@
     </div>
 
     <!-- Skeleton -->
-    <div v-if="loading" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div v-for="i in 4" :key="i" class="card animate-pulse h-36" />
+    <div v-if="loading" class="grid grid-cols-1 md:grid-cols-2 gap-4 stagger-in">
+      <Skeleton v-for="i in 4" :key="i" h="9rem" rounded="rounded-xl" />
     </div>
 
     <!-- Members grid -->
-    <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-4 stagger-in">
       <div
         v-for="s in stats"
         :key="s.user.id"
-        class="card hover:border-dark-600 transition-colors relative group"
+        class="card card-glow relative group"
       >
         <!-- Remove button -->
         <button
@@ -208,6 +208,7 @@ import type { MemberStats } from '@/types'
 import InviteMemberModal from '@/components/ui/InviteMemberModal.vue'
 import UserAvatar from '@/components/ui/UserAvatar.vue'
 import InviteLinkModal from '@/components/ui/InviteLinkModal.vue'
+import Skeleton from '@/components/ui/Skeleton.vue'
 
 const route = useRoute()
 const router = useRouter()

@@ -24,16 +24,24 @@ abstract class CodeNotification extends Notification
     {
         return (new MailMessage)
             ->subject($this->subjectLine())
-            ->greeting('Olá!')
-            ->line($this->intro())
-            ->line('**Seu código: '.$this->code.'**')
-            ->line('Este código expira em '.VerificationCodeService::EXPIRY_MINUTES.' minutos.')
-            ->line($this->outro());
+            ->markdown('emails.code', [
+                'heading' => $this->heading(),
+                'intro'   => $this->intro(),
+                'code'    => $this->code,
+                'minutes' => VerificationCodeService::EXPIRY_MINUTES,
+                'outro'   => $this->outro(),
+            ]);
     }
 
     abstract protected function subjectLine(): string;
 
     abstract protected function intro(): string;
+
+    /** Título grande exibido no corpo do e-mail (sobrescrevível). */
+    protected function heading(): string
+    {
+        return 'Seu código de verificação';
+    }
 
     protected function outro(): string
     {

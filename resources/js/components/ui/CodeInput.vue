@@ -9,7 +9,8 @@
       inputmode="numeric"
       autocomplete="one-time-code"
       maxlength="1"
-      class="w-11 h-14 text-center text-xl font-bold rounded-lg bg-dark-900 border border-dark-700 text-white focus:border-accent-500 focus:outline-none focus:ring-2 focus:ring-accent-500/30 transition-colors"
+      class="code-cell"
+      :class="{ 'code-filled': digits[i] }"
       :disabled="disabled"
       @input="onInput(i, $event)"
       @keydown="onKeydown(i, $event)"
@@ -73,3 +74,35 @@ watch(() => props.modelValue, (value) => {
   }
 })
 </script>
+
+<style scoped>
+.code-cell {
+  width: 2.75rem;
+  height: 3.5rem;
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #fff;
+  border-radius: 0.75rem;
+  background: rgb(var(--d-900) / 0.6);
+  border: 1px solid rgb(var(--d-700));
+  outline: none;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+.code-cell::selection { background: transparent; }
+.code-cell.code-filled {
+  border-color: rgb(var(--accent-500) / 0.55);
+  background: rgb(var(--accent-500) / 0.08);
+}
+.code-cell:focus {
+  border-color: rgb(var(--accent-500));
+  background: rgb(var(--d-900) / 0.9);
+  box-shadow: 0 0 0 4px rgb(var(--accent-500) / 0.18);
+  transform: translateY(-2px);
+}
+.code-cell:disabled { opacity: 0.6; cursor: not-allowed; }
+
+@media (max-width: 380px) {
+  .code-cell { width: 2.4rem; height: 3.1rem; font-size: 1.25rem; }
+}
+</style>

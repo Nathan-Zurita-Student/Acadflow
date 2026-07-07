@@ -12,7 +12,7 @@
         <div
           v-for="t in toasts"
           :key="t.id"
-          class="flex items-center gap-3 pl-4 pr-3 py-3 rounded-xl shadow-2xl text-sm font-medium pointer-events-auto w-80"
+          class="flex items-center gap-3 pl-4 pr-3 py-3 rounded-xl shadow-2xl text-sm font-medium pointer-events-auto w-80 backdrop-blur-md"
           :class="classes(t.type)"
         >
           <Icon :name="icon(t.type)" :size="20" class="flex-shrink-0" />

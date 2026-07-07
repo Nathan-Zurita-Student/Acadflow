@@ -1,9 +1,9 @@
 ﻿<template>
-  <div class="space-y-6 animate-fade-in" v-if="dashboard">
+  <div class="space-y-6 stagger-in" v-if="dashboard">
     <!-- Header -->
     <div class="flex items-start justify-between gap-3">
       <div>
-        <h1 class="text-xl font-bold text-white">{{ dashboard.project.name }}</h1>
+        <h1 class="text-2xl font-bold tracking-tight text-white">{{ dashboard.project.name }}</h1>
         <p v-if="dashboard.project.description" class="text-dark-400 text-sm mt-1">{{ dashboard.project.description }}</p>
       </div>
       <RiskBadge :level="dashboard.risk_level" />
@@ -120,11 +120,13 @@
   </div>
 
   <div v-else-if="loading" class="space-y-6">
-    <div class="animate-pulse space-y-4">
-      <div class="h-8 w-64 bg-dark-800 rounded" />
-      <div class="grid grid-cols-4 gap-4">
-        <div v-for="i in 4" :key="i" class="h-24 bg-dark-800 rounded-xl" />
-      </div>
+    <Skeleton w="16rem" h="2rem" />
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <Skeleton v-for="i in 4" :key="i" h="6rem" rounded="rounded-xl" />
+    </div>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <Skeleton h="16rem" rounded="rounded-xl" />
+      <Skeleton h="16rem" rounded="rounded-xl" />
     </div>
   </div>
 
@@ -147,6 +149,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useProjectsStore } from '@/stores/projects'
 import { useAuthStore } from '@/stores/auth'
 import StatCard from '@/components/ui/StatCard.vue'
+import Skeleton from '@/components/ui/Skeleton.vue'
 import RiskBadge from '@/components/ui/RiskBadge.vue'
 import MemberRow from '@/components/ui/MemberRow.vue'
 import TimelineItem from '@/components/ui/TimelineItem.vue'

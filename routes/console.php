@@ -10,3 +10,9 @@ Artisan::command('inspire', function () {
 
 // Exclusão definitiva de contas com soft delete além da carência (30 dias).
 Schedule::command('auth:purge-deleted')->daily();
+
+// Lembrete de tarefas que vencem amanhã (e-mail aos responsáveis).
+Schedule::command('tasks:notify-due')->dailyAt('08:00');
+
+// Resumo semanal por e-mail (segunda-feira de manhã).
+Schedule::command('reports:weekly')->weeklyOn(1, '08:00');

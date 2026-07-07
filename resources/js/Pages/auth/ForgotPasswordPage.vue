@@ -1,65 +1,101 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-dark-950 px-4">
-    <div class="w-full max-w-md animate-slide-up">
-      <div class="text-center mb-8">
-        <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-accent-600 mb-4 shadow-lg shadow-accent-600/30">
-          <svg class="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
-          </svg>
-        </div>
-        <h1 class="text-2xl font-bold text-white">Recuperar senha</h1>
-        <p class="text-dark-400 mt-1 text-sm">Informe seu e-mail para receber um código.</p>
-      </div>
-
-      <div class="card">
-        <form v-if="!sent" @submit.prevent="submit" class="space-y-4" novalidate>
-          <div>
-            <label class="label">E-mail</label>
-            <input v-model="email" type="email" class="input" placeholder="seu@email.com" autocomplete="email" />
+  <AuthLayout>
+    <div class="glass border-gradient rounded-2xl p-6 sm:p-8 animate-scale-in">
+      <transition name="swap" mode="out-in">
+        <!-- Estado inicial: pedir e-mail -->
+        <div v-if="!sent" key="form">
+          <div class="mb-6 text-center">
+            <div class="relative mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-accent-500/20 bg-accent-500/10 text-accent-300">
+              <span class="absolute -inset-2 rounded-full bg-accent-500/20 blur-xl animate-glow-pulse" aria-hidden="true" />
+              <svg class="relative h-7 w-7 animate-float-med" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 18v-2a4 4 0 0 1 4-4h4"/><circle cx="16" cy="16" r="6"/><path d="M16 14v2l1 1"/><circle cx="9" cy="7" r="4"/></svg>
+            </div>
+            <h1 class="text-[1.5rem] font-semibold tracking-tight text-white">Recuperar senha</h1>
+            <p class="mt-1.5 text-sm text-dark-400">Informe seu e-mail para receber um código de recuperação.</p>
           </div>
 
-          <p v-if="error" class="text-sm text-red-400 bg-red-400/10 border border-red-400/20 rounded-lg px-3 py-2">
-            {{ error }}
-          </p>
+          <form novalidate @submit.prevent="submit">
+            <AuthField
+              ref="emailField"
+              v-model="email"
+              label="E-mail"
+              icon="mail"
+              type="email"
+              inputmode="email"
+              autocomplete="email"
+              placeholder="seu@email.com"
+              :error="emailError"
+              :success="emailValid"
+              @blur="touched = true"
+            />
 
-          <button type="submit" :disabled="loading" class="btn-primary w-full justify-center">
-            <span v-if="loading" class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-            <span v-else>Enviar código</span>
-          </button>
-        </form>
+            <transition name="alert">
+              <div v-if="serverError" :key="serverError" class="mb-4 flex items-start gap-2.5 rounded-xl border border-red-500/25 bg-red-500/10 px-3.5 py-2.5 text-sm text-red-300 animate-shake">
+                <svg class="mt-0.5 h-4 w-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+                <span>{{ serverError }}</span>
+              </div>
+            </transition>
 
-        <div v-else class="text-center space-y-4">
-          <p class="text-sm text-dark-300">
-            Se o e-mail estiver cadastrado, você receberá um código de recuperação em instantes.
-          </p>
-          <RouterLink :to="`/reset-password?email=${encodeURIComponent(email)}`" class="btn-primary w-full justify-center">
-            Já tenho o código
-          </RouterLink>
+            <AuthSubmit :loading="loading">
+              Enviar código
+              <template #loading>Enviando…</template>
+            </AuthSubmit>
+          </form>
         </div>
 
-        <p class="mt-4 text-center text-sm text-dark-400">
-          Lembrou a senha?
-          <RouterLink to="/login" class="text-accent-400 hover:text-accent-300 font-medium ml-1">Entrar</RouterLink>
-        </p>
-      </div>
+        <!-- Estado enviado: sucesso -->
+        <div v-else key="sent" class="text-center">
+          <div class="relative mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full border border-emerald-500/25 bg-emerald-500/10 text-emerald-400">
+            <span class="absolute -inset-2 rounded-full bg-emerald-500/20 blur-xl" aria-hidden="true" />
+            <svg class="relative h-8 w-8 check-draw" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+          </div>
+          <h1 class="text-[1.4rem] font-semibold tracking-tight text-white">Verifique seu e-mail</h1>
+          <p class="mx-auto mt-2 max-w-xs text-sm leading-relaxed text-dark-400">
+            Se <span class="font-medium text-dark-200">{{ email }}</span> estiver cadastrado, você receberá um código de recuperação em instantes.
+          </p>
+          <RouterLink :to="`/reset-password?email=${encodeURIComponent(email)}`" class="mt-6 block">
+            <AuthSubmit type="button">Já tenho o código</AuthSubmit>
+          </RouterLink>
+        </div>
+      </transition>
+
+      <p class="mt-5 text-center text-sm text-dark-400">
+        Lembrou a senha?
+        <RouterLink to="/login" class="ml-1 font-medium text-accent-400 transition-colors hover:text-accent-300">Entrar</RouterLink>
+      </p>
     </div>
-  </div>
+  </AuthLayout>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { validateFields } from '@/composables/useFormValidation'
+import { ref, computed, onMounted } from 'vue'
 import { authApi } from '@/api/auth'
+import AuthLayout from '@/components/auth/AuthLayout.vue'
+import AuthField from '@/components/auth/AuthField.vue'
+import AuthSubmit from '@/components/auth/AuthSubmit.vue'
 
 const email = ref('')
-const error = ref('')
+const touched = ref(false)
+const submitted = ref(false)
+const serverError = ref('')
 const loading = ref(false)
 const sent = ref(false)
+const emailField = ref<InstanceType<typeof AuthField> | null>(null)
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const emailValid = computed(() => EMAIL_RE.test(email.value.trim()))
+const emailError = computed(() => {
+  if (!(touched.value || submitted.value)) return ''
+  if (!email.value.trim()) return 'Informe seu e-mail'
+  if (!emailValid.value) return 'E-mail inválido'
+  return ''
+})
+
+onMounted(() => emailField.value?.focus())
 
 async function submit() {
-  error.value = ''
-  const msg = validateFields([{ value: email.value, label: 'E-mail', rules: ['required', 'email'] }])
-  if (msg) { error.value = msg; return }
+  submitted.value = true
+  serverError.value = ''
+  if (emailError.value) { emailField.value?.focus(); return }
 
   loading.value = true
   try {
@@ -67,7 +103,7 @@ async function submit() {
     await authApi.forgotPassword(email.value)
     sent.value = true
   } catch (e: any) {
-    error.value = e.response?.status === 429
+    serverError.value = e.response?.status === 429
       ? 'Muitas solicitações. Aguarde um pouco e tente novamente.'
       : (e.response?.data?.message ?? 'Não foi possível enviar o código.')
   } finally {
@@ -75,3 +111,18 @@ async function submit() {
   }
 }
 </script>
+
+<style scoped>
+.alert-enter-active, .alert-leave-active { transition: opacity 0.25s, transform 0.25s; }
+.alert-enter-from, .alert-leave-to { opacity: 0; transform: translateY(-4px); }
+.swap-enter-active, .swap-leave-active { transition: opacity 0.3s, transform 0.3s; }
+.swap-enter-from { opacity: 0; transform: translateY(8px); }
+.swap-leave-to { opacity: 0; transform: translateY(-8px); }
+
+.check-draw path {
+  stroke-dasharray: 26;
+  stroke-dashoffset: 26;
+  animation: draw 0.5s cubic-bezier(0.65, 0, 0.35, 1) 0.15s forwards;
+}
+@keyframes draw { to { stroke-dashoffset: 0; } }
+</style>

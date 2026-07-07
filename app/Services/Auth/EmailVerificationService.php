@@ -5,6 +5,7 @@ namespace App\Services\Auth;
 use App\Models\EmailVerificationCode;
 use App\Models\User;
 use App\Notifications\Auth\EmailVerificationCodeNotification;
+use App\Notifications\Auth\WelcomeNotification;
 use App\Support\SafeNotify;
 use Illuminate\Auth\Events\Verified;
 
@@ -43,5 +44,11 @@ class EmailVerificationService
         $this->codes->consume($record);
 
         event(new Verified($user));
+
+        // Boas-vindas assim que a conta é ativada (não bloqueia a verificação).
+        SafeNotify::attempt(
+            fn () => $user->notify(new WelcomeNotification()),
+            'welcome_email',
+        );
     }
 }

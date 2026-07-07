@@ -17,6 +17,7 @@
         "axios": "^1.17.0",
         "dompurify": "^3.4.10",
         "laravel-echo": "^2.3.7",
+        "lottie-web": "^5.13.0",
         "marked": "^18.0.5",
         "pinia": "^3.0.4",
         "pusher-js": "^8.5.0",
