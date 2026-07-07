@@ -50,8 +50,6 @@ defineSlots<{ icon?: () => any; action?: () => any }>()
   color: rgb(var(--accent-300));
   background: linear-gradient(160deg, rgb(var(--accent-500) / 0.16), rgb(var(--accent-500) / 0.04));
   border: 1px solid rgb(var(--accent-500) / 0.2);
-  animation: floatY 6s ease-in-out infinite;
-  will-change: transform;
 }
 .empty-glow {
   position: absolute;

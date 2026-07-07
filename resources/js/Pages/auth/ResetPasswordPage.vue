@@ -4,7 +4,7 @@
       <div class="mb-6 text-center">
         <div class="relative mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-accent-500/20 bg-accent-500/10 text-accent-300">
           <span class="absolute -inset-2 rounded-full bg-accent-500/20 blur-xl animate-glow-pulse" aria-hidden="true" />
-          <svg class="relative h-7 w-7 animate-float-med" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><circle cx="12" cy="16" r="1"/></svg>
+          <svg class="relative h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><circle cx="12" cy="16" r="1"/></svg>
         </div>
         <h1 class="text-[1.5rem] font-semibold tracking-tight text-white">Nova senha</h1>
         <p class="mt-1.5 text-sm text-dark-400">Informe o código recebido e defina uma nova senha.</p>

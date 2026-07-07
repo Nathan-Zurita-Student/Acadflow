@@ -27,9 +27,6 @@ const sizeMap = {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  /* Flutua o conjunto inteiro (sem revelar bordas da imagem). */
-  animation: floatY 7s ease-in-out infinite;
-  will-change: transform;
 }
 
 .mark-glow {
@@ -79,6 +76,6 @@ const sizeMap = {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .brand-mark, .mark-glow, .mark-sheen { animation: none; }
+  .mark-glow, .mark-sheen { animation: none; }
 }
 </style>

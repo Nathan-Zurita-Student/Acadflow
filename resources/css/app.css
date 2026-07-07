@@ -162,7 +162,6 @@
   .card-interactive { @apply cursor-pointer; }
   .card-interactive:hover {
     border-color: rgb(var(--d-600));
-    transform: translateY(-2px);
     box-shadow: 0 1px 2px rgb(0 0 0 / 0.2), 0 16px 40px -18px rgb(0 0 0 / 0.7);
   }
   .input {
@@ -204,12 +203,11 @@
   .stagger-in > *:nth-child(7) { animation-delay: 0.40s; }
   .stagger-in > *:nth-child(8) { animation-delay: 0.46s; }
 
-  /* Card que reage ao hover com leve elevação + brilho em accent. */
+  /* Card que reage ao hover com brilho em accent (sem elevação). */
   .card-glow {
-    transition: border-color 0.25s ease, box-shadow 0.3s ease, transform 0.25s ease;
+    transition: border-color 0.25s ease, box-shadow 0.3s ease;
   }
   .card-glow:hover {
-    transform: translateY(-3px);
     border-color: rgb(var(--accent-500) / 0.4);
     box-shadow: 0 1px 2px rgb(0 0 0 / 0.2), 0 18px 44px -18px rgb(var(--accent-600) / 0.5);
   }

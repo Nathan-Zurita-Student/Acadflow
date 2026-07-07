@@ -1,9 +1,9 @@
 <template>
   <div class="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
-    <!-- Orbs de gradiente (mesh) em movimento lento -->
-    <span class="orb orb-1 animate-drift" />
-    <span class="orb orb-2 animate-drift-rev" />
-    <span class="orb orb-3 animate-float-slow" />
+    <!-- Orbs de gradiente (mesh) em movimento -->
+    <span class="orb orb-1" />
+    <span class="orb orb-2" />
+    <span class="orb orb-3" />
     <!-- Aurora superior -->
     <span class="aurora animate-aurora" />
     <!-- Grid tecnológico com fade radial -->
@@ -27,16 +27,35 @@
   top: -12%; left: -8%;
   width: 46vw; height: 46vw; max-width: 640px; max-height: 640px;
   background: radial-gradient(circle, rgb(var(--accent-500) / 0.55), transparent 68%);
+  animation: orbDriftA 16s ease-in-out infinite;
 }
 .orb-2 {
   bottom: -18%; right: -10%;
   width: 50vw; height: 50vw; max-width: 680px; max-height: 680px;
   background: radial-gradient(circle, rgb(139 92 246 / 0.5), transparent 68%);
+  animation: orbDriftB 19s ease-in-out infinite;
 }
 .orb-3 {
   top: 32%; left: 38%;
   width: 34vw; height: 34vw; max-width: 460px; max-height: 460px;
   background: radial-gradient(circle, rgb(34 211 238 / 0.32), transparent 70%);
+  animation: orbDriftC 13s ease-in-out infinite;
+}
+
+/* Movimento mais amplo e dinâmico dos orbs (só transform → GPU). */
+@keyframes orbDriftA {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  33%      { transform: translate3d(9%, -11%, 0) scale(1.14); }
+  66%      { transform: translate3d(-8%, 7%, 0) scale(0.92); }
+}
+@keyframes orbDriftB {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  33%      { transform: translate3d(-10%, 9%, 0) scale(1.12); }
+  66%      { transform: translate3d(8%, -7%, 0) scale(0.9); }
+}
+@keyframes orbDriftC {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50%      { transform: translate3d(6%, -14%, 0) scale(1.1); }
 }
 .aurora {
   position: absolute;

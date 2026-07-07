@@ -54,16 +54,15 @@
                     :style="{ background: c }" />
             </div>
             <p class="text-[13px] text-dark-300">
-              <span class="font-semibold text-white">+2.000</span> estudantes e pesquisadores
-            </p>
+              <span class="font-semibold text-white">Faça parte da nova geração de gestão acadêmica!</span></p>
           </div>
         </div>
       </aside>
 
       <!-- Área do formulário -->
-      <main class="flex min-h-screen flex-col items-center justify-center px-4 py-10 sm:px-6">
+      <main class="flex min-h-screen flex-col items-center justify-center px-4 py-5 sm:px-6">
         <!-- Logo compacto (mobile/tablet) -->
-        <RouterLink to="/" class="mb-8 flex flex-col items-center gap-3 lg:hidden animate-scale-in">
+        <RouterLink to="/" class="mb-5 flex flex-col items-center gap-3 lg:hidden animate-scale-in">
           <BrandMark size="md" />
           <span class="text-lg font-semibold tracking-tight text-white">AcadFlow</span>
         </RouterLink>
@@ -72,7 +71,7 @@
           <slot />
         </div>
 
-        <div class="mt-8 w-full max-w-md">
+        <div class="mt-5 w-full max-w-md">
           <slot name="footer" />
         </div>
       </main>

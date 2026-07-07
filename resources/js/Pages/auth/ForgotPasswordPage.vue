@@ -7,7 +7,7 @@
           <div class="mb-6 text-center">
             <div class="relative mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-accent-500/20 bg-accent-500/10 text-accent-300">
               <span class="absolute -inset-2 rounded-full bg-accent-500/20 blur-xl animate-glow-pulse" aria-hidden="true" />
-              <svg class="relative h-7 w-7 animate-float-med" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 18v-2a4 4 0 0 1 4-4h4"/><circle cx="16" cy="16" r="6"/><path d="M16 14v2l1 1"/><circle cx="9" cy="7" r="4"/></svg>
+              <svg class="relative h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 18v-2a4 4 0 0 1 4-4h4"/><circle cx="16" cy="16" r="6"/><path d="M16 14v2l1 1"/><circle cx="9" cy="7" r="4"/></svg>
             </div>
             <h1 class="text-[1.5rem] font-semibold tracking-tight text-white">Recuperar senha</h1>
             <p class="mt-1.5 text-sm text-dark-400">Informe seu e-mail para receber um código de recuperação.</p>

@@ -1,8 +1,8 @@
 <template>
   <AuthLayout>
-    <div class="glass border-gradient rounded-2xl p-6 sm:p-8 animate-scale-in">
+    <div class="glass border-gradient rounded-2xl p-5 sm:px-6 sm:py-5 animate-scale-in">
       <!-- Cabeçalho -->
-      <header class="mb-6">
+      <header class="mb-4">
         <h1 class="text-[1.6rem] font-semibold tracking-tight text-white">Crie sua conta</h1>
         <p class="mt-1 text-sm text-dark-400">Comece a organizar sua vida acadêmica</p>
       </header>
@@ -10,7 +10,7 @@
       <!-- SSO -->
       <GoogleButton />
 
-      <div class="my-5 flex items-center gap-3">
+      <div class="my-4 flex items-center gap-3">
         <div class="h-px flex-1 bg-gradient-to-r from-transparent to-dark-700" />
         <span class="text-xs text-dark-500">ou cadastre-se com e-mail</span>
         <div class="h-px flex-1 bg-gradient-to-l from-transparent to-dark-700" />
@@ -18,7 +18,7 @@
 
       <form novalidate @submit.prevent="handleRegister">
         <!-- Avatar (opcional) -->
-        <div class="mb-5 flex flex-col items-center gap-2">
+        <div class="mb-3 flex flex-col items-center gap-1.5">
           <button type="button" class="avatar-picker group" @click="fileInput?.click()">
             <span class="avatar-glow" aria-hidden="true" />
             <img v-if="avatarPreview" :src="avatarPreview" class="h-full w-full rounded-full object-cover" alt="Foto de perfil" />
@@ -73,7 +73,7 @@
 
           <!-- Medidor de força -->
           <transition name="collapse">
-            <div v-if="form.password" class="-mt-1 mb-3">
+            <div v-if="form.password" class="-mt-1 mb-2">
               <div class="flex gap-1.5">
                 <span
                   v-for="i in 4"
@@ -269,8 +269,8 @@ async function handleRegister() {
 /* Avatar picker */
 .avatar-picker {
   position: relative;
-  width: 5rem;
-  height: 5rem;
+  width: 4rem;
+  height: 4rem;
   border-radius: 9999px;
   cursor: pointer;
 }

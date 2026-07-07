@@ -135,7 +135,7 @@
       <div v-else class="flex-1 flex flex-col items-center justify-center gap-4 text-dark-500">
         <div class="relative flex h-16 w-16 items-center justify-center rounded-2xl border border-accent-500/20 bg-accent-500/10 text-accent-300">
           <span class="absolute -inset-2 rounded-full bg-accent-500/15 blur-xl animate-glow-pulse" aria-hidden="true" />
-          <svg class="relative h-8 w-8 animate-float-med" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+          <svg class="relative h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
             <path stroke-linecap="round" stroke-linejoin="round"
               d="M9 12h6m-6 4h4m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
