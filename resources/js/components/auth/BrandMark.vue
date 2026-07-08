@@ -1,13 +1,10 @@
 <template>
   <div class="brand-mark group" :class="sizeMap[size].wrap">
-    <!-- Glow pulsante atrás do tile -->
+    <!-- Brilho suave atrás do logo -->
     <span class="mark-glow" :class="sizeMap[size].glow" aria-hidden="true" />
 
-    <!-- Tile arredondado com o logo do AcadFlow + reflexo -->
-    <span class="mark-tile" :class="sizeMap[size].tile">
-      <span class="mark-sheen" aria-hidden="true" />
-      <img src="/imagem/acadflow.png" alt="AcadFlow" class="mark-img" />
-    </span>
+    <!-- Logo transparente do AcadFlow -->
+    <img src="/imagem/acadflow.png" alt="AcadFlow" class="mark-img" />
   </div>
 </template>
 
@@ -15,9 +12,9 @@
 withDefaults(defineProps<{ size?: 'sm' | 'md' | 'lg' }>(), { size: 'md' })
 
 const sizeMap = {
-  sm: { wrap: 'w-10 h-10', tile: 'rounded-xl',  glow: 'inset-0' },
-  md: { wrap: 'w-14 h-14', tile: 'rounded-2xl', glow: '-inset-1' },
-  lg: { wrap: 'w-16 h-16', tile: 'rounded-2xl', glow: '-inset-2' },
+  sm: { wrap: 'w-10 h-10', glow: 'inset-0' },
+  md: { wrap: 'w-14 h-14', glow: '-inset-1' },
+  lg: { wrap: 'w-16 h-16', glow: '-inset-2' },
 } as const
 </script>
 
@@ -32,29 +29,11 @@ const sizeMap = {
 .mark-glow {
   position: absolute;
   border-radius: 9999px;
-  background: radial-gradient(circle, rgb(var(--accent-500) / 0.6), transparent 70%);
-  filter: blur(14px);
-  opacity: 0.5;
+  background: radial-gradient(circle, rgb(var(--accent-500) / 0.45), transparent 70%);
+  filter: blur(13px);
+  opacity: 0.45;
   animation: glowPulse 4s ease-in-out infinite;
   will-change: transform, opacity;
-}
-
-.mark-tile {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  background: rgb(var(--d-900));
-  box-shadow:
-    0 10px 30px -8px rgb(0 0 0 / 0.5),
-    inset 0 0 0 1px rgb(255 255 255 / 0.08);
-  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-.group:hover .mark-tile {
-  transform: scale(1.06) rotate(-3deg);
 }
 
 .mark-img {
@@ -62,20 +41,14 @@ const sizeMap = {
   z-index: 1;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-
-/* Reflexo diagonal que cruza o tile periodicamente */
-.mark-sheen {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  background: linear-gradient(110deg, transparent 30%, rgb(255 255 255 / 0.35) 50%, transparent 70%);
-  transform: translateX(-120%);
-  animation: shimmer 4.5s ease-in-out infinite;
+.group:hover .mark-img {
+  transform: scale(1.08) rotate(-3deg);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .mark-glow, .mark-sheen { animation: none; }
+  .mark-glow { animation: none; }
 }
 </style>

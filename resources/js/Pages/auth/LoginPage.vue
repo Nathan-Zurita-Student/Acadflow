@@ -1,6 +1,6 @@
 <template>
   <AuthLayout>
-    <div class="glass border-gradient rounded-2xl p-6 sm:p-8 animate-scale-in">
+    <div class="animate-scale-in">
       <!-- Cabeçalho -->
       <header class="mb-6">
         <h1 class="text-[1.6rem] font-semibold tracking-tight text-white">Bem-vindo de volta</h1>

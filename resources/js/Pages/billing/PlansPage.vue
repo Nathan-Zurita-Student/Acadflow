@@ -106,7 +106,7 @@
         </ul>
 
         <button
-          class="mt-5 text-sm w-full"
+          class="mt-5 text-sm w-full justify-center"
           :class="buttonInfo(plan).disabled ? 'btn-secondary cursor-default' : 'btn-primary'"
           :disabled="busy || buttonInfo(plan).disabled"
           @click="onSelect(plan)"

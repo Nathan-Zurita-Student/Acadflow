@@ -1,6 +1,6 @@
 <template>
   <AuthLayout>
-    <div class="glass border-gradient rounded-2xl p-6 sm:p-8 animate-scale-in">
+    <div class="animate-scale-in">
       <transition name="swap" mode="out-in">
         <!-- Estado inicial: pedir e-mail -->
         <div v-if="!sent" key="form">

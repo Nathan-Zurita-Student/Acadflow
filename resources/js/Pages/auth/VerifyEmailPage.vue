@@ -1,6 +1,6 @@
 <template>
   <AuthLayout>
-    <div class="glass border-gradient rounded-2xl p-6 sm:p-8 animate-scale-in">
+    <div class="animate-scale-in">
       <!-- Ícone + cabeçalho -->
       <div class="mb-6 text-center">
         <div class="relative mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-accent-500/20 bg-accent-500/10 text-accent-300">

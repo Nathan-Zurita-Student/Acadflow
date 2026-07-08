@@ -1,6 +1,6 @@
 <template>
   <AuthLayout :hide-mobile-logo="true">
-    <div class="glass border-gradient rounded-2xl p-5 sm:px-6 sm:py-5 animate-scale-in">
+    <div class="animate-scale-in">
       <!-- Cabeçalho -->
       <header class="mb-4">
         <h1 class="text-[1.6rem] font-semibold tracking-tight text-white">Crie sua conta</h1>

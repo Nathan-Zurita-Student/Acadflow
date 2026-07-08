@@ -1,12 +1,12 @@
 <template>
-  <div class="relative min-h-screen w-full overflow-hidden bg-dark-950 text-dark-100">
+  <div class="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-dark-950 px-4 py-6 text-dark-100 sm:px-6">
     <!-- ============================ BACKGROUND VIVO ============================ -->
     <AuthBackground />
 
-    <!-- ============================ CONTEÚDO ============================ -->
-    <div class="relative z-10 grid min-h-screen w-full lg:grid-cols-[1.05fr_1fr]">
+    <!-- ============ RETÂNGULO "LIQUID GLASS" (marca + formulário) ============ -->
+    <div class="auth-card relative z-10 grid w-full max-w-md overflow-hidden rounded-[26px] lg:max-w-4xl lg:grid-cols-[1.02fr_1fr]">
       <!-- Painel de marca — somente desktop -->
-      <aside class="relative hidden flex-col justify-between overflow-hidden px-12 py-14 lg:flex xl:px-16">
+      <aside class="brand-side relative hidden flex-col justify-center gap-12 overflow-hidden p-9 lg:flex xl:p-10">
         <!-- Topo: logo + wordmark -->
         <RouterLink to="/" class="flex items-center gap-3 animate-rise" style="animation-delay: 40ms">
           <BrandMark size="md" />
@@ -45,33 +45,21 @@
           </ul>
         </div>
 
-        <!-- Base: prova social em vidro -->
-        <div class="animate-rise" style="animation-delay: 560ms">
-          <div class="glass-soft inline-flex items-center gap-3 rounded-2xl px-4 py-3">
-            <div class="flex -space-x-2">
-              <span v-for="(c, i) in avatarColors" :key="i"
-                    class="h-7 w-7 rounded-full border-2 border-dark-900"
-                    :style="{ background: c }" />
-            </div>
-            <p class="text-[13px] text-dark-300">
-              <span class="font-semibold text-white">Faça parte da nova geração de gestão acadêmica!</span></p>
-          </div>
-        </div>
       </aside>
 
       <!-- Área do formulário -->
-      <main class="flex min-h-screen flex-col items-center justify-center px-4 py-5 sm:px-6">
+      <main class="flex flex-col justify-center p-6 sm:p-8 lg:p-9">
         <!-- Logo compacto (mobile/tablet) -->
-        <RouterLink v-if="!hideMobileLogo" to="/" class="mb-5 flex flex-col items-center gap-3 lg:hidden animate-scale-in">
+        <RouterLink v-if="!hideMobileLogo" to="/" class="mb-6 flex flex-col items-center gap-3 lg:hidden animate-scale-in">
           <BrandMark size="md" />
           <span class="text-lg font-semibold tracking-tight text-white">AcadFlow</span>
         </RouterLink>
 
-        <div class="w-full max-w-md">
+        <div class="w-full">
           <slot />
         </div>
 
-        <div class="mt-5 w-full max-w-md">
+        <div class="mt-5 w-full">
           <slot name="footer" />
         </div>
       </main>
@@ -102,11 +90,35 @@ const features = [
     icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M12 3l1.9 4.6L18.5 9.5 14 11.4 12 16l-2-4.6L5.5 9.5 10 7.6 12 3z"/><path d="M19 15l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8.8-2z"/></svg>`,
   },
 ]
-
-const avatarColors = ['#6366f1', '#8b5cf6', '#ec4899', '#06b6d4']
 </script>
 
 <style scoped>
+/* ---------------- Liquid glass card ---------------- */
+.auth-card {
+  background: linear-gradient(155deg, rgb(var(--d-800) / 0.55), rgb(var(--d-900) / 0.42));
+  backdrop-filter: blur(25px) saturate(160%);
+  -webkit-backdrop-filter: blur(30px) saturate(160%);
+  border: 1px solid rgb(255 255 255 / 0.10);
+  box-shadow:
+    0 40px 90px -30px rgb(0 0 0 / 0.75),
+    0 8px 30px -12px rgb(0 0 0 / 0.5),
+    inset 0 1px 0 0 rgb(255 255 255 / 0.10);
+}
+
+/* Lado da marca: leve tint em accent + divisória fina separando do formulário. */
+.brand-side {
+  background: linear-gradient(160deg, rgb(var(--accent-500) / 0.10), transparent 62%);
+}
+.brand-side::after {
+  content: '';
+  position: absolute;
+  top: 8%;
+  bottom: 8%;
+  right: 0;
+  width: 1px;
+  background: linear-gradient(to bottom, transparent, rgb(255 255 255 / 0.10), transparent);
+}
+
 /* ---------------- Feature icons ---------------- */
 .feature-icon {
   display: inline-flex;

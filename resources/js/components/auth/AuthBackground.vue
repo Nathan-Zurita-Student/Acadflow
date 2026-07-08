@@ -4,6 +4,11 @@
     <span class="orb orb-1" />
     <span class="orb orb-2" />
     <span class="orb orb-3" />
+    <span class="orb orb-4" />
+    <span class="orb orb-5" />
+    <span class="orb orb-6" />
+    <span class="orb orb-7" />
+    <span class="orb orb-8" />
     <!-- Aurora superior -->
     <span class="aurora animate-aurora" />
     <!-- Grid tecnológico com fade radial -->
@@ -27,19 +32,54 @@
   top: -12%; left: -8%;
   width: 46vw; height: 46vw; max-width: 640px; max-height: 640px;
   background: radial-gradient(circle, rgb(var(--accent-500) / 0.55), transparent 68%);
-  animation: orbDriftA 16s ease-in-out infinite;
+  animation: orbDriftA 5s ease-in-out infinite;
 }
 .orb-2 {
   bottom: -18%; right: -10%;
   width: 50vw; height: 50vw; max-width: 680px; max-height: 680px;
   background: radial-gradient(circle, rgb(139 92 246 / 0.5), transparent 68%);
-  animation: orbDriftB 19s ease-in-out infinite;
+  animation: orbDriftB 5s ease-in-out infinite;
 }
 .orb-3 {
   top: 32%; left: 38%;
   width: 34vw; height: 34vw; max-width: 460px; max-height: 460px;
   background: radial-gradient(circle, rgb(34 211 238 / 0.32), transparent 70%);
-  animation: orbDriftC 13s ease-in-out infinite;
+  animation: orbDriftC 5s ease-in-out infinite;
+}
+.orb-4 {
+  top: 52%; left: 2%;
+  width: 30vw; height: 30vw; max-width: 420px; max-height: 420px;
+  background: radial-gradient(circle, rgb(var(--accent-500) / 0.40), transparent 70%);
+  animation: orbDriftB 5s ease-in-out infinite;
+  animation-delay: -2s;
+}
+.orb-5 {
+  top: 4%; right: 22%;
+  width: 28vw; height: 28vw; max-width: 380px; max-height: 380px;
+  background: radial-gradient(circle, rgb(139 92 246 / 0.42), transparent 70%);
+  animation: orbDriftC 5s ease-in-out infinite;
+  animation-delay: -3.5s;
+}
+.orb-6 {
+  bottom: 2%; left: 44%;
+  width: 26vw; height: 26vw; max-width: 360px; max-height: 360px;
+  background: radial-gradient(circle, rgb(34 211 238 / 0.30), transparent 72%);
+  animation: orbDriftA 5s ease-in-out infinite;
+  animation-delay: -1.5s;
+}
+.orb-7 {
+  top: 18%; right: 4%;
+  width: 24vw; height: 24vw; max-width: 340px; max-height: 340px;
+  background: radial-gradient(circle, rgb(var(--accent-500) / 0.34), transparent 72%);
+  animation: orbDriftC 5s ease-in-out infinite;
+  animation-delay: -2.6s;
+}
+.orb-8 {
+  bottom: 24%; left: 22%;
+  width: 22vw; height: 22vw; max-width: 320px; max-height: 320px;
+  background: radial-gradient(circle, rgb(139 92 246 / 0.34), transparent 72%);
+  animation: orbDriftB 5s ease-in-out infinite;
+  animation-delay: -4s;
 }
 
 /* Movimento mais amplo e dinâmico dos orbs (só transform → GPU). */
