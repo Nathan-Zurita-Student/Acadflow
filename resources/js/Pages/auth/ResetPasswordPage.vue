@@ -118,7 +118,7 @@ const submitted = ref(false)
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const emailValid = computed(() => EMAIL_RE.test(email.value.trim()))
 const emailError = computed(() => {
-  if (lockedEmail.value || !(touched.email || submitted.value)) return ''
+  if (lockedEmail.value || !submitted.value) return ''
   if (!email.value.trim()) return 'Informe seu e-mail'
   if (!emailValid.value) return 'E-mail inválido'
   return ''
@@ -133,14 +133,14 @@ const pwChecks = computed(() => ({
 }))
 const passwordStrong = computed(() => Object.values(pwChecks.value).every(Boolean))
 const passwordError = computed(() => {
-  if (!(touched.password || submitted.value)) return ''
+  if (!submitted.value) return ''
   if (!password.value) return 'Crie uma senha'
   if (!pwChecks.value.length) return 'Use pelo menos 8 caracteres'
   if (!passwordStrong.value) return 'Inclua maiúsculas, minúsculas, número e símbolo'
   return ''
 })
 const confirmError = computed(() => {
-  if (!(touched.confirm || submitted.value) || !passwordConfirmation.value) return ''
+  if (!submitted.value || !passwordConfirmation.value) return ''
   return password.value !== passwordConfirmation.value ? 'As senhas não coincidem' : ''
 })
 

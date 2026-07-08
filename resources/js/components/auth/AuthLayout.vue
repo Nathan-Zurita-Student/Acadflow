@@ -62,7 +62,7 @@
       <!-- Área do formulário -->
       <main class="flex min-h-screen flex-col items-center justify-center px-4 py-5 sm:px-6">
         <!-- Logo compacto (mobile/tablet) -->
-        <RouterLink to="/" class="mb-5 flex flex-col items-center gap-3 lg:hidden animate-scale-in">
+        <RouterLink v-if="!hideMobileLogo" to="/" class="mb-5 flex flex-col items-center gap-3 lg:hidden animate-scale-in">
           <BrandMark size="md" />
           <span class="text-lg font-semibold tracking-tight text-white">AcadFlow</span>
         </RouterLink>
@@ -82,6 +82,8 @@
 <script setup lang="ts">
 import BrandMark from './BrandMark.vue'
 import AuthBackground from './AuthBackground.vue'
+
+defineProps<{ hideMobileLogo?: boolean }>()
 
 const features = [
   {

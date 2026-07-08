@@ -1,5 +1,5 @@
 <template>
-  <AuthLayout>
+  <AuthLayout :hide-mobile-logo="true">
     <div class="glass border-gradient rounded-2xl p-5 sm:px-6 sm:py-5 animate-scale-in">
       <!-- Cabeçalho -->
       <header class="mb-4">
@@ -171,7 +171,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 // --- Validações reativas ---
 const nameValid = computed(() => form.name.trim().length >= 2)
 const nameError = computed(() => {
-  if (!(touched.name || submitted.value)) return ''
+  if (!submitted.value) return ''
   if (!form.name.trim()) return 'Informe seu nome'
   if (!nameValid.value) return 'Nome muito curto'
   return ''
@@ -179,7 +179,7 @@ const nameError = computed(() => {
 
 const emailValid = computed(() => EMAIL_RE.test(form.email.trim()))
 const emailError = computed(() => {
-  if (!(touched.email || submitted.value)) return ''
+  if (!submitted.value) return ''
   if (!form.email.trim()) return 'Informe seu e-mail'
   if (!emailValid.value) return 'E-mail inválido'
   return ''
@@ -194,7 +194,7 @@ const pwChecks = computed(() => ({
 }))
 const passwordStrong = computed(() => Object.values(pwChecks.value).every(Boolean))
 const passwordError = computed(() => {
-  if (!(touched.password || submitted.value)) return ''
+  if (!submitted.value) return ''
   if (!form.password) return 'Crie uma senha'
   if (!pwChecks.value.length) return 'Use pelo menos 8 caracteres'
   if (!passwordStrong.value) return 'Inclua maiúsculas, minúsculas, número e símbolo'
@@ -209,7 +209,7 @@ const strength = computed(() => {
   return { bars: 4, label: 'Senha excelente', barClass: 'bg-emerald-500', textClass: 'text-emerald-400' }
 })
 
-const termsError = computed(() => (submitted.value || touched.terms) && !form.terms)
+const termsError = computed(() => submitted.value && !form.terms)
 
 const loginLink = computed(() =>
   route.query.redirect ? `/login?redirect=${encodeURIComponent(String(route.query.redirect))}` : '/login',

@@ -84,7 +84,7 @@ const emailField = ref<InstanceType<typeof AuthField> | null>(null)
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const emailValid = computed(() => EMAIL_RE.test(email.value.trim()))
 const emailError = computed(() => {
-  if (!(touched.value || submitted.value)) return ''
+  if (!submitted.value) return ''
   if (!email.value.trim()) return 'Informe seu e-mail'
   if (!emailValid.value) return 'E-mail inválido'
   return ''
