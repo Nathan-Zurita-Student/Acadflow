@@ -108,7 +108,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 const emailValid = computed(() => EMAIL_RE.test(form.email.trim()))
 const emailError = computed(() => {
-  if (!(touched.email || submitted.value)) return ''
+  if (!submitted.value) return ''
   if (!form.email.trim()) return 'Informe seu e-mail'
   if (!emailValid.value) return 'E-mail inválido'
   return ''
@@ -116,7 +116,7 @@ const emailError = computed(() => {
 const emailSuccess = computed(() => emailValid.value)
 
 const passwordError = computed(() => {
-  if (!(touched.password || submitted.value)) return ''
+  if (!submitted.value) return ''
   if (!form.password) return 'Informe sua senha'
   return ''
 })
