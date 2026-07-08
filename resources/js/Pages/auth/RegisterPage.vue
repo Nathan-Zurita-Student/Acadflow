@@ -1,5 +1,5 @@
 <template>
-  <AuthLayout :hide-mobile-logo="true">
+  <AuthLayout :hide-mobile-logo="true" :compact="true">
     <div class="animate-scale-in">
       <!-- Cabeçalho -->
       <header class="mb-4">

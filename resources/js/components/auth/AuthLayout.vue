@@ -48,7 +48,7 @@
       </aside>
 
       <!-- Área do formulário -->
-      <main class="flex flex-col justify-center p-6 sm:p-8 lg:p-9">
+      <main class="flex flex-col justify-center p-6 sm:p-8" :class="compact ? 'lg:px-9 lg:py-5' : 'lg:p-9'">
         <!-- Logo compacto (mobile/tablet) -->
         <RouterLink v-if="!hideMobileLogo" to="/" class="mb-6 flex flex-col items-center gap-3 lg:hidden animate-scale-in">
           <BrandMark size="md" />
@@ -71,7 +71,7 @@
 import BrandMark from './BrandMark.vue'
 import AuthBackground from './AuthBackground.vue'
 
-defineProps<{ hideMobileLogo?: boolean }>()
+defineProps<{ hideMobileLogo?: boolean; compact?: boolean }>()
 
 const features = [
   {
