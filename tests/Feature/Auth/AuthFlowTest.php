@@ -25,6 +25,7 @@ it('registra usuário como não verificado e envia código', function () {
         'email'                 => '  FULANO@Example.com ',
         'password'              => 'Str0ng#Pass1',
         'password_confirmation' => 'Str0ng#Pass1',
+        'terms'                 => true,
     ]);
 
     $response->assertCreated()->assertJsonPath('user.email_verified', false);
@@ -44,6 +45,7 @@ it('rejeita senha fraca no cadastro', function () {
         'email'                 => 'fraco@example.com',
         'password'              => '12345678',
         'password_confirmation' => '12345678',
+        'terms'                 => true,
     ])->assertStatus(422)->assertJsonValidationErrors('password');
 });
 
@@ -177,6 +179,7 @@ it('exclui a conta com senha, faz soft delete e libera o e-mail', function () {
         'email'                 => 'bye@example.com',
         'password'              => 'Str0ng#Pass1',
         'password_confirmation' => 'Str0ng#Pass1',
+        'terms'                 => true,
     ])->assertCreated();
 });
 

@@ -142,12 +142,14 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { useOnboarding } from '@/composables/useOnboarding'
 import AuthLayout from '@/components/auth/AuthLayout.vue'
 import AuthField from '@/components/auth/AuthField.vue'
 import AuthSubmit from '@/components/auth/AuthSubmit.vue'
 import GoogleButton from '@/components/auth/GoogleButton.vue'
 
 const auth = useAuthStore()
+const { markPendingTour } = useOnboarding()
 const router = useRouter()
 const route = useRoute()
 
@@ -250,6 +252,7 @@ async function handleRegister() {
       terms: form.terms,
     })
     success.value = true
+    markPendingTour() // agenda o tour de boas-vindas para a 1ª entrada no app
     // Nova conta entra não verificada → confirmação por código.
     setTimeout(() => router.push('/verify-email'), 550)
   } catch (e: any) {

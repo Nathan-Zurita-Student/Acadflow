@@ -8,6 +8,7 @@ test('user can register', function () {
         'email'                 => 'test@example.com',
         'password'              => 'Str0ng#Pass1',
         'password_confirmation' => 'Str0ng#Pass1',
+        'terms'                 => true,
     ]);
 
     // Contrato novo: sessão/cookie (sem token) e usuário ainda não verificado.
@@ -24,6 +25,7 @@ test('registered user has member role', function () {
         'email'                 => 'member@example.com',
         'password'              => 'Str0ng#Pass1',
         'password_confirmation' => 'Str0ng#Pass1',
+        'terms'                 => true,
     ]);
 
     $user = User::where('email', 'member@example.com')->first();

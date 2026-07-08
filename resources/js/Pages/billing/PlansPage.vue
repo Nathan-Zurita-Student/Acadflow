@@ -1,5 +1,5 @@
 <template>
-  <div class="space-y-6 animate-fade-in" :class="embedded ? '' : 'max-w-5xl mx-auto'">
+  <div class="space-y-6" :class="embedded ? '' : 'max-w-5xl mx-auto'">
     <!-- Header (oculto quando embutido nas Configurações) -->
     <div v-if="!embedded">
       <h1 class="text-xl font-bold text-white">Planos & Assinatura</h1>
@@ -53,6 +53,13 @@
     <!-- Loading -->
     <div v-if="loading" class="grid grid-cols-1 md:grid-cols-3 gap-4">
       <div v-for="i in 3" :key="i" class="card animate-pulse h-72" />
+    </div>
+
+    <!-- Erro ao carregar -->
+    <div v-else-if="error" class="card text-center py-10">
+      <p class="text-dark-200 font-medium">Não foi possível carregar os planos.</p>
+      <p class="text-dark-500 text-sm mt-1">Verifique sua conexão e tente novamente.</p>
+      <button class="btn-primary mt-4" @click="load">Tentar novamente</button>
     </div>
 
     <!-- Planos -->
@@ -161,6 +168,7 @@ const { confirm } = useConfirm()
 const auth = useAuthStore()
 
 const loading = ref(true)
+const error = ref(false)
 const busy = ref(false)
 const plans = ref<Plan[]>([])
 const current = ref<PlansResponse['current'] | null>(null)
@@ -197,8 +205,8 @@ const pendingNote = computed(() => {
   return `Mudança para ${p?.name ?? c.pending_plan} aguardando confirmação do pagamento.`
 })
 
-function formatPrice(value: number) {
-  return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+function formatPrice(value: number | null | undefined) {
+  return (value ?? 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 }
 
 function formatDate(iso: string) {
@@ -243,12 +251,14 @@ function buttonInfo(plan: Plan): { label: string; disabled: boolean } {
 
 async function load() {
   loading.value = true
+  error.value = false
   try {
     const { data } = await billingApi.plans()
-    plans.value = data.plans
-    current.value = data.current
-    cycle.value = data.current.cycle ?? 'monthly'
+    plans.value = data.plans ?? []
+    current.value = data.current ?? null
+    cycle.value = data.current?.cycle ?? 'monthly'
   } catch {
+    error.value = true
     toast.error('Não foi possível carregar os planos.')
   } finally {
     loading.value = false

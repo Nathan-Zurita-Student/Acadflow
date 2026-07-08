@@ -3,7 +3,7 @@ import Pusher from 'pusher-js'
 
 ;(window as any).Pusher = Pusher
 
-let echo!: Echo
+let echo!: Echo<any>
 
 try {
   const key = import.meta.env.VITE_REVERB_APP_KEY
@@ -17,8 +17,10 @@ try {
     wssPort: Number(import.meta.env.VITE_REVERB_PORT ?? 8080),
     forceTLS: (import.meta.env.VITE_REVERB_SCHEME ?? 'http') === 'https',
     enabledTransports: ['ws', 'wss'],
-    authorizer: (channel: { name: string }) => ({
-      authorize: (socketId: string, callback: (error: boolean, data: unknown) => void) => {
+    // Cast localizado: a assinatura do authorizer por sessão é a "deprecated"
+    // do laravel-echo v2 (funciona em runtime), mas os tipos v2 reclamam dela.
+    authorizer: ((channel: { name: string }) => ({
+      authorize: (socketId: string, callback: (error: unknown, data: unknown) => void) => {
         // Autenticação por SESSÃO/cookie: envia o cookie de sessão + o header CSRF.
         const xsrf = decodeURIComponent(
           document.cookie.match(/(?:^|;\s*)XSRF-TOKEN=([^;]+)/)?.[1] ?? ''
@@ -37,11 +39,11 @@ try {
           .then(data => callback(false, data))
           .catch(err => callback(true, err))
       },
-    }),
+    })) as any,
   })
 } catch {
   // Reverb not configured — AppLayout gracefully degrades to polling
-  echo = null as unknown as Echo
+  echo = null as unknown as Echo<any>
 }
 
 export default echo

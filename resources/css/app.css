@@ -191,8 +191,10 @@
 
   /* Entrada escalonada dos filhos diretos — aparição progressiva "viva". */
   .stagger-in > * {
-    opacity: 0;
-    animation: rise 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    /* `both`: o estado inicial (oculto) vem da própria animação (backwards),
+       então a base fica visível — se um filho tiver seu próprio animate-*, ele
+       não fica preso em opacity:0. */
+    animation: rise 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
   }
   .stagger-in > *:nth-child(1) { animation-delay: 0.04s; }
   .stagger-in > *:nth-child(2) { animation-delay: 0.10s; }

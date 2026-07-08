@@ -147,8 +147,9 @@ async function save() {
     form.value.password_confirmation = ''
     setTimeout(() => emit('close'), 1200)
   } catch (e: any) {
+    const errs = e.response?.data?.errors as Record<string, string[]> | undefined
     error.value = e.response?.data?.message
-      ?? Object.values(e.response?.data?.errors ?? {})[0]?.[0]
+      ?? (errs ? Object.values(errs)[0]?.[0] : undefined)
       ?? 'Erro ao salvar perfil.'
   } finally {
     saving.value = false
