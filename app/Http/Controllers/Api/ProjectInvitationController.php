@@ -73,6 +73,7 @@ class ProjectInvitationController extends Controller
                 $project->name,
                 $request->user()->name,
                 $invitation->role,
+                $invitation->token,
             )),
             'project_invitation_email',
         );

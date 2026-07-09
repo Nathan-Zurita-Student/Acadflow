@@ -11,6 +11,19 @@
         <p class="text-sm text-dark-400">Entrando no projeto…</p>
       </div>
 
+      <!-- Convite pertence a outra conta -->
+      <div v-else-if="wrongAccount" class="glass border-gradient rounded-2xl p-8 text-center animate-scale-in">
+        <div class="relative mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full border border-amber-500/25 bg-amber-500/10 text-amber-400">
+          <span class="absolute -inset-2 rounded-full bg-amber-500/15 blur-xl" aria-hidden="true" />
+          <svg class="relative h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20a6 6 0 0 0-12 0"/><circle cx="12" cy="10" r="4"/><circle cx="12" cy="12" r="10"/></svg>
+        </div>
+        <h2 class="text-xl font-semibold tracking-tight text-white">Convite de outra conta</h2>
+        <p class="mt-1.5 text-sm text-dark-400">
+          Este convite foi enviado para outra conta. Entre com a conta que recebeu o e-mail.
+        </p>
+        <button type="button" class="btn-cta mt-6" @click="switchAccount">Trocar de conta</button>
+      </div>
+
       <!-- Link inválido / expirado -->
       <div v-else-if="error" class="glass border-gradient rounded-2xl p-8 text-center animate-scale-in">
         <div class="relative mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full border border-red-500/25 bg-red-500/10 text-red-400">
@@ -34,6 +47,25 @@
           <p v-if="invite.project.description" class="mt-2 text-sm leading-relaxed text-dark-400">
             {{ invite.project.description }}
           </p>
+
+          <div v-if="invite.invited_by" class="mt-4 inline-flex items-center gap-2 rounded-full border border-white/8 bg-dark-800/60 py-1 pl-1 pr-3">
+            <img
+              v-if="invite.invited_by.avatar"
+              :src="invite.invited_by.avatar"
+              alt=""
+              class="h-6 w-6 rounded-full object-cover"
+            />
+            <span
+              v-else
+              class="flex h-6 w-6 items-center justify-center rounded-full bg-accent-500/20 text-[11px] font-semibold text-accent-300"
+            >
+              {{ invite.invited_by.name?.[0]?.toUpperCase() }}
+            </span>
+            <span class="text-xs text-dark-300">
+              Convidado por <strong class="font-medium text-white">{{ invite.invited_by.name }}</strong>
+            </span>
+          </div>
+
           <div class="mt-3 flex items-center justify-center gap-2">
             <span class="text-xs text-dark-500">
               {{ invite.project.members_count }} membro{{ invite.project.members_count !== 1 ? 's' : '' }}
@@ -75,13 +107,14 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { inviteApi } from '@/api/projects'
 import AuthBackground from '@/components/auth/AuthBackground.vue'
 
-const route = useRoute()
-const auth  = useAuthStore()
+const route  = useRoute()
+const router = useRouter()
+const auth   = useAuthStore()
 
 const token    = computed(() => route.params.token as string)
 const fullPath = computed(() => route.fullPath)
@@ -89,6 +122,7 @@ const isLoggedIn = computed(() => !!auth.user)
 
 const autoJoining = ref(false)
 const error       = ref(false)
+const wrongAccount = ref(false)
 const joined      = ref(false)
 const alreadyMember  = ref(false)
 const joinedProjectId = ref<number | null>(null)
@@ -96,6 +130,7 @@ const invite = ref<{
   project: { id: number; name: string; description: string | null; members_count: number }
   role: string
   expires_at: string
+  invited_by: { name: string; avatar: string | null } | null
 } | null>(null)
 
 const PROJECT_COLORS = ['#6366f1', '#8b5cf6', '#ec4899', '#f43f5e', '#f97316', '#10b981', '#06b6d4', '#3b82f6']
@@ -129,11 +164,18 @@ async function acceptInvite() {
     alreadyMember.value    = !!data.already_member
     joinedProjectId.value  = data.project_id
     joined.value = true
-  } catch {
-    error.value = true
+  } catch (e: any) {
+    // Convite nominal aberto por outra conta: dá a chance de trocar de login.
+    if (e?.response?.status === 403 && e.response.data?.wrong_account) wrongAccount.value = true
+    else error.value = true
   } finally {
     autoJoining.value = false
   }
+}
+
+async function switchAccount() {
+  await auth.logout()
+  router.push({ path: '/login', query: { redirect: fullPath.value } })
 }
 </script>
 

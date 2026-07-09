@@ -15,6 +15,7 @@ class ProjectInvitationNotification extends Notification
         public readonly string $projectName,
         public readonly string $inviterName,
         public readonly string $role,
+        public readonly string $token,
     ) {}
 
     /** @return array<int, string> */
@@ -32,7 +33,7 @@ class ProjectInvitationNotification extends Notification
                 'project' => $this->projectName,
                 'inviter' => $this->inviterName,
                 'role'    => $this->role === 'leader' ? 'Líder' : 'Membro',
-                'url'     => config('app.url'),
+                'url'     => rtrim(config('app.url'), '/') . '/invite/' . $this->token,
             ]);
     }
 }

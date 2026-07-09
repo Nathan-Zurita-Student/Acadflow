@@ -138,6 +138,7 @@ export const inviteApi = {
       project: { id: number; name: string; description: string | null; members_count: number }
       role: string
       expires_at: string
+      invited_by: { name: string; avatar: string | null } | null
     }>(`/invite/${token}`),
   accept: (token: string) =>
     api.post<{ message: string; project_id: number; role: string; already_member?: boolean }>(`/invite/${token}/accept`),

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Str;
 
 class ProjectInvitation extends Model
 {
@@ -15,6 +16,7 @@ class ProjectInvitation extends Model
         'project_id',
         'invited_user_id',
         'invited_by_user_id',
+        'token',
         'role',
         'status',
         'expires_at',
@@ -23,6 +25,13 @@ class ProjectInvitation extends Model
     protected $casts = [
         'expires_at' => 'datetime',
     ];
+
+    protected static function booted(): void
+    {
+        static::creating(function (self $invitation) {
+            $invitation->token ??= Str::random(48);
+        });
+    }
 
     public function project(): BelongsTo
     {
